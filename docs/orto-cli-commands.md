@@ -306,7 +306,7 @@ Actions are `keep`, `refresh_mental_model`, `supersede`, `archive`, or `delete_c
 Live runs write `.orto/local/audit-plan.json` (gitignored) and print the same table on stdout.
 `--dry-run` prints the table only.
 Missing `ORTO_TYPESAFE_API_KEY` with `--judge jev` is a hard error.
-Apply is a separate step ([JEV-17](https://github.com/zanuka/orto/issues/52)); this command only plans.
+Apply with `orto prune --apply --plan .orto/local/audit-plan.json` ([JEV-17](https://github.com/zanuka/orto/issues/52)); this command only plans.
 
 | Flag | Description |
 |------|-------------|
@@ -361,12 +361,29 @@ Do not treat all `orto:` ids as stale merely because they are not bare paths.
 - Mental-model refresh may be recommended in the output. It is a separate confirmation (not auto-run).
 - For still-on-disk claims that may be outdated or superseded, run `orto audit --judge jev` first. Path-gone and section-gone prune groups work with no TypeSafe key.
 
+### Apply an audit plan
+
+```bash
+orto prune --plan .orto/local/audit-plan.json
+orto prune --apply --plan .orto/local/audit-plan.json
+orto prune --apply --plan .orto/local/audit-plan.json --allow-delete
+```
+
+Without `--apply`, prune prints a preview and mutates nothing.
+With `--apply`, high-confidence allowed actions run: mental-model refresh, local archive tombstones, and supersede provenance.
+`delete_candidate` (and supersede deletes) require `--allow-delete`.
+Stale plans (ids missing from the current bank) are refused.
+Re-applying the same plan is idempotent.
+
 | Flag | Description |
 |------|-------------|
 | `--dry-run` | Print the groups. Do not delete. |
 | `--source <path>` | Limit the selection to bank documents for this repo path |
 | `--document-id <id>` | Limit the selection to this Hindsight `document_id` |
 | `-y, --yes` | Apply an explicit `--source` or `--document-id` selection without a second prompt. Refused when nothing is selected. |
+| `--plan <path>` | Preview or apply an audit plan (default `.orto/local/audit-plan.json` when used with `--apply`) |
+| `--apply` | With `--plan`, execute high-confidence allowed audit actions |
+| `--allow-delete` | With `--plan --apply`, allow `delete_candidate` deletes |
 | `--hindsight-url <url>` | Override Hindsight base URL |
 | `--api-key <key>` | Hindsight API key (or set env vars above) |
 | `--judge <id>` | `off`, `heuristic` (default), or `jev` (hosted TypeSafe, optional) |

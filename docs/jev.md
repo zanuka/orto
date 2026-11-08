@@ -94,7 +94,7 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Audit prune/refresh plans (shipped on `orto audit --judge jev`)
 - Layer-specific aging on that plan (shipped)
 - Mental-model freshness on that plan (shipped)
-- Apply audit plans with confirmation
+- Apply audit plans with confirmation (shipped on `orto prune --apply --plan`)
 - Bank-template fitness scores (mission / directives / tags / mental-model questions); prose stays in the template
 - MCP `retain` guardrails, recall rerank, still-true checks, `reflect` vs `recall` vs mental-model routing
 - Firstmate routing and escalation when confidence is low
@@ -166,7 +166,7 @@ A confident no, or an uncertain score, adds no metadata for that id.
 
 The old observation stays in the bank.
 `orto audit --judge jev` can propose delete or supersede ([JEV-14](https://github.com/zanuka/orto/issues/32)).
-Deleting still waits on apply-with-confirm ([JEV-17](https://github.com/zanuka/orto/issues/52)).
+Deleting waits on `orto prune --apply --plan ... --allow-delete` ([JEV-17](https://github.com/zanuka/orto/issues/52)).
 
 ---
 
@@ -321,7 +321,19 @@ Live runs write `.orto/local/audit-plan.json` (gitignored) and print a table wit
 `--dry-run` prints the table only.
 The bank is never mutated.
 Missing `ORTO_TYPESAFE_API_KEY` is a hard error ([JEV-14](https://github.com/zanuka/orto/issues/32)).
-Apply-with-confirm is separate ([JEV-17](https://github.com/zanuka/orto/issues/52)).
+
+### Apply audit plan
+
+`orto prune --plan .orto/local/audit-plan.json` previews high-confidence allowed actions and mutates nothing.
+`orto prune --apply --plan .orto/local/audit-plan.json` executes them ([JEV-17](https://github.com/zanuka/orto/issues/52)):
+
+- `refresh_mental_model` calls the Hindsight mental-model refresh path
+- `archive` tombstones document ids locally (no delete)
+- `supersede` records provenance under `.orto/local/audit-supersedes.json` and deletes only with `--allow-delete`
+- `delete_candidate` deletes only with `--allow-delete`
+- Low-confidence and `reviewOnly` rows stay skipped
+- A plan whose ids are missing from the current bank is refused as stale
+- Re-applying the same plan is idempotent via `.orto/local/audit-plan-applied.json`
 
 ### Layer-specific aging
 

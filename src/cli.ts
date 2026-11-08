@@ -718,7 +718,7 @@ async function main(): Promise<void> {
     program
       .command("prune")
       .description(
-        "Remove bank documents that are path-gone, section-gone, or explicitly selected",
+        "Remove bank documents that are path-gone, section-gone, or explicitly selected; or apply an audit plan",
       )
       .option(
         "--dry-run",
@@ -737,6 +737,18 @@ async function main(): Promise<void> {
         "Apply an explicit --source or --document-id selection without a second prompt",
       )
       .option(
+        "--plan <path>",
+        "Apply or preview an audit plan (default path: .orto/local/audit-plan.json)",
+      )
+      .option(
+        "--apply",
+        "With --plan, execute high-confidence allowed audit actions",
+      )
+      .option(
+        "--allow-delete",
+        "With --plan --apply, allow delete_candidate (and supersede deletes)",
+      )
+      .option(
         "--hindsight-url <url>",
         "Hindsight base URL (default: config, ORTO_HINDSIGHT_URL, or http://localhost:8888)",
       )
@@ -750,6 +762,9 @@ async function main(): Promise<void> {
       source?: string;
       documentId?: string;
       yes?: boolean;
+      plan?: string;
+      apply?: boolean;
+      allowDelete?: boolean;
       hindsightUrl?: string;
       apiKey?: string;
       judge?: string;
@@ -760,10 +775,13 @@ async function main(): Promise<void> {
       await runPruneCommand({
         dryRun: Boolean(opts.dryRun),
         yes: Boolean(opts.yes),
+        apply: Boolean(opts.apply),
+        allowDelete: Boolean(opts.allowDelete),
         ...(opts.source !== undefined ? { source: opts.source } : {}),
         ...(opts.documentId !== undefined
           ? { documentId: opts.documentId }
           : {}),
+        ...(opts.plan !== undefined ? { plan: opts.plan } : {}),
         ...(opts.hindsightUrl !== undefined
           ? { hindsightUrl: opts.hindsightUrl }
           : {}),
