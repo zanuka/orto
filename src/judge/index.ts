@@ -86,6 +86,18 @@ export type {
   EditDurabilityDecision,
 } from "./edit-durability.js";
 export {
+  AUDIT_ACTIONS,
+  auditQuestions,
+  formatAuditTable,
+  interpretAudit,
+  judgeAuditItem,
+} from "./audit.js";
+export type {
+  AuditAction,
+  AuditDecision,
+  AuditItemState,
+} from "./audit.js";
+export {
   assertRetainBudget,
   compositePriority,
   DEFAULT_PRIORITY_WEIGHTS,

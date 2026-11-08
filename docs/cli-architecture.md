@@ -103,9 +103,9 @@ flowchart TD
 | `src/scanner/` | Find durable docs (default README, docs/**, ADRs, or `scanner.include` / `exclude` / `extensions`); skip `AGENTS.md`; `store`'s stricter denylist |
 | `src/extractor/` | Conservative heuristics → candidate facts + provenance |
 | `src/providers/hindsight/` | Bank template, mental-model helpers, HTTP retain / list / delete / bank-apply / mental-model client |
-| `src/judge/` | Opt-in `Judge` port (`off` / `heuristic` / `jev`); `buildJevState` skips denylisted paths and inline secrets and caps state before the TypeSafe HTTP call; `seed --judge jev` runs the relevance gate, the knowledge-kind choice, a contradiction check, and `contains_secret` / `contains_pii` once per `document_id` (kind criteria in `knowledge-kinds.json`; up to 5 observation summaries). Confident supersedes or contradicts stamps observation metadata and does not delete the old item. A confident secret or personal-data answer is not retained. Citation then previews Hindsight's extracted facts (read-only) and asks once per section whether each fact is in the source. A high-confidence unsupported fact is not retained. `judgeWatcherGate` answers `durable_claim_changed` and `behavior_delta` for a future watch loop; there is no default `watch` CLI. Hindsight code must not import TypeSafe |
+| `src/judge/` | Opt-in `Judge` port (`off` / `heuristic` / `jev`); `buildJevState` skips denylisted paths and inline secrets and caps state before the TypeSafe HTTP call; `seed --judge jev` runs the relevance gate, the knowledge-kind choice, a contradiction check, and `contains_secret` / `contains_pii` once per `document_id` (kind criteria in `knowledge-kinds.json`; up to 5 observation summaries). Confident supersedes or contradicts stamps observation metadata and does not delete the old item. A confident secret or personal-data answer is not retained. Citation then previews Hindsight's extracted facts (read-only) and asks once per section whether each fact is in the source. A high-confidence unsupported fact is not retained. `judgeWatcherGate` answers `durable_claim_changed` and `behavior_delta` for a future watch loop; there is no default `watch` CLI. `judgeAuditItem` asks `still_supported_by_repo`, `superseded`, and an `action` choice for `orto audit --judge jev`. Hindsight code must not import TypeSafe |
 | `src/watcher/` | Seed enqueue helper for the high-signal gate (`collectSeedEnqueue`). No filesystem watcher and no CLI command yet |
-| `src/seeder/` | Prepare retain payload, incremental manifest, prune planner, tombstones (shared by `seed`, `store`, `prune`) |
+| `src/seeder/` | Prepare retain payload, incremental manifest, prune planner, audit plan writer, tombstones (shared by `seed`, `store`, `audit`, `prune`) |
 | `src/integration/` | MCP URL + harness snippets + AGENTS/Cursor rule emitters + Firstmate `project-bank` skill |
 | `src/docker/` | Local Hindsight Docker run/stop/status plans |
 | `src/utils/` | Shared FS helpers and actionable errors |
@@ -142,13 +142,14 @@ node dist/cli.js mcp --write --dry-run
 | `seed` | Retain candidates into Hindsight; update local seed manifest |
 | `store --dry-run` | Print known/new/changed/unchanged buckets for allowlisted + discovered markdown; **no** API calls |
 | `store` | Retain an operator-selected subset (allowlist, `--files`, or interactive pick) via the same seed retain path. `--propose-adopt --judge jev` prints new files to consider; `--apply` writes those paths and does not retain. `--judge jev` on changed files runs the edit durability gate before retain |
+| `audit --judge jev` | Read-only prune/refresh plan: judge bank documents one at a time; write `.orto/local/audit-plan.json` (skipped with `--dry-run`); never mutates the bank |
 | `prune --dry-run` | List path-gone / section-gone / explicit candidates (read-only document list); no deletes |
 | `prune` | Delete selected bank documents; write local tombstones under `.orto/local/` |
 | `mcp` | Print ready-to-paste MCP snippets (bank-scoped server names); optional `--write` / `--check` / AGENTS / Cursor rules / Firstmate |
 
 Common flags:
 
-- `--dry-run`: preview without mutating (`seed --dry-run` does not retain; with `--judge jev` it may recall observation summaries and preview extracted facts, both read-only; prune may list documents read-only)
+- `--dry-run`: preview without mutating (`seed --dry-run` does not retain; with `--judge jev` it may recall observation summaries and preview extracted facts, both read-only; `audit --dry-run` prints the plan table without writing `audit-plan.json`; prune may list documents read-only)
 - `--force`: overwrite config/template/MCP entry, or re-seed unchanged / tombstoned sources
 - `--yes` / `-y`: on `init`, accept defaults; on `prune`, apply an explicit `--source` / `--document-id` selection
 - `--bank-id <id>`: Hindsight bank id on `init` (project-specific; many banks can share one server)
@@ -156,7 +157,7 @@ Common flags:
 - `--hindsight-url <url>`: override Hindsight base URL for this run
 - `--api-key <key>`: override API key for this run (seed / store / prune) or enable tenant auth (docker) / print auth snippets (mcp)
 - `--async`: submit retain asynchronously to Hindsight
-- `--judge <id>`: `off`, `heuristic` (default), or `jev` (hosted TypeSafe, optional; needs `ORTO_TYPESAFE_API_KEY`) on seed / store / prune
+- `--judge <id>`: `off`, `heuristic` (default), or `jev` (hosted TypeSafe, optional; needs `ORTO_TYPESAFE_API_KEY`) on seed / store / audit / prune
 - `--confidence <n>`: minimum confidence to apply a Jev decision (default `0.8`; see [jev.md](./jev.md))
 - `--strict`: with `--judge jev`, fail on TypeSafe network/API errors instead of falling back to heuristics
 
@@ -308,6 +309,20 @@ Flow: `store` resolves the project root (refusing a disposable git worktree via 
 - **unchanged**: known, content hash matches (skipped)
 
 `--files` and `--add-files` both persist onto `store.allowlist`; `--add-files` never retains. `--yes` stores changed known files only and prints skipped new files. Interactively (TTY, no `--yes`/`--files`), `store` multi-selects new files via `src/utils/prompt.ts`'s `promptMultiSelect`, and always includes changed known files by default. `src/scanner/store-policy.ts` adds a stricter denylist on top of `sensitive.ts`: non-markdown paths, paths outside the project root, `.backpass/`, and Firstmate's `.stow-archive.md` / `.stow-notes.md` disk-pref files (allowed only via explicit `--files`).
+
+## Audit: prune/refresh plan
+
+`orto audit --judge jev` (`src/commands/audit.ts`) proposes keep / refresh / supersede / archive / delete-candidate for retained bank documents without mutating the bank.
+
+Flow:
+
+1. List bank documents via `HindsightClient.listAllDocuments` (optional `--limit`).
+2. Build per-document state in `src/seeder/audit-plan.ts` from the local file, retained-sources cache, or a stub when the path is gone.
+3. `judgeAuditItem` asks `still_supported_by_repo`, `superseded`, and `action` once per id.
+4. `--dry-run` prints the table only. Live runs write `.orto/local/audit-plan.json`.
+5. Apply is a separate command (not this issue).
+
+Details: [orto-cli-commands.md](./orto-cli-commands.md#orto-audit).
 
 ## Prune: bank hygiene
 

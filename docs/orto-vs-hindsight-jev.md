@@ -31,7 +31,7 @@ Jev is an **opt-in judge** (`--judge jev` or key) for bounded decisions. Orto ow
 
 - Seed quality: knowledge-kind, contradiction vs existing observations, the secret / personal-data check, and citation support are on `seed --judge jev`.
 - Store: allowlist proposals are on `store --propose-adopt --judge jev` ([JEV-10](https://github.com/zanuka/orto/issues/41)). `seed --budget N --judge jev` ranks the retain queue ([JEV-11](https://github.com/zanuka/orto/issues/50)). `store --judge jev` gates wording-only edits and workarounds ([JEV-12](https://github.com/zanuka/orto/issues/31)). The watcher high-signal gate helper ships ([JEV-13](https://github.com/zanuka/orto/issues/42)); there is no default `watch` CLI.
-- Prune annotation (JEV-14–17): score still-on-disk items as outdated / irrelevant / contradicted (Jev annotates; you confirm delete).
+- Audit plan ships on `orto audit --judge jev` ([JEV-14](https://github.com/zanuka/orto/issues/32)). Prune annotation follow-ups (JEV-15 through JEV-17): aging, mental-model freshness, apply-with-confirm.
 - Bank-template fitness (JEV-18–21): score mission/directives, extraction aggressiveness, etc. (does not author prose).
 - **Recall & MCP guards** (JEV-22–25): block unsafe MCP retain, rerank recalled passages (overlaps Hindsight’s feature), check “still true?”, route reflect vs recall vs mental-model lookup.
 - Firstmate routing (JEV-26–30), share safety (JEV-31/33), heuristic golden-set eval (JEV-34).
@@ -44,7 +44,7 @@ Jev is an **opt-in judge** (`--judge jev` or key) for bounded decisions. Orto ow
 |---|---|---|---|
 | **What enters the bank** | Whatever you (or an agent) `retain`. Quality = extraction from the input. | Scanner + heuristics + optional Jev relevance/durability gate *before* retain. Section-level keep/skip. | Spend retain (and future recall) on durable decisions/invariants/architecture, not changelogs, TOCs, badge walls, or session fluff. |
 | **Recall ranking** | Strong listwise Jev reranker (opt-in). Better order + optional prune. | Can use Hindsight’s built-in. Additional planned guards (JEV-23 etc.): still-true check, routing, MCP retain blocking. | Hindsight already solves ranking. Orto adds gates around *how* and *when* recall is used. |
-| **Bank hygiene / prune** | Manual or your own scripts. | Existing `prune` (path/section-gone + tombstones). Optional Jev annotation of outdated/irrelevant/contradicted items (you confirm). | Structured, confidence-gated cleanup instead of ad-hoc Hindsight cleanup. |
+| **Bank hygiene / prune** | Manual or your own scripts. | Existing `prune` (path/section-gone + tombstones). `orto audit --judge jev` plans keep/refresh/supersede/archive/delete-candidate without mutating the bank; apply is separate. | Structured, confidence-gated cleanup instead of ad-hoc Hindsight cleanup. |
 | **Incremental / provenance** | You manage re-ingest. | Hash-gated incremental seed; source path + commit are first-class. | Agents inherit stable, attributable institutional knowledge. |
 | **Agent / MCP surface** | You wire MCP. Agents can retain freely. | Emits ready MCP configs. Planned Jev gates on unsafe retains and routing (reflect/recall/mental-model). | Safer company-brain usage; less session junk in the shared bank. |
 | **Firstmate / multi-agent** | Out of scope. | Planned routing decisions (needs bank? which bank? escalate vs dispatch? seedable?). | Keeps agent crews from thrashing the bank. |
