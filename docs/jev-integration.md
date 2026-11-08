@@ -42,7 +42,7 @@ The same pass can score the generated mission and directives, and can propose me
 **Put the durable part of a large diff first.** A monorepo change can touch dozens of markdown files and contain only a few decisions. `seed --budget N --judge jev` ranks the retain queue and keeps the top N. The rest stay pending in the seed manifest. Dry-run prints the order and the cutoff. The same layer can also:
 
 - propose which new files belong on the `store` allowlist (`store --propose-adopt --judge jev` prints the list; `--apply` writes it and does not retain)
-- hold an edit that does not look durable (still planned)
+- hold an edit that does not look durable (`store --judge jev` skips wording-only changes and reviews temporary workarounds)
 
 You confirm before anything is retained.
 

@@ -344,7 +344,159 @@ describe("runStore", () => {
     ) as { store?: { allowlist: string[] } };
     expect(config.store?.allowlist).toEqual(["docs/adr/0002-keep-local.md"]);
   });
+
+  it("skips a typo-only edit with --judge jev and still updates the content hash", async () => {
+    const root = await tempProject();
+    const previous =
+      "# ADR 0001\n\n## Decision\n\nWe use Redis for the local bank. This architecture decision is a project invariant.\n";
+    const typo =
+      "# ADR 0001\n\n## Decision\n\nWe use Redis for the local bank. This architecture decision is a project invariant!\n";
+    await writeConfig(root, { store: { allowlist: ["docs/adr/0001.md"] } });
+    await mkdir(join(root, "docs", "adr"), { recursive: true });
+    await mkdir(join(root, ".orto", "local"), { recursive: true });
+    await writeFile(join(root, "docs", "adr", "0001.md"), typo, "utf8");
+    await writeFile(
+      join(root, ".orto", "local", "seed-manifest.json"),
+      JSON.stringify({
+        version: 1,
+        bankId: "fixture-bank",
+        updatedAt: new Date().toISOString(),
+        sources: {
+          "docs/adr/0001.md": {
+            contentHash: "old-hash",
+            factIds: ["orto:docs/adr/0001.md#decision"],
+            seededAt: "2020-01-01T00:00:00.000Z",
+          },
+        },
+      }),
+      "utf8",
+    );
+    const fetchImpl = vi.fn();
+    vi.stubGlobal("fetch", fetchImpl);
+    const judge: Judge = {
+      id: "jev",
+      async evaluate(): Promise<JudgeResult> {
+        return {
+          judgeId: "jev",
+          answers: {
+            claim_changed: { type: "noul", noul: 0.04 },
+            looks_like_workaround: { type: "noul", noul: 0.03 },
+            action: editAction("skip", 0.93),
+          },
+        };
+      },
+    };
+
+    const result = await runStore({
+      cwd: root,
+      yes: true,
+      apiKey: "test-key",
+      resolvedJudge: {
+        judgeId: "jev",
+        confidence: 0.8,
+        strict: false,
+        judge,
+      },
+      previousByPath: { "docs/adr/0001.md": previous },
+    });
+
+    expect(result.editDurability?.map((row) => row.action)).toEqual(["skip"]);
+    expect(result.retained).toBe(0);
+    expect(fetchImpl).not.toHaveBeenCalled();
+    const manifest = JSON.parse(
+      await readFile(join(root, ".orto", "local", "seed-manifest.json"), "utf8"),
+    ) as {
+      sources: Record<string, { contentHash: string; factIds: string[] }>;
+    };
+    expect(manifest.sources["docs/adr/0001.md"]?.contentHash).not.toBe("old-hash");
+    expect(manifest.sources["docs/adr/0001.md"]?.factIds).toEqual([
+      "orto:docs/adr/0001.md#decision",
+    ]);
+  });
+
+  it("re-retains when Redis becomes SQLite under --judge jev", async () => {
+    const root = await tempProject();
+    const previous =
+      "# ADR 0001\n\n## Decision\n\nWe use Redis for the local bank. This architecture decision is a project invariant.\n";
+    const changed =
+      "# ADR 0001\n\n## Decision\n\nWe no longer use Redis; use SQLite for the local bank. This architecture decision is a project invariant.\n";
+    await writeConfig(root, { store: { allowlist: ["docs/adr/0001.md"] } });
+    await mkdir(join(root, "docs", "adr"), { recursive: true });
+    await mkdir(join(root, ".orto", "local"), { recursive: true });
+    await writeFile(join(root, "docs", "adr", "0001.md"), changed, "utf8");
+    await writeFile(
+      join(root, ".orto", "local", "seed-manifest.json"),
+      JSON.stringify({
+        version: 1,
+        bankId: "fixture-bank",
+        updatedAt: new Date().toISOString(),
+        sources: {
+          "docs/adr/0001.md": {
+            contentHash: "old-hash",
+            factIds: ["orto:docs/adr/0001.md#decision"],
+            seededAt: "2020-01-01T00:00:00.000Z",
+          },
+        },
+      }),
+      "utf8",
+    );
+    stubRetainSuccess();
+    const judge: Judge = {
+      id: "jev",
+      async evaluate(): Promise<JudgeResult> {
+        return {
+          judgeId: "jev",
+          answers: {
+            claim_changed: { type: "noul", noul: 0.96 },
+            looks_like_workaround: { type: "noul", noul: 0.05 },
+            action: editAction("re_retain", 0.94),
+          },
+        };
+      },
+    };
+
+    const result = await runStore({
+      cwd: root,
+      yes: true,
+      apiKey: "test-key",
+      resolvedJudge: {
+        judgeId: "jev",
+        confidence: 0.8,
+        strict: false,
+        judge,
+      },
+      previousByPath: { "docs/adr/0001.md": previous },
+    });
+
+    expect(result.editDurability?.map((row) => row.action)).toEqual(["re_retain"]);
+    expect(result.retained).toBeGreaterThan(0);
+  });
+
+  it("default store without --judge is unchanged", async () => {
+    const root = await tempProject();
+    await writeConfig(root, { store: { allowlist: ["README.md"] } });
+    await writeFile(
+      join(root, "README.md"),
+      "# Fixture\n\n## Architecture\n\nThis module owns retain boundaries and stays separate from scanning.",
+    );
+    stubRetainSuccess();
+
+    const result = await runStore({ cwd: root, yes: true, apiKey: "test-key" });
+
+    expect(result.editDurability).toBeUndefined();
+    expect(result.retained).toBeGreaterThan(0);
+  });
 });
+
+function editAction(choice: string, confidence: number): ChoiceAnswer {
+  const rest = ["re_retain", "skip", "review"].filter((id) => id !== choice);
+  const share = (1 - confidence) / rest.length;
+  const probabilities: Record<string, number> = { [choice]: confidence };
+  for (const id of rest) {
+    probabilities[id] = share;
+  }
+  return { type: "choice", choice, probabilities, confidence };
+}
 
 function adoptKind(choice: string, confidence: number): ChoiceAnswer {
   const probabilities: Record<string, number> = {};

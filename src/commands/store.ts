@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { isAbsolute, resolve } from "node:path";
+import { isAbsolute, join, resolve } from "node:path";
 import { loadConfig, loadShareConfig, saveConfig } from "../config/load.js";
 import {
   assertApiKeyForConnection,
@@ -34,10 +34,17 @@ import { retainPreparedItems } from "./seed.js";
 import {
   createJudge,
   formatAdoptLines,
+  formatEditDurabilityLines,
   judgeAllowlistAdoption,
+  judgeEditDurability,
   type AdoptProposal,
+  type EditDurabilityDecision,
   type ResolvedJudge,
 } from "../judge/index.js";
+import {
+  loadRetainedSources,
+  rememberRetainedSource,
+} from "../seeder/retained-sources.js";
 import { OrtoError } from "../utils/errors.js";
 import { isInteractive, promptMultiSelect } from "../utils/prompt.js";
 
@@ -58,6 +65,7 @@ export interface StoreOptions {
   proposeAdopt?: boolean;
   apply?: boolean;
   resolvedJudge?: ResolvedJudge;
+  previousByPath?: Record<string, string>;
 }
 
 export interface StoreBucketEntry {
@@ -86,6 +94,7 @@ export interface StoreResult {
   async: boolean;
   addFilesOnly: boolean;
   proposals?: AdoptProposal[];
+  editDurability?: EditDurabilityDecision[];
 }
 
 function parsePathList(raw: string | undefined): string[] {
@@ -461,6 +470,34 @@ export async function runStore(options: StoreOptions = {}): Promise<StoreResult>
     );
   }
 
+  let editDurability: EditDurabilityDecision[] | undefined;
+  let retainSelected = selected;
+  if (resolved.judgeId === "jev" && selected.length > 0) {
+    const gated = await applyEditDurabilityGate({
+      projectRoot,
+      selected,
+      dryRun,
+      judge: resolved.judge,
+      confidence: resolved.confidence,
+      ...(options.previousByPath !== undefined
+        ? { previousByPath: options.previousByPath }
+        : {}),
+      ...(dryRun ? {} : { manifest }),
+    });
+    editDurability = gated.decisions;
+    retainSelected = gated.retainSelected;
+    if (!dryRun && gated.manifest !== undefined) {
+      manifest = gated.manifest;
+    }
+    for (const line of formatEditDurabilityLines({
+      decisions: gated.decisions,
+      dryRun,
+    })) {
+      console.log(line);
+    }
+    console.log("");
+  }
+
   if (dryRun) {
     console.log("");
     console.log("No memories were retained. Suggested next commands:");
@@ -485,6 +522,7 @@ export async function runStore(options: StoreOptions = {}): Promise<StoreResult>
       failed: 0,
       async: asyncRetain,
       addFilesOnly: false,
+      ...(editDurability !== undefined ? { editDurability } : {}),
     };
   }
 
@@ -494,9 +532,16 @@ export async function runStore(options: StoreOptions = {}): Promise<StoreResult>
     await saveConfig(projectRoot, { ...config, store: { allowlist } }, false);
   }
 
-  if (selected.length === 0) {
+  if (retainSelected.length === 0) {
+    if (editDurability !== undefined && !dryRun) {
+      await saveSeedManifest(projectRoot, manifest);
+    }
     console.log("");
-    console.log("Nothing selected to store.");
+    console.log(
+      editDurability !== undefined && editDurability.length > 0
+        ? "Nothing was sent to Hindsight after the edit durability gate."
+        : "Nothing selected to store.",
+    );
     return {
       projectRoot,
       bankId: config.bankId,
@@ -510,6 +555,7 @@ export async function runStore(options: StoreOptions = {}): Promise<StoreResult>
       failed: 0,
       async: asyncRetain,
       addFilesOnly: false,
+      ...(editDurability !== undefined ? { editDurability } : {}),
     };
   }
 
@@ -517,11 +563,14 @@ export async function runStore(options: StoreOptions = {}): Promise<StoreResult>
     projectRoot,
     bankId: config.bankId,
     force,
-    only: new Set(selected),
+    only: new Set(retainSelected),
     ...(config.scanner !== undefined ? { scanner: config.scanner } : {}),
   });
 
   if (prepared.factsToRetain.length === 0) {
+    if (editDurability !== undefined) {
+      await saveSeedManifest(projectRoot, manifest);
+    }
     console.log("");
     console.log("Nothing was sent to Hindsight (no high-signal candidates).");
     return {
@@ -537,6 +586,7 @@ export async function runStore(options: StoreOptions = {}): Promise<StoreResult>
       failed: 0,
       async: asyncRetain,
       addFilesOnly: false,
+      ...(editDurability !== undefined ? { editDurability } : {}),
     };
   }
 
@@ -562,6 +612,28 @@ export async function runStore(options: StoreOptions = {}): Promise<StoreResult>
   await saveSeedManifest(projectRoot, manifest);
   if (retainedIds.size > 0) {
     await clearTombstonesForIds(projectRoot, retainedIds);
+    for (const source of prepared.sources) {
+      if (source.unchanged) {
+        continue;
+      }
+      const retainedHere = source.facts.some((fact) => retainedIds.has(fact.id));
+      if (!retainedHere) {
+        continue;
+      }
+      const text = await readFile(
+        join(projectRoot, source.relativePath),
+        "utf8",
+      ).catch(() => undefined);
+      if (text === undefined) {
+        continue;
+      }
+      await rememberRetainedSource({
+        projectRoot,
+        relativePath: source.relativePath,
+        contentHash: source.contentHash,
+        text,
+      });
+    }
   }
 
   console.log("");
@@ -589,6 +661,97 @@ export async function runStore(options: StoreOptions = {}): Promise<StoreResult>
     failed,
     async: asyncRetain,
     addFilesOnly: false,
+    ...(editDurability !== undefined ? { editDurability } : {}),
+  };
+}
+
+async function applyEditDurabilityGate(input: {
+  projectRoot: string;
+  selected: readonly string[];
+  dryRun: boolean;
+  judge: import("../judge/types.js").Judge;
+  confidence: number;
+  previousByPath?: Record<string, string>;
+  manifest?: SeedManifest;
+}): Promise<{
+  decisions: EditDurabilityDecision[];
+  retainSelected: string[];
+  manifest?: SeedManifest;
+}> {
+  const snapshots = await loadRetainedSources(input.projectRoot);
+  const decisions: EditDurabilityDecision[] = [];
+  const retainSelected: string[] = [];
+  let nextManifestState = input.manifest;
+
+  for (const relativePath of input.selected) {
+    const absolutePath = join(input.projectRoot, relativePath);
+    let currentText = "";
+    try {
+      currentText = await readFile(absolutePath, "utf8");
+    } catch {
+      decisions.push({
+        path: relativePath,
+        action: "review",
+        reason: "file could not be read",
+      });
+      continue;
+    }
+    const previousText =
+      input.previousByPath?.[relativePath] ??
+      snapshots.sources[relativePath]?.text;
+    if (previousText === undefined) {
+      retainSelected.push(relativePath);
+      continue;
+    }
+
+    const decision = await judgeEditDurability({
+      path: relativePath,
+      previousText,
+      currentText,
+      judge: input.judge,
+      confidence: input.confidence,
+    });
+    decisions.push(decision);
+
+    if (decision.action === "re_retain") {
+      retainSelected.push(relativePath);
+      continue;
+    }
+    if (decision.action === "review") {
+      continue;
+    }
+
+    if (!input.dryRun && nextManifestState !== undefined) {
+      const hash = hashContent(currentText);
+      const previous = nextManifestState.sources[relativePath];
+      nextManifestState = {
+        ...nextManifestState,
+        updatedAt: new Date().toISOString(),
+        sources: {
+          ...nextManifestState.sources,
+          [relativePath]: {
+            contentHash: hash,
+            factIds: previous?.factIds ?? [],
+            seededAt: previous?.seededAt ?? new Date().toISOString(),
+            ...(previous?.pendingFactIds !== undefined
+              ? { pendingFactIds: previous.pendingFactIds }
+              : {}),
+          },
+        },
+      };
+      await rememberRetainedSource({
+        projectRoot: input.projectRoot,
+        relativePath,
+        contentHash: hash,
+        text: currentText,
+      });
+    }
+  }
+
+  return {
+    decisions,
+    retainSelected,
+    ...(nextManifestState !== undefined ? { manifest: nextManifestState } : {}),
   };
 }
 

@@ -269,6 +269,12 @@ A dependency readme and other non-durable markdown are not proposed.
 `--apply` writes the proposed paths and does not retain.
 `--dry-run` with `--apply` prints the paths and does not write the allowlist.
 
+`--judge jev` on a normal store also runs the edit durability gate on changed allowlisted files.
+A wording-only edit skips retain and still updates the content hash so the same change does not loop.
+A temporary workaround stays in review and is not retained.
+A real claim change re-retains.
+Without `--judge jev`, store is unchanged.
+
 The allowlist is `store.allowlist` in `.orto/config.json` (version-controlled). The first `store` after a `seed` bootstraps it from `.orto/local/seed-manifest.json`'s sources, so already-seeded files read as known, not new. Content hashes for incremental skip live in the same seed manifest `store` reuses.
 
 `store` refuses to run from a disposable git worktree (detected via `git rev-parse --git-dir` vs. `--git-common-dir`, not path naming): it only operates on the durable clone that owns `.orto/`. From a worktree it resolves the durable clone through the captain-home registry (`$FM_HOME/.orto/projects.json`, fallback `~/.orto/projects.json`, installed by `orto mcp --harness firstmate --write-firstmate`), or via an explicit `--project <durable-clone-path>`.

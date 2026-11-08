@@ -76,6 +76,16 @@ export type {
   WatcherGateVerdict,
 } from "./watcher-gate.js";
 export {
+  editDurabilityQuestions,
+  formatEditDurabilityLines,
+  interpretEditDurability,
+  judgeEditDurability,
+} from "./edit-durability.js";
+export type {
+  EditDurabilityAction,
+  EditDurabilityDecision,
+} from "./edit-durability.js";
+export {
   assertRetainBudget,
   compositePriority,
   DEFAULT_PRIORITY_WEIGHTS,

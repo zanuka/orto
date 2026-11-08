@@ -30,7 +30,7 @@ Jev is an **opt-in judge** (`--judge jev` or key) for bounded decisions. Orto ow
 **Open / planned areas** (grouped):
 
 - Seed quality: knowledge-kind, contradiction vs existing observations, the secret / personal-data check, and citation support are on `seed --judge jev`.
-- Store: allowlist proposals are on `store --propose-adopt --judge jev` ([JEV-10](https://github.com/zanuka/orto/issues/41)). `seed --budget N --judge jev` ranks the retain queue ([JEV-11](https://github.com/zanuka/orto/issues/50)). The watcher high-signal gate helper ships ([JEV-13](https://github.com/zanuka/orto/issues/42)); there is no default `watch` CLI. The `store` edit durability gate (JEV-12) is still open.
+- Store: allowlist proposals are on `store --propose-adopt --judge jev` ([JEV-10](https://github.com/zanuka/orto/issues/41)). `seed --budget N --judge jev` ranks the retain queue ([JEV-11](https://github.com/zanuka/orto/issues/50)). `store --judge jev` gates wording-only edits and workarounds ([JEV-12](https://github.com/zanuka/orto/issues/31)). The watcher high-signal gate helper ships ([JEV-13](https://github.com/zanuka/orto/issues/42)); there is no default `watch` CLI.
 - Prune annotation (JEV-14–17): score still-on-disk items as outdated / irrelevant / contradicted (Jev annotates; you confirm delete).
 - Bank-template fitness (JEV-18–21): score mission/directives, extraction aggressiveness, etc. (does not author prose).
 - **Recall & MCP guards** (JEV-22–25): block unsafe MCP retain, rerank recalled passages (overlaps Hindsight’s feature), check “still true?”, route reflect vs recall vs mental-model lookup.

@@ -141,7 +141,7 @@ node dist/cli.js mcp --write --dry-run
 | `seed --dry-run` | Scan + extract; print candidates; no retain. `--judge jev` prints the relevance gate, calls TypeSafe, and may recall up to 5 observation summaries and preview extracted facts (both read-only). `--budget N` prints the ranked queue and a cutoff |
 | `seed` | Retain candidates into Hindsight; update local seed manifest |
 | `store --dry-run` | Print known/new/changed/unchanged buckets for allowlisted + discovered markdown; **no** API calls |
-| `store` | Retain an operator-selected subset (allowlist, `--files`, or interactive pick) via the same seed retain path. `--propose-adopt --judge jev` prints new files to consider; `--apply` writes those paths and does not retain |
+| `store` | Retain an operator-selected subset (allowlist, `--files`, or interactive pick) via the same seed retain path. `--propose-adopt --judge jev` prints new files to consider; `--apply` writes those paths and does not retain. `--judge jev` on changed files runs the edit durability gate before retain |
 | `prune --dry-run` | List path-gone / section-gone / explicit candidates (read-only document list); no deletes |
 | `prune` | Delete selected bank documents; write local tombstones under `.orto/local/` |
 | `mcp` | Print ready-to-paste MCP snippets (bank-scoped server names); optional `--write` / `--check` / AGENTS / Cursor rules / Firstmate |

@@ -18,7 +18,7 @@ Allowlist proposals ship on `store --propose-adopt --judge jev`.
 A retain budget ships on `seed --budget N --judge jev`.
 The watcher high-signal gate helper ships in `src/judge/watcher-gate.ts`.
 There is no `watch` CLI command yet.
-`store` edit durability gates are still planned.
+`store` edit durability ships on `store --judge jev`.
 Prune annotation is still planned.
 **Related:** [jev-integration.md](./jev-integration.md) (where it sits), [jev-diagrams.md](./jev-diagrams.md) (store / update flows), [jev-benefits-and-costs.md](./jev-benefits-and-costs.md), [ROADMAP.md](../ROADMAP.md) Phase 7, [JEV-0](https://github.com/zanuka/orto/issues/58).
 
@@ -90,7 +90,7 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Store allowlist proposals (shipped on `store --propose-adopt --judge jev`)
 - Seed priority and retain budget (shipped on `seed --budget N --judge jev`)
 - Watcher high-signal gate (helper shipped; no default `watch` CLI yet)
-- `store` edit durability gates
+- `store` edit durability (shipped on `store --judge jev`)
 - Prune / audit plans for outdated, irrelevant, or contradicted items (including when the file is still on disk)
 - Bank-template fitness scores (mission / directives / tags / mental-model questions); prose stays in the template
 - MCP `retain` guardrails, recall rerank, still-true checks, `reflect` vs `recall` vs mental-model routing
@@ -279,6 +279,25 @@ A secret match is skipped and is not sent to Jev.
 There is no `orto watch` command on the default CLI.
 Phase 8 can wire an event loop to this helper.
 Until then, tests cover the gate with fixtures ([JEV-13](https://github.com/zanuka/orto/issues/42)).
+
+---
+
+## Store edit durability
+
+`store --judge jev` gates changed allowlisted files before retain.
+One Jev call per changed path asks:
+
+- Noul `claim_changed`: durable meaning changed vs wording or formatting only
+- Noul `looks_like_workaround`: temporary hack, "revert this", or "TODO undo"
+- Choice `action`: `re_retain`, `skip`, or `review`
+
+A confident wording-only answer skips retain.
+The content hash still updates under `.orto/local/seed-manifest.json` so the same edit does not loop.
+A confident workaround stays in review and is not retained.
+A confident claim change that is not a workaround re-retains.
+Previous text comes from `.orto/local/retained-sources.json` after an earlier store, or from a test override.
+Without previous text, store retains as today.
+Without `--judge jev`, store is unchanged ([JEV-12](https://github.com/zanuka/orto/issues/31)).
 
 ---
 

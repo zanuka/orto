@@ -9,7 +9,7 @@ The seed relevance gate is shipped ([JEV-4](https://github.com/zanuka/orto/issue
 Section-level keep/skip is shipped with it ([JEV-5](https://github.com/zanuka/orto/issues/36)).
 One file can retain one section and skip another.
 `store --propose-adopt` can propose new allowlist files ([JEV-10](https://github.com/zanuka/orto/issues/41)).
-Edit durability gates are still planned ([JEV-12](https://github.com/zanuka/orto/issues/31)).
+Edit durability ships on `store --judge jev` ([JEV-12](https://github.com/zanuka/orto/issues/31)).
 The watcher high-signal gate helper ships ([JEV-13](https://github.com/zanuka/orto/issues/42)); there is no default `watch` CLI yet.
 The diagrams show that intended `store` experience with `--judge jev`.
 
