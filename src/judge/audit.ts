@@ -9,10 +9,18 @@ whether it is superseded (superseded), and which plan action to take
 The action choice is used when its confidence meets --confidence. Otherwise
 the nouls decide: unsupported and superseded lean toward delete_candidate or
 supersede; still supported and not superseded keeps. Mid-range answers stay
-as keep with a review reason so the plan is never empty. Audit never mutates
-the bank. The caller writes .orto/local/audit-plan.json and prints a table.
+as keep with a review reason so the plan is never empty. Layer-specific aging
+then biases the plan (archive world facts when the source is gone, prefer
+refresh over delete for mental models, and so on). Audit never mutates the
+bank. The caller writes .orto/local/audit-plan.json and prints a table.
 */
 
+import {
+  biasAuditByLayer,
+  parseAuditLayer,
+  type AuditAgingContext,
+  type AuditLayer,
+} from "./aging.js";
 import { noulBand, type NoulBand } from "./relevance.js";
 import {
   assertJevStateSendable,
@@ -29,6 +37,9 @@ import type {
   JudgeQuestion,
   NoulQuestion,
 } from "./types.js";
+
+export type { AuditAgingContext, AuditLayer } from "./aging.js";
+export { AUDIT_LAYERS, biasAuditByLayer, parseAuditLayer } from "./aging.js";
 
 export const AUDIT_ACTIONS = [
   "keep",
@@ -49,6 +60,12 @@ export interface AuditItemState {
   currentFileExcerpt?: string;
   bankMission?: string;
   lastAccessed?: string;
+  layer?: AuditLayer;
+  sourceGone?: boolean;
+  hashMismatch?: boolean;
+  proofCountLow?: boolean;
+  hasContradictingCandidate?: boolean;
+  sectionRewritten?: boolean;
 }
 
 export interface AuditDecision {
@@ -62,6 +79,8 @@ export interface AuditDecision {
   supersededBand?: NoulBand;
   chosenAction?: string;
   actionConfidence?: number;
+  layer?: AuditLayer;
+  agingBias?: string;
 }
 
 export function auditQuestions(): Record<string, JudgeQuestion> {
@@ -76,6 +95,7 @@ export function interpretAudit(input: {
   id: string;
   answers: Record<string, JudgeAnswer>;
   confidence: number;
+  aging?: AuditAgingContext;
 }): AuditDecision {
   const supported = readNoul(input.answers.still_supported_by_repo);
   const superseded = readNoul(input.answers.superseded);
@@ -100,8 +120,9 @@ export function interpretAudit(input: {
       : {}),
   };
 
+  let decision: AuditDecision;
   if (actionConfident && chosen !== undefined) {
-    return {
+    decision = {
       ...base,
       action: chosen.choice as AuditAction,
       confidence: chosen.confidence,
@@ -113,10 +134,8 @@ export function interpretAudit(input: {
         supersededBand,
       }),
     };
-  }
-
-  if (supportedBand === "no" && supersededBand === "yes") {
-    return {
+  } else if (supportedBand === "no" && supersededBand === "yes") {
+    decision = {
       ...base,
       action: "delete_candidate",
       confidence: input.confidence,
@@ -128,10 +147,8 @@ export function interpretAudit(input: {
         supersededBand,
       }),
     };
-  }
-
-  if (supersededBand === "yes") {
-    return {
+  } else if (supersededBand === "yes") {
+    decision = {
       ...base,
       action: "supersede",
       confidence: input.confidence,
@@ -143,10 +160,8 @@ export function interpretAudit(input: {
         supersededBand,
       }),
     };
-  }
-
-  if (supportedBand === "yes" && supersededBand === "no") {
-    return {
+  } else if (supportedBand === "yes" && supersededBand === "no") {
+    decision = {
       ...base,
       action: "keep",
       confidence: input.confidence,
@@ -158,10 +173,8 @@ export function interpretAudit(input: {
         supersededBand,
       }),
     };
-  }
-
-  if (supportedBand === "no") {
-    return {
+  } else if (supportedBand === "no") {
+    decision = {
       ...base,
       action: "archive",
       confidence: input.confidence,
@@ -173,22 +186,32 @@ export function interpretAudit(input: {
         supersededBand,
       }),
     };
+  } else {
+    decision = {
+      ...base,
+      action: "keep",
+      confidence: chosen?.confidence ?? 0,
+      reason: reasonFromAnswers({
+        action: "keep",
+        supported,
+        supportedBand,
+        superseded,
+        supersededBand,
+        review: true,
+        threshold: input.confidence,
+      }),
+    };
   }
 
-  return {
-    ...base,
-    action: "keep",
-    confidence: chosen?.confidence ?? 0,
-    reason: reasonFromAnswers({
-      action: "keep",
-      supported,
-      supportedBand,
-      superseded,
-      supersededBand,
-      review: true,
-      threshold: input.confidence,
-    }),
-  };
+  if (input.aging === undefined) {
+    return decision;
+  }
+  return biasAuditByLayer({
+    decision,
+    aging: input.aging,
+    confidence: input.confidence,
+    ...(supportedBand !== undefined ? { stillSupportedBand: supportedBand } : {}),
+  });
 }
 
 export async function judgeAuditItem(input: {
@@ -210,8 +233,10 @@ export async function judgeAuditItem(input: {
     };
   }
 
+  const aging = agingContextFromItem(input.item);
   const state = {
     type: input.item.type,
+    layer: aging.layer,
     id: input.item.id.slice(0, JEV_DOCUMENT_ID_MAX_CHARS),
     text: input.item.text.slice(0, JEV_SECTION_MAX_CHARS),
     sourceStillExists: input.item.sourceStillExists,
@@ -264,7 +289,30 @@ export async function judgeAuditItem(input: {
     id: input.item.id,
     answers: result.answers,
     confidence: input.confidence,
+    aging,
   });
+}
+
+export function agingContextFromItem(item: AuditItemState): AuditAgingContext {
+  const layer = parseAuditLayer(item.layer ?? item.type);
+  const context: AuditAgingContext = { layer };
+  const sourceGone = item.sourceGone ?? !item.sourceStillExists;
+  if (sourceGone) {
+    context.sourceGone = true;
+  }
+  if (item.hashMismatch === true) {
+    context.hashMismatch = true;
+  }
+  if (item.proofCountLow === true) {
+    context.proofCountLow = true;
+  }
+  if (item.hasContradictingCandidate === true) {
+    context.hasContradictingCandidate = true;
+  }
+  if (item.sectionRewritten === true) {
+    context.sectionRewritten = true;
+  }
+  return context;
 }
 
 export function formatAuditTable(input: {

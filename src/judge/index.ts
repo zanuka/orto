@@ -87,15 +87,21 @@ export type {
 } from "./edit-durability.js";
 export {
   AUDIT_ACTIONS,
+  AUDIT_LAYERS,
+  agingContextFromItem,
   auditQuestions,
+  biasAuditByLayer,
   formatAuditTable,
   interpretAudit,
   judgeAuditItem,
+  parseAuditLayer,
 } from "./audit.js";
 export type {
   AuditAction,
+  AuditAgingContext,
   AuditDecision,
   AuditItemState,
+  AuditLayer,
 } from "./audit.js";
 export {
   assertRetainBudget,
