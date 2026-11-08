@@ -85,8 +85,8 @@ A bank you seed before that import runs with whatever mission is already on the 
 Editing a file in place and re-running updates that section.
 Renaming or deleting a source retains the new path and leaves the old `document_id`s in the bank until you run `orto prune` (path-gone / section-gone / explicit selection).
 See the [CLI reference](./orto-cli-commands.md#orto-prune).
-Optional `--judge jev` for “still on disk but no longer true” is planned later ([Jev integration](./jev-integration.md)).
-Orto deletes only after you confirm (or after `--yes` with an explicit selection).
+For still-on-disk claims that may be outdated, run `orto audit --judge jev` ([Jev integration](./jev-integration.md)).
+Orto deletes only after you confirm prune (or after `--yes` with an explicit selection).
 
 The same `seed` / `mcp` flow targets a local server or Hindsight Cloud.
 Cloud is opt-in.
@@ -210,7 +210,7 @@ A low score stays a preview until someone confirms.
 | What `store` adopts | You pick every new file. The command never adopts one on its own. | `store --propose-adopt --judge jev` can propose a new durable file. You confirm with `--apply` before the allowlist changes. Nothing is retained until you store it. |
 | Whether a known-file edit is worth retaining | Every changed allowlisted file is eligible. | `store --judge jev` skips wording-only edits (hash still updates) and holds temporary workarounds for review. A real claim change re-retains. |
 | Whether the template fits the repo | `configure` writes mission, directives, and starter mental models for you to review in git. | Jev scores that draft, suggests how aggressive extraction should be, proposes mental-model questions, and assigns tags the same way across sections. The prose stays in the template you commit. |
-| Whether the bank is still current | `seed` and `store` are additive. `orto prune` lists path-gone / section-gone candidates (and explicit selections) and deletes after you confirm. | Optional `--judge jev` also scores what is outdated, irrelevant, or contradicted when the file is still on disk. Low confidence stays unchecked. A mental-model refresh is a separate confirmation. |
+| Whether the bank is still current | `seed` and `store` are additive. `orto prune` lists path-gone / section-gone candidates (and explicit selections) and deletes after you confirm. | `orto audit --judge jev` scores still-on-disk claims and writes a prune/refresh plan (keep / refresh / supersede / archive / delete-candidate). Low confidence stays as keep-for-review. Apply is a separate confirmation. A mental-model refresh is also separate. |
 | What an agent should trust | MCP exposes `recall`, `reflect`, and `retain` on the project bank. | An unsafe `retain` from the agent is refused. Recalled passages can be reranked before they fill a prompt. A still-true check can flag a memory the docs no longer support. The route picks `reflect`, `recall`, or a mental model for the question. |
 | When Firstmate should use the bank | The `project-bank` skill is recall-only. Crewmates do not seed or store. | Jev can say whether the task needs this bank, which bank, and whether the outcome is a doc update, a pull request, or both. Low confidence goes to the captain. A scout report is judged for seedability before anyone retains it. |
 | Before the bank is shared | You choose local, LAN, VPN, public self-host, or Hindsight Cloud. | A safety check runs before a public or Cloud share. The destination stays a Orto choice, with Hindsight first. |

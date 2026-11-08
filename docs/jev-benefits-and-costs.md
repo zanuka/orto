@@ -103,15 +103,15 @@ A monorepo change can touch dozens of markdown files and contain only a few deci
 
 ### 3.4 Remove knowledge that is no longer true: with a plan, not a guess
 
-`seed` and `store` add or upsert. Months later a path is gone, a section is gone, or the file is still on disk but the claim is false. `orto prune` already groups path-gone and section-gone without a TypeSafe key (plus explicit `--source` / `--document-id`). Optional `audit --judge jev` / `--judge jev` on prune is planned to annotate:
+`seed` and `store` add or upsert. Months later a path is gone, a section is gone, or the file is still on disk but the claim is false. `orto prune` already groups path-gone and section-gone without a TypeSafe key (plus explicit `--source` / `--document-id`). `orto audit --judge jev` scores still-on-disk claims and writes a plan:
 
-- source path no longer in the repo (shipped today; no TypeSafe key required)
-- section no longer in the file (shipped today; no key required)
-- Jev-scored outdated / irrelevant / contradicted (key + `--judge jev`; not shipped yet)
+- source path no longer in the repo (prune today; no TypeSafe key required)
+- section no longer in the file (prune today; no key required)
+- Jev-scored keep / refresh / supersede / archive / delete-candidate (`orto audit --judge jev`; plan only, no bank mutations)
 
-Jev annotates the prompt with a choice and a confidence score. Low score is shown and left unchecked. `--dry-run` prints groups and does not delete. After you confirm, Orto deletes and tombstones so the next seed does not put the same unchanged text back.
+Jev annotates each item with an action and a confidence score. Low score is shown as keep-for-review. `--dry-run` prints the table and does not write the plan file. Live audit writes `.orto/local/audit-plan.json`. Apply-with-confirm is separate. After you confirm a prune, Orto deletes and tombstones so the next seed does not put the same unchanged text back.
 
-**User-visible result:** prune is a reviewable plan instead of manual Hindsight cleanup. Path-gone / section-gone work offline today.
+**User-visible result:** audit is a reviewable plan; prune still owns deletes. Path-gone / section-gone work offline today.
 
 ### 3.5 Stop agents from retaining session junk
 
@@ -423,7 +423,7 @@ A single bad MCP retain of a 2,000-token chat blob is “free” at write time a
 | MCP retain gate | Stop session fluff entering the bank | Yes (JEV-22) |
 | Golden-set eval | Know whether Jev beats heuristics; improve offline path | Yes (JEV-34) |
 | Kind / tags / contradiction / secrets | Cleaner bank, supersession instead of duplicate facts, secrets and personal data stay out | Shipped for kind ([JEV-6](https://github.com/zanuka/orto/issues/37)), contradiction ([JEV-7](https://github.com/zanuka/orto/issues/38)), the secret / personal-data check ([JEV-8](https://github.com/zanuka/orto/issues/39)), and citation support ([JEV-9](https://github.com/zanuka/orto/issues/40)) |
-| `audit --judge jev` + confirm | Structured prune; tombstones | After |
+| `audit --judge jev` + confirm | Structured prune plan; tombstones on apply | Audit plan shipped; apply later |
 | Firstmate routing | Bank only when the task needs it | After |
 | Recall rerank / still-true | Safer context; extra latency and tokens | After, flag-gated |
 | Share safety gate | Extra check before `public` | After, with Phase 5 profiles |

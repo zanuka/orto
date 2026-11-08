@@ -19,6 +19,7 @@ orto seed --dry-run
 orto seed
 orto store --dry-run
 orto store --yes
+orto audit --judge jev --dry-run
 orto prune --dry-run
 orto share --profile local
 orto mcp --write --write-agents --write-cursor-rules --include-auth
@@ -52,6 +53,7 @@ Mutating or network commands support `--dry-run` where practical.
 With `--judge jev` it may recall up to 5 observation summaries and preview extracted facts (both read-only).
 Without that flag it does not call Hindsight.
 `prune --dry-run` lists bank candidates (read-only list) and never deletes or writes tombstones.
+`audit --judge jev` never mutates the bank; without `--dry-run` it writes `.orto/local/audit-plan.json`.
 
 ---
 
@@ -62,7 +64,7 @@ Without that flag it does not call Hindsight.
 | `orto --help` | Top-level help |
 | `orto --version` | Package version |
 
-Hindsight connection (for `seed`, `store`, `prune`, `mcp`, `docker upgrade`):
+Hindsight connection (for `seed`, `store`, `audit`, `prune`, `mcp`, `docker upgrade`):
 
 | Source | URL | API key |
 |--------|-----|---------|
@@ -283,6 +285,37 @@ Denylist (in addition to the seed scanner's secrets/credentials rules): `.stow-a
 
 ---
 
+## `orto audit`
+
+Write a read-only prune/refresh plan for retained bank documents with `--judge jev`.
+Lists documents from Hindsight, builds a small state object per id (text, source-still-exists, optional file excerpt, bank mission), and asks Jev once per item.
+Never deletes, retains, or otherwise mutates the bank.
+
+```bash
+orto audit --judge jev --dry-run
+orto audit --judge jev
+orto audit --judge jev --limit 20
+```
+
+Each plan row has `id`, `action`, `confidence`, and a structured `reason` built from the answers (`still_supported_by_repo`, `superseded`, `action`).
+Actions are `keep`, `refresh_mental_model`, `supersede`, `archive`, or `delete_candidate`.
+Live runs write `.orto/local/audit-plan.json` (gitignored) and print the same table on stdout.
+`--dry-run` prints the table only.
+Missing `ORTO_TYPESAFE_API_KEY` with `--judge jev` is a hard error.
+Apply is a separate step ([JEV-17](https://github.com/zanuka/orto/issues/52)); this command only plans.
+
+| Flag | Description |
+|------|-------------|
+| `--dry-run` | Print the plan table without writing `.orto/local/audit-plan.json` |
+| `--limit <n>` | Maximum bank documents to judge this run |
+| `--hindsight-url <url>` | Override Hindsight base URL |
+| `--api-key <key>` | Hindsight API key (or set env vars above) |
+| `--judge <id>` | Requires `jev` for this command |
+| `--confidence <n>` | Minimum confidence to trust the action choice (default `0.8`) |
+| `--strict` | With `--judge jev`, fail on TypeSafe errors instead of falling back to heuristics |
+
+---
+
 ## `orto prune`
 
 Remove bank documents that are no longer backed by durable sources, or that you name explicitly.
@@ -322,7 +355,7 @@ Do not treat all `orto:` ids as stale merely because they are not bare paths.
 - Apply writes `.orto/local/tombstones.json` so an unchanged source is not re-retained on the next `seed` or `store`.
 - A later edit, or `--force` on `seed` / `store`, can retain again (and clears matching tombstones after a successful retain).
 - Mental-model refresh may be recommended in the output. It is a separate confirmation (not auto-run).
-- Optional `--judge jev` prune annotation (outdated / irrelevant / contradicted scoring) is not wired yet. The judge port and flags exist; path-gone and section-gone work with no TypeSafe key.
+- For still-on-disk claims that may be outdated or superseded, run `orto audit --judge jev` first. Path-gone and section-gone prune groups work with no TypeSafe key.
 
 | Flag | Description |
 |------|-------------|

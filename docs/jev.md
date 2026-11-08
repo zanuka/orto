@@ -91,7 +91,8 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Seed priority and retain budget (shipped on `seed --budget N --judge jev`)
 - Watcher high-signal gate (helper shipped; no default `watch` CLI yet)
 - `store` edit durability (shipped on `store --judge jev`)
-- Prune / audit plans for outdated, irrelevant, or contradicted items (including when the file is still on disk)
+- Audit prune/refresh plans (shipped on `orto audit --judge jev`)
+- Apply audit plans and related prune annotation follow-ups (aging, mental-model freshness)
 - Bank-template fitness scores (mission / directives / tags / mental-model questions); prose stays in the template
 - MCP `retain` guardrails, recall rerank, still-true checks, `reflect` vs `recall` vs mental-model routing
 - Firstmate routing and escalation when confidence is low
@@ -162,7 +163,8 @@ A confident yes records that id as `contradicts`.
 A confident no, or an uncertain score, adds no metadata for that id.
 
 The old observation stays in the bank.
-Deleting it is prune annotation ([JEV-14](https://github.com/zanuka/orto/issues/32), [JEV-17](https://github.com/zanuka/orto/issues/52)), after you confirm.
+`orto audit --judge jev` can propose delete or supersede ([JEV-14](https://github.com/zanuka/orto/issues/32)).
+Deleting still waits on apply-with-confirm ([JEV-17](https://github.com/zanuka/orto/issues/52)).
 
 ---
 
@@ -298,6 +300,26 @@ A confident claim change that is not a workaround re-retains.
 Previous text comes from `.orto/local/retained-sources.json` after an earlier store, or from a test override.
 Without previous text, store retains as today.
 Without `--judge jev`, store is unchanged ([JEV-12](https://github.com/zanuka/orto/issues/31)).
+
+---
+
+## Audit plan
+
+`orto audit --judge jev` writes a prune/refresh plan for retained bank documents.
+One Jev call per document asks:
+
+- Noul `still_supported_by_repo`
+- Noul `superseded`
+- Choice `action`: `keep`, `refresh_mental_model`, `supersede`, `archive`, or `delete_candidate`
+
+State is a small object: id, text, source-still-exists, optional file excerpt, bank mission.
+Items are batched with `--limit`.
+The whole bank is never dumped into one request.
+Live runs write `.orto/local/audit-plan.json` (gitignored) and print a table with id, action, confidence, and a reason built from the answers.
+`--dry-run` prints the table only.
+The bank is never mutated.
+Missing `ORTO_TYPESAFE_API_KEY` is a hard error ([JEV-14](https://github.com/zanuka/orto/issues/32)).
+Apply-with-confirm is separate ([JEV-17](https://github.com/zanuka/orto/issues/52)).
 
 ---
 

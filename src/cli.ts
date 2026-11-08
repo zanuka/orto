@@ -15,6 +15,7 @@ import {
 import { printInitResult, runInit } from "./commands/init.js";
 import { printMcpResult, runMcp } from "./commands/mcp.js";
 import { runMentalModelCommand } from "./commands/mental-model.js";
+import { runAuditCommand } from "./commands/audit.js";
 import { runPruneCommand } from "./commands/prune.js";
 import { runSeedCommand } from "./commands/seed.js";
 import { runStoreCommand } from "./commands/store.js";
@@ -662,6 +663,48 @@ async function main(): Promise<void> {
         ...(opts.files !== undefined ? { files: opts.files } : {}),
         ...(opts.addFiles !== undefined ? { addFiles: opts.addFiles } : {}),
         ...(opts.project !== undefined ? { project: opts.project } : {}),
+        ...(opts.hindsightUrl !== undefined
+          ? { hindsightUrl: opts.hindsightUrl }
+          : {}),
+        ...(opts.apiKey !== undefined ? { apiKey: opts.apiKey } : {}),
+        ...judgeOpts,
+      });
+    },
+  );
+
+  addJudgeCliOptions(
+    program
+      .command("audit")
+      .description(
+        "Write a read-only prune/refresh plan with --judge jev (no bank mutations)",
+      )
+      .option(
+        "--dry-run",
+        "Print the plan table without writing .orto/local/audit-plan.json",
+      )
+      .option("--limit <n>", "Maximum bank documents to judge this run")
+      .option(
+        "--hindsight-url <url>",
+        "Hindsight base URL (default: config, ORTO_HINDSIGHT_URL, or http://localhost:8888)",
+      )
+      .option(
+        "--api-key <key>",
+        "Hindsight API key (or set ORTO_HINDSIGHT_API_KEY / HINDSIGHT_API_KEY)",
+      ),
+  ).action(
+    async (opts: {
+      dryRun?: boolean;
+      limit?: string;
+      hindsightUrl?: string;
+      apiKey?: string;
+      judge?: string;
+      confidence?: string;
+      strict?: boolean;
+    }) => {
+      const judgeOpts = judgeOptionsFromCli(opts);
+      await runAuditCommand({
+        dryRun: Boolean(opts.dryRun),
+        ...(opts.limit !== undefined ? { limit: Number(opts.limit) } : {}),
         ...(opts.hindsightUrl !== undefined
           ? { hindsightUrl: opts.hindsightUrl }
           : {}),

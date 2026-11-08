@@ -46,18 +46,20 @@ The same pass can score the generated mission and directives, and can propose me
 
 You confirm before anything is retained.
 
-**Remove knowledge that is no longer true.** `seed` and `store` add or upsert. Months later a doc can be irrelevant, a path can be gone, or a section can contradict the current tree. `orto prune` groups those cases and asks you to choose:
+**Remove knowledge that is no longer true.** `seed` and `store` add or upsert. Months later a doc can be irrelevant, a path can be gone, or a section can contradict the current tree. `orto prune` groups path-gone, section-gone, and explicit selections. `orto audit --judge jev` plans keep / refresh / supersede / archive / delete-candidate for still-on-disk claims without mutating the bank.
 
 - source path no longer in the repo
 - section no longer in the file
 - a path or `document_id` you name
-- with `--judge jev`, items scored as outdated, irrelevant, or contradicted, including when the file is still on disk
+- with `orto audit --judge jev`, items scored for support and supersession, including when the file is still on disk
 
-Jev annotates that prompt with a choice and a confidence score.
-A low score is shown and left unchecked.
-`--dry-run` prints the groups and does not delete.
-After you confirm, Orto invalidates or deletes the chosen documents and tombstones them so the next `seed` or `store` does not put the same unchanged text back.
-A mental-model refresh can be recommended in the same run and is its own confirmation.
+Jev annotates each audit item with an action and a confidence score.
+A low score is shown as keep-for-review.
+`audit --dry-run` prints the table and does not write the plan file.
+Live audit writes `.orto/local/audit-plan.json`.
+Apply-with-confirm is separate.
+After you confirm prune, Orto invalidates or deletes the chosen documents and tombstones them so the next `seed` or `store` does not put the same unchanged text back.
+A mental-model refresh can be recommended and is its own confirmation.
 Path-gone and section-gone groups work with no TypeSafe key.
 
 **Act only when the decision is still real.** At read time, Jev can:
