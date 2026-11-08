@@ -145,6 +145,7 @@ node dist/cli.js mcp --write --dry-run
 | `audit --judge jev` | Read-only prune/refresh plan: judge bank documents one at a time; write `.orto/local/audit-plan.json` (skipped with `--dry-run`); never mutates the bank |
 | `prune --dry-run` | List path-gone / section-gone / explicit candidates (read-only document list); no deletes |
 | `prune` | Delete selected bank documents; write local tombstones under `.orto/local/` |
+| `prune --plan` / `--apply` | Preview or apply an audit plan (`refresh_mental_model`, archive, supersede provenance; deletes only with `--allow-delete`) |
 | `mcp` | Print ready-to-paste MCP snippets (bank-scoped server names); optional `--write` / `--check` / AGENTS / Cursor rules / Firstmate |
 
 Common flags:
@@ -340,6 +341,7 @@ Flow:
 6. Later `prepareSeed` skips tombstoned unchanged facts; `--force` or a content hash change can retain again.
 
 Day-to-day order: retain (`store` / `seed`), then prune.
+`orto prune --apply --plan .orto/local/audit-plan.json` applies a prior `orto audit` plan (refresh / archive / supersede; deletes need `--allow-delete`).
 Details: [orto-cli-commands.md](./orto-cli-commands.md#orto-prune).
 
 ## Hindsight integration

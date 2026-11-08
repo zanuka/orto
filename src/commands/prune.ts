@@ -18,6 +18,10 @@ import { addTombstones } from "../seeder/tombstones.js";
 import { createJudge } from "../judge/index.js";
 import { OrtoError } from "../utils/errors.js";
 import { isInteractive, promptLine, promptMultiSelect } from "../utils/prompt.js";
+import {
+  runPruneAuditPlan,
+  type PruneAuditPlanResult,
+} from "./prune-audit-plan.js";
 
 export interface PruneOptions {
   cwd?: string;
@@ -32,6 +36,9 @@ export interface PruneOptions {
   judge?: string;
   confidence?: number;
   strict?: boolean;
+  plan?: string;
+  apply?: boolean;
+  allowDelete?: boolean;
 }
 
 export interface PruneResult {
@@ -45,7 +52,23 @@ export interface PruneResult {
   failed: number;
 }
 
-export async function runPrune(options: PruneOptions = {}): Promise<PruneResult> {
+export async function runPrune(
+  options: PruneOptions = {},
+): Promise<PruneResult | PruneAuditPlanResult> {
+  if (options.plan !== undefined || options.apply === true) {
+    return runPruneAuditPlan({
+      ...(options.cwd !== undefined ? { cwd: options.cwd } : {}),
+      ...(options.plan !== undefined ? { plan: options.plan } : {}),
+      apply: options.apply === true,
+      allowDelete: options.allowDelete === true,
+      ...(options.hindsightUrl !== undefined
+        ? { hindsightUrl: options.hindsightUrl }
+        : {}),
+      ...(options.apiKey !== undefined ? { apiKey: options.apiKey } : {}),
+      ...(options.client !== undefined ? { client: options.client } : {}),
+    });
+  }
+
   const cwd = options.cwd ?? process.cwd();
   const dryRun = options.dryRun ?? false;
   const yes = options.yes ?? false;
