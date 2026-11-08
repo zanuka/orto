@@ -92,7 +92,8 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Watcher high-signal gate (helper shipped; no default `watch` CLI yet)
 - `store` edit durability (shipped on `store --judge jev`)
 - Audit prune/refresh plans (shipped on `orto audit --judge jev`)
-- Apply audit plans and related prune annotation follow-ups (aging, mental-model freshness)
+- Layer-specific aging on that plan (shipped)
+- Apply audit plans and mental-model freshness follow-ups
 - Bank-template fitness scores (mission / directives / tags / mental-model questions); prose stays in the template
 - MCP `retain` guardrails, recall rerank, still-true checks, `reflect` vs `recall` vs mental-model routing
 - Firstmate routing and escalation when confidence is low
@@ -320,6 +321,22 @@ Live runs write `.orto/local/audit-plan.json` (gitignored) and print a table wit
 The bank is never mutated.
 Missing `ORTO_TYPESAFE_API_KEY` is a hard error ([JEV-14](https://github.com/zanuka/orto/issues/32)).
 Apply-with-confirm is separate ([JEV-17](https://github.com/zanuka/orto/issues/52)).
+
+### Layer-specific aging
+
+Hindsight layers age differently.
+After Jev answers, the audit planner biases the action by layer ([JEV-15](https://github.com/zanuka/orto/issues/43)):
+
+| Layer | Default bias |
+|-------|--------------|
+| World / experience | Archive when the source is gone, or when the content hash changed and `still_supported_by_repo` is low |
+| Observation | Supersede (mark) when proof-count is low and a contradicting candidate exists |
+| Mental model / knowledge page | Prefer `refresh_mental_model` over `delete_candidate` or `archive` (Reflect reads these first) |
+| Document (`orto:<path>#<section>`) | Keep for re-retain when the section was rewritten; archive when the source file is gone |
+
+Reasons include `layer=<layer>` and, when a bias applied, `aging=<rule>`.
+Today's `orto audit` lists bank documents and fills document-layer signals (source gone, hash mismatch, section rewritten).
+World, experience, observation, and mental-model rows are covered by the same planner and tests; wiring those inventories into the CLI is a later step.
 
 ---
 

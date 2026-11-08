@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ortoDir } from "../config/paths.js";
 import { extractFromSource } from "../extractor/extract.js";
+import { hashContent } from "../extractor/hash.js";
 import type { AuditDecision, AuditItemState } from "../judge/audit.js";
 import type { DocumentSummary } from "../providers/hindsight/client.js";
 import type { DurableSource } from "../scanner/durable-sources.js";
@@ -27,6 +28,8 @@ export interface AuditPlanItem {
   superseded?: number;
   chosenAction?: string;
   actionConfidence?: number;
+  layer?: string;
+  agingBias?: string;
 }
 
 export function auditPlanPath(projectRoot: string): string {
@@ -71,6 +74,12 @@ export function toAuditPlanFile(input: {
       if (decision.actionConfidence !== undefined) {
         item.actionConfidence = decision.actionConfidence;
       }
+      if (decision.layer !== undefined) {
+        item.layer = decision.layer;
+      }
+      if (decision.agingBias !== undefined) {
+        item.agingBias = decision.agingBias;
+      }
       return item;
     }),
   };
@@ -105,9 +114,11 @@ export async function buildAuditItems(input: {
 
     let text = "";
     let currentFileExcerpt: string | undefined;
+    let currentHash: string | undefined;
     if (sourcePath !== undefined && sourceStillExists) {
       const absolutePath = join(input.projectRoot, sourcePath);
       const content = await readFile(absolutePath, "utf8");
+      currentHash = hashContent(content);
       const source: DurableSource = {
         absolutePath,
         relativePath: sourcePath,
@@ -134,12 +145,22 @@ export async function buildAuditItems(input: {
       sourcePath !== undefined
         ? manifest?.sources[sourcePath]?.contentHash
         : undefined;
+    const hashMismatch =
+      currentHash !== undefined &&
+      lastSourceHash !== undefined &&
+      currentHash !== lastSourceHash;
+    const sectionRewritten =
+      sourceStillExists && hashMismatch && parsed.kind === "section";
     const item: AuditItemState = {
       type: "document",
+      layer: "document",
       id: doc.id,
       text,
       sourceStillExists,
+      sourceGone: !sourceStillExists,
       ...(lastSourceHash !== undefined ? { lastSourceHash } : {}),
+      ...(hashMismatch ? { hashMismatch: true } : {}),
+      ...(sectionRewritten ? { sectionRewritten: true } : {}),
       ...(currentFileExcerpt !== undefined ? { currentFileExcerpt } : {}),
       ...(input.bankMission !== undefined ? { bankMission: input.bankMission } : {}),
       ...(doc.updated_at !== undefined ? { lastAccessed: doc.updated_at } : {}),
