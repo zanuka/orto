@@ -116,6 +116,17 @@ export type {
   MentalModelFreshnessState,
 } from "./mental-model-freshness.js";
 export {
+  LOW_MISSION_FIT_MAX,
+  MISSION_FIT_MAX,
+  interpretMissionFit,
+  judgeMissionFit,
+  missionFitQuestions,
+} from "./mission-fit.js";
+export type {
+  MissionFitDecision,
+  MissionFitState,
+} from "./mission-fit.js";
+export {
   assertRetainBudget,
   compositePriority,
   DEFAULT_PRIORITY_WEIGHTS,

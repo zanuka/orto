@@ -95,7 +95,8 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Layer-specific aging on that plan (shipped)
 - Mental-model freshness on that plan (shipped)
 - Apply audit plans with confirmation (shipped on `orto prune --apply --plan`)
-- Bank-template fitness scores (mission / directives / tags / mental-model questions); prose stays in the template
+- Bank-template mission / directives fitness (shipped on `configure --judge jev`)
+- Bank-template fitness follow-ups (extraction aggressiveness, mental-model questions, tags); prose stays in the template
 - MCP `retain` guardrails, recall rerank, still-true checks, `reflect` vs `recall` vs mental-model routing
 - Firstmate routing and escalation when confidence is low
 - Share / deployment-profile safety before public or Cloud exposure
@@ -362,6 +363,19 @@ Pinned mental models and knowledge pages get dedicated questions ([JEV-16](https
 `refresh` becomes plan action `refresh_mental_model` and never proposes delete.
 `retarget_query` is review-only: the plan records it with `reviewOnly`, and Orto does not rewrite the source query in this step.
 `leave` maps to `keep`. `archive` maps to `archive`.
+
+---
+
+## Mission and directives fitness
+
+`orto configure --judge jev` scores the generated bank template against the repo ([JEV-18](https://github.com/zanuka/orto/issues/23)):
+
+- Score `mission_fit` (0 generic or wrong through 3 specific and true)
+- Noul `directives_conflict_with_docs`
+
+Jev does not write mission or directive prose.
+A low `mission_fit` (0 or 1) at or above `--confidence` prints `review mission before applying` and skips the template write unless `--yes`.
+Default `configure` without `--judge jev` is unchanged.
 
 ---
 

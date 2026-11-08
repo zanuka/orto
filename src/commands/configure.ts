@@ -1,10 +1,23 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { loadConfig } from "../config/load.js";
 import { bankTemplatePath, hindsightDir } from "../config/paths.js";
+import {
+  createJudge,
+  judgeMissionFit,
+  type MissionFitDecision,
+  type ResolvedJudge,
+} from "../judge/index.js";
 import { detectProjectRoot } from "../project/detect-root.js";
 import { generateHindsightBankTemplate } from "../providers/hindsight/template.js";
 import type { HindsightBankTemplate } from "../providers/hindsight/types.js";
 import { OrtoError } from "../utils/errors.js";
-import { ensureDir, pathExists, readJsonFile, writeJsonFile } from "../utils/fs.js";
+import {
+  ensureDir,
+  pathExists,
+  readJsonFile,
+  writeJsonFile,
+} from "../utils/fs.js";
 import {
   printBankApplyResult,
   runBankApply,
@@ -22,6 +35,10 @@ export interface ConfigureOptions extends ConfigureWizardFlags {
   apply?: boolean;
   hindsightUrl?: string;
   apiKey?: string;
+  judge?: string;
+  confidence?: number;
+  strict?: boolean;
+  resolvedJudge?: ResolvedJudge;
 }
 
 export interface ConfigureResult {
@@ -31,6 +48,8 @@ export interface ConfigureResult {
   template: HindsightBankTemplate;
   dryRun: boolean;
   wrote: boolean;
+  skippedWriteForReview: boolean;
+  missionFit?: MissionFitDecision;
   apply?: BankApplyResult;
 }
 
@@ -41,6 +60,7 @@ export async function runConfigure(
   const dryRun = options.dryRun ?? false;
   const force = options.force ?? false;
   const apply = options.apply ?? false;
+  const yes = options.yes ?? false;
 
   const projectRoot = await detectProjectRoot(cwd);
   const config = await loadConfig(projectRoot);
@@ -49,6 +69,8 @@ export async function runConfigure(
 
   let template: HindsightBankTemplate;
   let wrote = false;
+  let skippedWriteForReview = false;
+  let missionFit: MissionFitDecision | undefined;
 
   if (apply && exists && !force) {
     template = await readJsonFile<HindsightBankTemplate>(templatePath);
@@ -84,15 +106,47 @@ export async function runConfigure(
 
     template = generateHindsightBankTemplate(templateInput);
 
-    if (!dryRun) {
-      await ensureDir(hindsightDir(projectRoot));
+    const resolved =
+      options.resolvedJudge ??
+      (options.judge !== undefined
+        ? createJudge({
+            judge: options.judge,
+            ...(options.confidence !== undefined
+              ? { confidence: options.confidence }
+              : {}),
+            ...(options.strict !== undefined ? { strict: options.strict } : {}),
+          })
+        : undefined);
+
+    if (resolved?.judgeId === "jev") {
+      const repoExcerpt = await loadRepoExcerpt(projectRoot);
+      missionFit = await judgeMissionFit({
+        state: {
+          projectName: config.name,
+          mission: template.bank.retain_mission,
+          directives: template.directives.map((item) => item.content),
+          ...(repoExcerpt !== undefined ? { repoExcerpt } : {}),
+        },
+        judge: resolved.judge,
+        confidence: resolved.confidence,
+      });
+      if (missionFit.needsReview && !yes) {
+        skippedWriteForReview = true;
+      }
     }
-    await writeJsonFile(templatePath, template, dryRun);
-    wrote = !dryRun;
+
+    const shouldWrite = !skippedWriteForReview;
+    if (shouldWrite) {
+      if (!dryRun) {
+        await ensureDir(hindsightDir(projectRoot));
+      }
+      await writeJsonFile(templatePath, template, dryRun);
+      wrote = !dryRun;
+    }
   }
 
   let applyResult: BankApplyResult | undefined;
-  if (apply) {
+  if (apply && !skippedWriteForReview) {
     applyResult = await runBankApply({
       cwd: projectRoot,
       dryRun,
@@ -110,12 +164,34 @@ export async function runConfigure(
     template,
     dryRun,
     wrote,
+    skippedWriteForReview,
+    ...(missionFit !== undefined ? { missionFit } : {}),
     ...(applyResult !== undefined ? { apply: applyResult } : {}),
   };
 }
 
 export function printConfigureResult(result: ConfigureResult): void {
   const prefix = result.dryRun ? "[dry-run] " : "";
+
+  if (result.missionFit !== undefined) {
+    console.log(`Mission fit: ${result.missionFit.reason}`);
+    if (result.missionFit.needsReview) {
+      console.log("review mission before applying");
+    }
+    console.log("");
+  }
+
+  if (result.skippedWriteForReview) {
+    console.log(
+      `${prefix}Skipped writing bank template for bank "${result.bankId}"`,
+    );
+    console.log(`${prefix}Path: ${result.templatePath}`);
+    console.log(
+      "Low mission_fit with high confidence. Review the mission, then re-run with --yes to write, or edit the template by hand.",
+    );
+    console.log(JSON.stringify(result.template, null, 2));
+    return;
+  }
 
   if (result.wrote) {
     console.log(`${prefix}Wrote bank template for bank "${result.bankId}"`);
@@ -159,4 +235,21 @@ export function printConfigureResult(result: ConfigureResult): void {
   console.log(
     "After seed, refresh models with `orto mental-model refresh --all` or `seed --refresh-mental-models`.",
   );
+}
+
+async function loadRepoExcerpt(projectRoot: string): Promise<string | undefined> {
+  for (const name of ["README.md", "readme.md", "Readme.md"]) {
+    const path = join(projectRoot, name);
+    if (!(await pathExists(path))) {
+      continue;
+    }
+    try {
+      const content = await readFile(path, "utf8");
+      const trimmed = content.trim();
+      return trimmed.length > 0 ? trimmed.slice(0, 4_000) : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
 }
