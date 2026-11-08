@@ -54,10 +54,7 @@ function biasMentalModel(input: {
   if (input.aging.layer !== "mental_model") {
     return undefined;
   }
-  if (
-    input.decision.action !== "delete_candidate" &&
-    input.decision.action !== "archive"
-  ) {
+  if (input.decision.action !== "delete_candidate") {
     return undefined;
   }
   return {

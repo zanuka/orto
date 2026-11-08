@@ -7,7 +7,11 @@ import { bankTemplatePath } from "../config/paths.js";
 import {
   createJudge,
   formatAuditTable,
+  freshnessToAuditDecision,
   judgeAuditItem,
+  judgeMentalModelFreshness,
+  observationRecallQuery,
+  recalledToOverlaps,
   type AuditDecision,
   type ResolvedJudge,
 } from "../judge/index.js";
@@ -16,11 +20,14 @@ import {
   HindsightClient,
   resolveHindsightApiKey,
   type DocumentSummary,
+  type MentalModelRecord,
+  type RecalledObservation,
 } from "../providers/hindsight/client.js";
 import type { HindsightBankTemplate } from "../providers/hindsight/types.js";
 import {
   auditPlanPath,
   buildAuditItems,
+  buildMentalModelFreshnessStates,
   saveAuditPlan,
   toAuditPlanFile,
 } from "../seeder/audit-plan.js";
@@ -39,6 +46,11 @@ export interface AuditOptions {
   resolvedJudge?: ResolvedJudge;
   client?: HindsightClient;
   documents?: readonly DocumentSummary[];
+  mentalModels?: readonly MentalModelRecord[];
+  recallObservations?: (
+    bankId: string,
+    query: string,
+  ) => Promise<RecalledObservation[]>;
 }
 
 export interface AuditResult {
@@ -95,20 +107,92 @@ export async function runAudit(options: AuditOptions = {}): Promise<AuditResult>
       ...(apiKey !== undefined ? { apiKey } : {}),
     });
 
-  const documents =
-    options.documents ??
-    (await client.listAllDocuments(config.bankId, {
-      ...(options.limit !== undefined ? { limit: options.limit } : {}),
-    }));
   const mission = await loadRetainMission(projectRoot);
+  const mentalModels =
+    options.mentalModels ?? (await client.listAllMentalModels(config.bankId));
+  const modelBudget =
+    options.limit === undefined
+      ? mentalModels.length
+      : Math.min(mentalModels.length, Math.max(0, options.limit));
+  const modelsForFreshness = mentalModels.slice(0, modelBudget);
+  const recall =
+    options.recallObservations ??
+    ((bankId: string, query: string) => client.recallObservations(bankId, query));
+
+  const recentObservationsByModelId: Record<
+    string,
+    Array<{ id?: string; summary: string; documentId?: string }>
+  > = {};
+  for (const model of modelsForFreshness) {
+    const sourceQuery = model.source_query?.trim();
+    if (sourceQuery === undefined || sourceQuery === "") {
+      continue;
+    }
+    const query = observationRecallQuery({
+      title: model.name,
+      content: sourceQuery,
+    });
+    const recalled = await recall(config.bankId, query);
+    const overlaps = recalledToOverlaps(
+      recalled.map((item) => ({
+        id: item.id,
+        text: item.text,
+        ...(item.documentId !== undefined ? { documentId: item.documentId } : {}),
+      })),
+    );
+    if (overlaps.length > 0) {
+      recentObservationsByModelId[model.id] = overlaps.map((item) => ({
+        ...(item.id !== undefined ? { id: item.id } : {}),
+        summary: item.summary,
+        ...(item.documentId !== undefined ? { documentId: item.documentId } : {}),
+      }));
+    }
+  }
+
+  const freshnessStates = buildMentalModelFreshnessStates({
+    models: modelsForFreshness.map((model) => ({
+      id: model.id,
+      name: model.name,
+      sourceQuery: model.source_query?.trim() || model.name,
+      ...(model.content !== undefined && model.content !== null
+        ? { content: model.content }
+        : {}),
+      ...(model.last_refreshed_at !== undefined && model.last_refreshed_at !== null
+        ? { lastRefreshedAt: model.last_refreshed_at }
+        : {}),
+    })),
+    ...(mission !== undefined ? { bankMission: mission } : {}),
+    recentObservationsByModelId,
+  });
+
+  const decisions: AuditDecision[] = [];
+  for (const model of freshnessStates) {
+    const freshness = await judgeMentalModelFreshness({
+      model,
+      judge: resolved.judge,
+      confidence: resolved.confidence,
+    });
+    decisions.push(freshnessToAuditDecision(freshness));
+  }
+
+  const remaining =
+    options.limit === undefined
+      ? undefined
+      : Math.max(0, options.limit - decisions.length);
+  const documents =
+    remaining === 0
+      ? []
+      : (options.documents ??
+        (await client.listAllDocuments(config.bankId, {
+          ...(remaining !== undefined ? { limit: remaining } : {}),
+        })));
   const items = await buildAuditItems({
     projectRoot,
     documents,
     ...(mission !== undefined ? { bankMission: mission } : {}),
-    ...(options.limit !== undefined ? { limit: options.limit } : {}),
+    ...(remaining !== undefined ? { limit: remaining } : {}),
   });
 
-  const decisions: AuditDecision[] = [];
   for (const item of items) {
     decisions.push(
       await judgeAuditItem({
