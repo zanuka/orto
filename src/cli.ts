@@ -89,37 +89,38 @@ async function main(): Promise<void> {
       },
     );
 
-  program
-    .command("configure")
-    .description("Generate a Hindsight bank template into .orto/")
-    .option("--dry-run", "Print the template without writing files")
-    .option("--force", "Overwrite an existing bank template")
-    .option("-y, --yes", "Accept starter defaults without interactive prompts")
-    .option(
-      "--models <ids>",
-      "Comma-separated starter mental model ids (project-context,architecture-decisions,coding-standards)",
-    )
-    .option(
-      "--tagging-mode <mode>",
-      "Mental model tagging: topic-scoped (default), project-wide, or custom",
-    )
-    .option(
-      "--refresh-policy <policy>",
-      "Mental model refresh: differentiated (default), auto, or manual",
-    )
-    .option(
-      "--apply",
-      "Apply the bank template to Hindsight (create/update bank, directives, mental models)",
-    )
-    .option(
-      "--hindsight-url <url>",
-      "Hindsight base URL when using --apply",
-    )
-    .option(
-      "--api-key <key>",
-      "Hindsight API key when using --apply (or set ORTO_HINDSIGHT_API_KEY / HINDSIGHT_API_KEY)",
-    )
-    .action(
+  addJudgeCliOptions(
+    program
+      .command("configure")
+      .description("Generate a Hindsight bank template into .orto/")
+      .option("--dry-run", "Print the template without writing files")
+      .option("--force", "Overwrite an existing bank template")
+      .option("-y, --yes", "Accept starter defaults without interactive prompts")
+      .option(
+        "--models <ids>",
+        "Comma-separated starter mental model ids (project-context,architecture-decisions,coding-standards)",
+      )
+      .option(
+        "--tagging-mode <mode>",
+        "Mental model tagging: topic-scoped (default), project-wide, or custom",
+      )
+      .option(
+        "--refresh-policy <policy>",
+        "Mental model refresh: differentiated (default), auto, or manual",
+      )
+      .option(
+        "--apply",
+        "Apply the bank template to Hindsight (create/update bank, directives, mental models)",
+      )
+      .option(
+        "--hindsight-url <url>",
+        "Hindsight base URL when using --apply",
+      )
+      .option(
+        "--api-key <key>",
+        "Hindsight API key when using --apply (or set ORTO_HINDSIGHT_API_KEY / HINDSIGHT_API_KEY)",
+      ),
+  ).action(
       async (opts: {
         dryRun?: boolean;
         force?: boolean;
@@ -130,7 +131,11 @@ async function main(): Promise<void> {
         apply?: boolean;
         hindsightUrl?: string;
         apiKey?: string;
+        judge?: string;
+        confidence?: string;
+        strict?: boolean;
       }) => {
+        const judgeOpts = judgeOptionsFromCli(opts);
         const result = await runConfigure({
           dryRun: Boolean(opts.dryRun),
           force: Boolean(opts.force),
@@ -147,6 +152,7 @@ async function main(): Promise<void> {
             ? { hindsightUrl: opts.hindsightUrl }
             : {}),
           ...(opts.apiKey !== undefined ? { apiKey: opts.apiKey } : {}),
+          ...judgeOpts,
         });
         printConfigureResult(result);
       },

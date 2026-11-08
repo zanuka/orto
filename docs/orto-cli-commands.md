@@ -113,6 +113,14 @@ In a TTY, prompts for starter mental models, tagging mode, and refresh policy un
 | `--apply` | Apply the existing (or newly written) template to Hindsight |
 | `--hindsight-url <url>` | Override Hindsight base URL when using `--apply` |
 | `--api-key <key>` | API key when using `--apply` |
+| `--judge <id>` | `off`, `heuristic` (default), or `jev` (scores mission/directives fit) |
+| `--confidence <n>` | Minimum confidence for mission-fit review (default `0.8`) |
+| `--strict` | With `--judge jev`, fail on TypeSafe errors instead of falling back |
+
+With `--judge jev`, configure scores `mission_fit` and `directives_conflict_with_docs` after generating the template.
+A low `mission_fit` (0 or 1) at or above `--confidence` prints `review mission before applying` and skips the write unless `-y` / `--yes`.
+Default configure without `--judge jev` is unchanged.
+Jev does not author mission or directive prose.
 
 The template holds mission, directives, mental models, and extraction policy.
 It is separate from project content retained by `seed`.
