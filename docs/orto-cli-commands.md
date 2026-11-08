@@ -298,7 +298,10 @@ orto audit --judge jev --limit 20
 ```
 
 Each plan row has `id`, `action`, `confidence`, and a structured `reason` built from the answers (`still_supported_by_repo`, `superseded`, `action`).
-Layer-specific aging then biases the action (for example archive when a document source is gone; prefer `refresh_mental_model` over delete for mental models).
+Mental models are judged first with freshness questions (`leave` / `refresh` / `retarget_query` / `archive`).
+`refresh` becomes `refresh_mental_model` and never proposes delete.
+`retarget_query` is review-only and does not rewrite the source query.
+Layer-specific aging then biases document (and other) actions (for example archive when a document source is gone; prefer `refresh_mental_model` over delete for mental models).
 Actions are `keep`, `refresh_mental_model`, `supersede`, `archive`, or `delete_candidate`.
 Live runs write `.orto/local/audit-plan.json` (gitignored) and print the same table on stdout.
 `--dry-run` prints the table only.

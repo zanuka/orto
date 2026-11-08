@@ -93,7 +93,8 @@ Bounded decisions where a typed answer plus confidence is enough:
 - `store` edit durability (shipped on `store --judge jev`)
 - Audit prune/refresh plans (shipped on `orto audit --judge jev`)
 - Layer-specific aging on that plan (shipped)
-- Apply audit plans and mental-model freshness follow-ups
+- Mental-model freshness on that plan (shipped)
+- Apply audit plans with confirmation
 - Bank-template fitness scores (mission / directives / tags / mental-model questions); prose stays in the template
 - MCP `retain` guardrails, recall rerank, still-true checks, `reflect` vs `recall` vs mental-model routing
 - Firstmate routing and escalation when confidence is low
@@ -331,12 +332,24 @@ After Jev answers, the audit planner biases the action by layer ([JEV-15](https:
 |-------|--------------|
 | World / experience | Archive when the source is gone, or when the content hash changed and `still_supported_by_repo` is low |
 | Observation | Supersede (mark) when proof-count is low and a contradicting candidate exists |
-| Mental model / knowledge page | Prefer `refresh_mental_model` over `delete_candidate` or `archive` (Reflect reads these first) |
+| Mental model / knowledge page | Prefer `refresh_mental_model` over `delete_candidate` (Reflect reads these first). Freshness questions can still propose `archive`. |
 | Document (`orto:<path>#<section>`) | Keep for re-retain when the section was rewritten; archive when the source file is gone |
 
 Reasons include `layer=<layer>` and, when a bias applied, `aging=<rule>`.
-Today's `orto audit` lists bank documents and fills document-layer signals (source gone, hash mismatch, section rewritten).
-World, experience, observation, and mental-model rows are covered by the same planner and tests; wiring those inventories into the CLI is a later step.
+Today's `orto audit` lists bank mental models (freshness path) then documents (document-layer signals: source gone, hash mismatch, section rewritten).
+World, experience, and observation rows stay on the same aging planner for when those inventories are wired in.
+
+### Mental-model freshness
+
+Pinned mental models and knowledge pages get dedicated questions ([JEV-16](https://github.com/zanuka/orto/issues/51)):
+
+- Noul `model_still_answers_source_query`
+- Noul `new_evidence_since_refresh` (state includes recent observation summaries)
+- Choice `action`: `leave`, `refresh`, `retarget_query`, or `archive`
+
+`refresh` becomes plan action `refresh_mental_model` and never proposes delete.
+`retarget_query` is review-only: the plan records it with `reviewOnly`, and Orto does not rewrite the source query in this step.
+`leave` maps to `keep`. `archive` maps to `archive`.
 
 ---
 

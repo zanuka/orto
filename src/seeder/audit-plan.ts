@@ -30,6 +30,8 @@ export interface AuditPlanItem {
   actionConfidence?: number;
   layer?: string;
   agingBias?: string;
+  freshnessAction?: string;
+  reviewOnly?: boolean;
 }
 
 export function auditPlanPath(projectRoot: string): string {
@@ -80,9 +82,65 @@ export function toAuditPlanFile(input: {
       if (decision.agingBias !== undefined) {
         item.agingBias = decision.agingBias;
       }
+      if (decision.freshnessAction !== undefined) {
+        item.freshnessAction = decision.freshnessAction;
+      }
+      if (decision.reviewOnly === true) {
+        item.reviewOnly = true;
+      }
       return item;
     }),
   };
+}
+
+export interface MentalModelAuditInput {
+  id: string;
+  name: string;
+  sourceQuery: string;
+  content?: string;
+  lastRefreshedAt?: string;
+}
+
+export function buildMentalModelFreshnessStates(input: {
+  models: readonly MentalModelAuditInput[];
+  bankMission?: string;
+  recentObservationsByModelId?: Readonly<
+    Record<string, ReadonlyArray<{ id?: string; summary: string; documentId?: string }>>
+  >;
+  limit?: number;
+}): Array<{
+  id: string;
+  name: string;
+  sourceQuery: string;
+  content?: string;
+  bankMission?: string;
+  lastRefreshedAt?: string;
+  recentObservations?: ReadonlyArray<{
+    id?: string;
+    summary: string;
+    documentId?: string;
+  }>;
+}> {
+  const models =
+    input.limit === undefined
+      ? input.models
+      : input.models.slice(0, Math.max(0, input.limit));
+  return models.map((model) => {
+    const recent = input.recentObservationsByModelId?.[model.id];
+    return {
+      id: model.id,
+      name: model.name,
+      sourceQuery: model.sourceQuery,
+      ...(model.content !== undefined ? { content: model.content } : {}),
+      ...(input.bankMission !== undefined ? { bankMission: input.bankMission } : {}),
+      ...(model.lastRefreshedAt !== undefined
+        ? { lastRefreshedAt: model.lastRefreshedAt }
+        : {}),
+      ...(recent !== undefined && recent.length > 0
+        ? { recentObservations: recent }
+        : {}),
+    };
+  });
 }
 
 export async function buildAuditItems(input: {

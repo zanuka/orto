@@ -103,7 +103,7 @@ flowchart TD
 | `src/scanner/` | Find durable docs (default README, docs/**, ADRs, or `scanner.include` / `exclude` / `extensions`); skip `AGENTS.md`; `store`'s stricter denylist |
 | `src/extractor/` | Conservative heuristics → candidate facts + provenance |
 | `src/providers/hindsight/` | Bank template, mental-model helpers, HTTP retain / list / delete / bank-apply / mental-model client |
-| `src/judge/` | Opt-in `Judge` port (`off` / `heuristic` / `jev`); `buildJevState` skips denylisted paths and inline secrets and caps state before the TypeSafe HTTP call; `seed --judge jev` runs the relevance gate, the knowledge-kind choice, a contradiction check, and `contains_secret` / `contains_pii` once per `document_id` (kind criteria in `knowledge-kinds.json`; up to 5 observation summaries). Confident supersedes or contradicts stamps observation metadata and does not delete the old item. A confident secret or personal-data answer is not retained. Citation then previews Hindsight's extracted facts (read-only) and asks once per section whether each fact is in the source. A high-confidence unsupported fact is not retained. `judgeWatcherGate` answers `durable_claim_changed` and `behavior_delta` for a future watch loop; there is no default `watch` CLI. `judgeAuditItem` asks `still_supported_by_repo`, `superseded`, and an `action` choice for `orto audit --judge jev`, then `biasAuditByLayer` applies layer-specific aging. Hindsight code must not import TypeSafe |
+| `src/judge/` | Opt-in `Judge` port (`off` / `heuristic` / `jev`); `buildJevState` skips denylisted paths and inline secrets and caps state before the TypeSafe HTTP call; `seed --judge jev` runs the relevance gate, the knowledge-kind choice, a contradiction check, and `contains_secret` / `contains_pii` once per `document_id` (kind criteria in `knowledge-kinds.json`; up to 5 observation summaries). Confident supersedes or contradicts stamps observation metadata and does not delete the old item. A confident secret or personal-data answer is not retained. Citation then previews Hindsight's extracted facts (read-only) and asks once per section whether each fact is in the source. A high-confidence unsupported fact is not retained. `judgeWatcherGate` answers `durable_claim_changed` and `behavior_delta` for a future watch loop; there is no default `watch` CLI. `judgeAuditItem` asks `still_supported_by_repo`, `superseded`, and an `action` choice for `orto audit --judge jev`, then `biasAuditByLayer` applies layer-specific aging. `judgeMentalModelFreshness` asks `model_still_answers_source_query`, `new_evidence_since_refresh`, and leave/refresh/retarget_query/archive for pinned models. Hindsight code must not import TypeSafe |
 | `src/watcher/` | Seed enqueue helper for the high-signal gate (`collectSeedEnqueue`). No filesystem watcher and no CLI command yet |
 | `src/seeder/` | Prepare retain payload, incremental manifest, prune planner, audit plan writer, tombstones (shared by `seed`, `store`, `audit`, `prune`) |
 | `src/integration/` | MCP URL + harness snippets + AGENTS/Cursor rule emitters + Firstmate `project-bank` skill |
@@ -312,15 +312,16 @@ Flow: `store` resolves the project root (refusing a disposable git worktree via 
 
 ## Audit: prune/refresh plan
 
-`orto audit --judge jev` (`src/commands/audit.ts`) proposes keep / refresh / supersede / archive / delete-candidate for retained bank documents without mutating the bank.
+`orto audit --judge jev` (`src/commands/audit.ts`) proposes keep / refresh / supersede / archive / delete-candidate for retained bank documents and mental models without mutating the bank.
 
 Flow:
 
-1. List bank documents via `HindsightClient.listAllDocuments` (optional `--limit`).
-2. Build per-document state in `src/seeder/audit-plan.ts` from the local file, retained-sources cache, or a stub when the path is gone.
-3. `judgeAuditItem` asks `still_supported_by_repo`, `superseded`, and `action` once per id.
-4. `--dry-run` prints the table only. Live runs write `.orto/local/audit-plan.json`.
-5. Apply is a separate command (not this issue).
+1. List mental models via `HindsightClient.listAllMentalModels` (preferred within `--limit`), recall recent observation summaries per source query, and run `judgeMentalModelFreshness`.
+2. List bank documents via `HindsightClient.listAllDocuments` for any remaining `--limit` budget.
+3. Build per-document state in `src/seeder/audit-plan.ts` from the local file, retained-sources cache, or a stub when the path is gone.
+4. `judgeAuditItem` asks `still_supported_by_repo`, `superseded`, and `action` once per document id.
+5. `--dry-run` prints the table only. Live runs write `.orto/local/audit-plan.json`.
+6. Apply is a separate command (not this issue).
 
 Details: [orto-cli-commands.md](./orto-cli-commands.md#orto-audit).
 

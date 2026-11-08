@@ -100,7 +100,7 @@ describe("layer-specific aging policy", () => {
     expect(decision.reason).toContain("layer=mental_model");
   });
 
-  it("prefers refresh_mental_model over archive for mental models", () => {
+  it("leaves a confident archive on mental models (freshness may archive)", () => {
     const decision = interpretAudit({
       id: "mm:standards",
       confidence: 0.8,
@@ -112,8 +112,9 @@ describe("layer-specific aging policy", () => {
       }),
       aging: { layer: "mental_model" },
     });
-    expect(decision.action).toBe("refresh_mental_model");
-    expect(decision.agingBias).toBe("prefer_refresh_over_delete");
+    expect(decision.action).toBe("archive");
+    expect(decision.agingBias).toBeUndefined();
+    expect(decision.reason).toContain("layer=mental_model");
   });
 
   it("keeps documents for re-retain when the section was rewritten", () => {

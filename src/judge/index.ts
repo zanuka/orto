@@ -104,6 +104,18 @@ export type {
   AuditLayer,
 } from "./audit.js";
 export {
+  MENTAL_MODEL_FRESHNESS_ACTIONS,
+  freshnessToAuditDecision,
+  interpretMentalModelFreshness,
+  judgeMentalModelFreshness,
+  mentalModelFreshnessQuestions,
+} from "./mental-model-freshness.js";
+export type {
+  MentalModelFreshnessAction,
+  MentalModelFreshnessDecision,
+  MentalModelFreshnessState,
+} from "./mental-model-freshness.js";
+export {
   assertRetainBudget,
   compositePriority,
   DEFAULT_PRIORITY_WEIGHTS,

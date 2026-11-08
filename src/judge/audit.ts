@@ -81,6 +81,8 @@ export interface AuditDecision {
   actionConfidence?: number;
   layer?: AuditLayer;
   agingBias?: string;
+  freshnessAction?: string;
+  reviewOnly?: boolean;
 }
 
 export function auditQuestions(): Record<string, JudgeQuestion> {

@@ -128,7 +128,7 @@ Where it sits: [docs/jev-integration.md](./docs/jev-integration.md).
 Tracked in [JEV-0](https://github.com/zanuka/orto/issues/58) and the [open `jev` issues](https://github.com/zanuka/orto/issues?q=is%3Aissue+is%3Aopen+label%3Ajev).
 The checklist groups those tickets.
 The [issue index](#jev-issue-index) lists the epic.
-JEV-1 through JEV-15 are done in the checklist (JEV-12 and JEV-13 helpers included).
+JEV-1 through JEV-16 are done in the checklist (JEV-12 and JEV-13 helpers included).
 JEV-1 through JEV-10 are closed on GitHub.
 
 - [x] Product rule: `docs/jev.md` states Jev is a judge, not a backend (opt-in, offline fallback, do-not-build, confidence gate, state budget). ([JEV-1](https://github.com/zanuka/orto/issues/20))
@@ -146,7 +146,8 @@ JEV-1 through JEV-10 are closed on GitHub.
 - [x] Watcher high-signal gate helper: `judgeWatcherGate` asks `durable_claim_changed` and `behavior_delta`. Formatting-only changes skip. High `behavior_delta` enqueues a seed path. No `watch` CLI command ships with this helper. ([JEV-13](https://github.com/zanuka/orto/issues/42))
 - [x] Audit plan: `orto audit --judge jev` judges bank documents one at a time (`still_supported_by_repo`, `superseded`, `action`) and writes `.orto/local/audit-plan.json` plus a stdout table. The bank is never mutated. `--dry-run` prints the table without writing the plan. Missing `ORTO_TYPESAFE_API_KEY` is a hard error. ([JEV-14](https://github.com/zanuka/orto/issues/32))
 - [x] Layer-specific aging: the audit planner biases Jev answers per Hindsight layer (world/experience archive on source-gone or unsupported hash mismatch; observations supersede on low proof + contradiction; mental models prefer refresh over delete; documents re-retain when rewritten and archive when the source is gone). ([JEV-15](https://github.com/zanuka/orto/issues/43))
-- [ ] Optional prune annotation follow-ups: mental-model freshness and apply-with-confirm after an audit plan. Jev annotates only; Orto deletes after confirm. Low confidence is listed and left unchecked. ([JEV-16](https://github.com/zanuka/orto/issues/51), [JEV-17](https://github.com/zanuka/orto/issues/52))
+- [x] Mental-model freshness: `orto audit --judge jev` judges pinned models with `model_still_answers_source_query`, `new_evidence_since_refresh`, and `leave|refresh|retarget_query|archive`. Refresh marks the plan without delete; `retarget_query` is review-only and does not rewrite the source query. ([JEV-16](https://github.com/zanuka/orto/issues/51))
+- [ ] Optional prune annotation follow-up: apply-with-confirm after an audit plan. Jev annotates only; Orto deletes after confirm. Low confidence is listed and left unchecked. ([JEV-17](https://github.com/zanuka/orto/issues/52))
 - [ ] Bank-template fitness: score mission and directives, choose extraction aggressiveness from repo shape, propose mental-model catalog questions, and assign tags consistently. Jev does not author the prose. ([JEV-18](https://github.com/zanuka/orto/issues/23), [JEV-19](https://github.com/zanuka/orto/issues/24), [JEV-20](https://github.com/zanuka/orto/issues/53), [JEV-21](https://github.com/zanuka/orto/issues/54))
 - [ ] Recall and MCP guards: block unsafe MCP `retain`, rerank recalled passages, check whether a memory is still true, and route `reflect` vs `recall` vs mental-model lookup. ([JEV-22](https://github.com/zanuka/orto/issues/44), [JEV-23](https://github.com/zanuka/orto/issues/25), [JEV-24](https://github.com/zanuka/orto/issues/45), [JEV-25](https://github.com/zanuka/orto/issues/26))
 - [ ] Firstmate routing: whether a task needs the project bank, which bank, knowledge update vs PR vs both, escalate vs dispatch, and whether a scout report is seedable. Low confidence escalates to the captain. ([JEV-26](https://github.com/zanuka/orto/issues/27), [JEV-27](https://github.com/zanuka/orto/issues/33), [JEV-28](https://github.com/zanuka/orto/issues/34), [JEV-29](https://github.com/zanuka/orto/issues/35), [JEV-30](https://github.com/zanuka/orto/issues/46))
@@ -161,7 +162,7 @@ Deferred (still tracked under the Jev epic; land with later phases):
 ### Jev issue index
 
 Issue index as of 2 November 2026.
-JEV-1 through JEV-15 are done in the checklist (JEV-12 and JEV-13 helpers included).
+JEV-1 through JEV-16 are done in the checklist (JEV-12 and JEV-13 helpers included).
 JEV-1 through JEV-10 are closed on GitHub.
 Open [`jev`-labeled issues](https://github.com/zanuka/orto/issues?q=is%3Aissue+is%3Aopen+label%3Ajev) are the rest of the table.
 Closed duplicate epic [#19](https://github.com/zanuka/orto/issues/19) is superseded by [#58](https://github.com/zanuka/orto/issues/58).
@@ -184,7 +185,7 @@ Closed duplicate epic [#19](https://github.com/zanuka/orto/issues/19) is superse
 | JEV-13 | [#42](https://github.com/zanuka/orto/issues/42) | Watcher / event-driven re-seed: high-signal gate (Phase 8) |
 | JEV-14 | [#32](https://github.com/zanuka/orto/issues/32) | `orto audit --judge jev` writes a prune/refresh plan (done in checklist) |
 | JEV-15 | [#43](https://github.com/zanuka/orto/issues/43) | Layer-specific aging policy (done in checklist) |
-| JEV-16 | [#51](https://github.com/zanuka/orto/issues/51) | Mental-model freshness: refresh vs leave |
+| JEV-16 | [#51](https://github.com/zanuka/orto/issues/51) | Mental-model freshness: refresh vs leave (done in checklist) |
 | JEV-17 | [#52](https://github.com/zanuka/orto/issues/52) | Apply audit plan with explicit confirmation |
 | JEV-18 | [#23](https://github.com/zanuka/orto/issues/23) | Score generated bank mission / directives |
 | JEV-19 | [#24](https://github.com/zanuka/orto/issues/24) | Choose extraction aggressiveness from repo shape |
