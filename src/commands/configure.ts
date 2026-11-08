@@ -1,10 +1,16 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { loadConfig } from "../config/load.js";
+import { loadConfig, saveConfig } from "../config/load.js";
 import { bankTemplatePath, hindsightDir } from "../config/paths.js";
+import type { OrtoConfig } from "../config/schema.js";
 import {
+  buildRepoShapeSnapshot,
   createJudge,
+  judgeExtractionAggressiveness,
   judgeMissionFit,
+  overrideExtractionAggressiveness,
+  type ExtractionAggressiveness,
+  type ExtractionAggressivenessDecision,
   type MissionFitDecision,
   type ResolvedJudge,
 } from "../judge/index.js";
@@ -39,6 +45,7 @@ export interface ConfigureOptions extends ConfigureWizardFlags {
   confidence?: number;
   strict?: boolean;
   resolvedJudge?: ResolvedJudge;
+  extraction?: ExtractionAggressiveness;
 }
 
 export interface ConfigureResult {
@@ -50,6 +57,8 @@ export interface ConfigureResult {
   wrote: boolean;
   skippedWriteForReview: boolean;
   missionFit?: MissionFitDecision;
+  extraction?: ExtractionAggressivenessDecision;
+  configUpdated: boolean;
   apply?: BankApplyResult;
 }
 
@@ -71,6 +80,8 @@ export async function runConfigure(
   let wrote = false;
   let skippedWriteForReview = false;
   let missionFit: MissionFitDecision | undefined;
+  let extraction: ExtractionAggressivenessDecision | undefined;
+  let configUpdated = false;
 
   if (apply && exists && !force) {
     template = await readJsonFile<HindsightBankTemplate>(templatePath);
@@ -118,6 +129,17 @@ export async function runConfigure(
           })
         : undefined);
 
+    extraction = await resolveExtractionDecision({
+      projectRoot,
+      projectName: config.name,
+      config,
+      options,
+      resolved,
+    });
+    if (extraction !== undefined) {
+      template.bank.retain_extraction_mode = extraction.retainExtractionMode;
+    }
+
     if (resolved?.judgeId === "jev") {
       const repoExcerpt = await loadRepoExcerpt(projectRoot);
       missionFit = await judgeMissionFit({
@@ -142,6 +164,14 @@ export async function runConfigure(
       }
       await writeJsonFile(templatePath, template, dryRun);
       wrote = !dryRun;
+
+      if (extraction !== undefined) {
+        const nextConfig = withBankTemplateExtraction(config, extraction.extraction);
+        if (configNeedsExtractionWrite(config, extraction.extraction)) {
+          await saveConfig(projectRoot, nextConfig, dryRun);
+          configUpdated = !dryRun;
+        }
+      }
     }
   }
 
@@ -165,7 +195,9 @@ export async function runConfigure(
     dryRun,
     wrote,
     skippedWriteForReview,
+    configUpdated,
     ...(missionFit !== undefined ? { missionFit } : {}),
+    ...(extraction !== undefined ? { extraction } : {}),
     ...(applyResult !== undefined ? { apply: applyResult } : {}),
   };
 }
@@ -178,6 +210,14 @@ export function printConfigureResult(result: ConfigureResult): void {
     if (result.missionFit.needsReview) {
       console.log("review mission before applying");
     }
+    console.log("");
+  }
+
+  if (result.extraction !== undefined) {
+    console.log(`Extraction aggressiveness: ${result.extraction.reason}`);
+    console.log(
+      `Mapped retain_extraction_mode: ${result.extraction.retainExtractionMode}`,
+    );
     console.log("");
   }
 
@@ -199,6 +239,11 @@ export function printConfigureResult(result: ConfigureResult): void {
     console.log(
       `Extraction mode: ${result.template.bank.retain_extraction_mode}; observations: ${result.template.bank.enable_observations ? "on" : "off"}`,
     );
+    if (result.configUpdated) {
+      console.log(
+        `${prefix}Updated .orto/config.json bankTemplate.extraction=${result.extraction?.extraction}`,
+      );
+    }
     console.log(
       `Mental models: ${result.template.mental_models.length}, directives: ${result.template.directives.length}`,
     );
@@ -235,6 +280,52 @@ export function printConfigureResult(result: ConfigureResult): void {
   console.log(
     "After seed, refresh models with `orto mental-model refresh --all` or `seed --refresh-mental-models`.",
   );
+}
+
+async function resolveExtractionDecision(input: {
+  projectRoot: string;
+  projectName: string;
+  config: OrtoConfig;
+  options: ConfigureOptions;
+  resolved: ResolvedJudge | undefined;
+}): Promise<ExtractionAggressivenessDecision | undefined> {
+  const override =
+    input.options.extraction ?? input.config.bankTemplate?.extraction;
+  if (override !== undefined) {
+    return overrideExtractionAggressiveness(override);
+  }
+
+  if (input.resolved?.judgeId !== "jev") {
+    return undefined;
+  }
+
+  const snapshot = await buildRepoShapeSnapshot(input.projectRoot);
+  return judgeExtractionAggressiveness({
+    snapshot,
+    judge: input.resolved.judge,
+    confidence: input.resolved.confidence,
+    projectName: input.projectName,
+  });
+}
+
+function withBankTemplateExtraction(
+  config: OrtoConfig,
+  extraction: ExtractionAggressiveness,
+): OrtoConfig {
+  return {
+    ...config,
+    bankTemplate: {
+      ...config.bankTemplate,
+      extraction,
+    },
+  };
+}
+
+function configNeedsExtractionWrite(
+  config: OrtoConfig,
+  extraction: ExtractionAggressiveness,
+): boolean {
+  return config.bankTemplate?.extraction !== extraction;
 }
 
 async function loadRepoExcerpt(projectRoot: string): Promise<string | undefined> {

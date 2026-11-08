@@ -39,6 +39,19 @@ describe("OrtoConfigSchema", () => {
     expect(parsed.judge?.priorityWeights?.durability).toBe(0.4);
   });
 
+  it("accepts bankTemplate.extraction overrides", () => {
+    const parsed = OrtoConfigSchema.parse({
+      version: 1,
+      name: "fixture",
+      provider: "hindsight",
+      bankId: "fixture",
+      root: ".",
+      createdAt: new Date().toISOString(),
+      bankTemplate: { extraction: "conservative" },
+    });
+    expect(parsed.bankTemplate?.extraction).toBe("conservative");
+  });
+
   it("accepts an optional deploymentProfile", () => {
     const parsed = OrtoConfigSchema.parse({
       version: 1,

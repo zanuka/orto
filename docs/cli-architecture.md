@@ -133,7 +133,7 @@ node dist/cli.js mcp --write --dry-run
 | Command | What it does |
 |---------|----------------|
 | `init` | Detect project root; prompt (or flags) for bank id + Docker container; write `.orto/config.json` |
-| `configure` | Generate Hindsight bank template under `.orto/hindsight/`; optional `--apply`. `--judge jev` scores mission/directives fit and may skip write on a low confident score unless `--yes` |
+| `configure` | Generate Hindsight bank template under `.orto/hindsight/`; optional `--apply`. `--judge jev` scores mission/directives fit, chooses extraction aggressiveness from a compact repo snapshot, writes `bankTemplate.extraction`, and may skip write on a low confident mission score unless `--yes` |
 | `bank apply` | Create/update bank + directives + mental models from the template (`--dry-run`) |
 | `share` | Write/validate `.orto/share.json` deployment profile (local/LAN/VPN/public/cloud) |
 | `docs list` | Flat bank document inventory for scripts |

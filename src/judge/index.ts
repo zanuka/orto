@@ -127,6 +127,24 @@ export type {
   MissionFitState,
 } from "./mission-fit.js";
 export {
+  EXTRACTION_AGGRESSIVENESS,
+  extractionAggressivenessQuestions,
+  interpretExtractionAggressiveness,
+  judgeExtractionAggressiveness,
+  isExtractionAggressiveness,
+  overrideExtractionAggressiveness,
+  parseExtractionAggressiveness,
+  suggestExtractionFromSnapshot,
+  toRetainExtractionMode,
+} from "./extraction-aggressiveness.js";
+export type {
+  ExtractionAggressiveness,
+  ExtractionAggressivenessDecision,
+  ExtractionDecisionSource,
+} from "./extraction-aggressiveness.js";
+export { buildRepoShapeSnapshot } from "./repo-shape.js";
+export type { RepoShapeSnapshot } from "./repo-shape.js";
+export {
   assertRetainBudget,
   compositePriority,
   DEFAULT_PRIORITY_WEIGHTS,
