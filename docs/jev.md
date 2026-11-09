@@ -97,7 +97,8 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Apply audit plans with confirmation (shipped on `orto prune --apply --plan`)
 - Bank-template mission / directives fitness (shipped on `configure --judge jev`)
 - Extraction aggressiveness from repo shape (shipped on `configure --judge jev`)
-- Bank-template fitness follow-ups (mental-model questions, tags); prose stays in the template
+- Mental-model catalog question proposals (shipped on `orto mental-model propose --judge jev`)
+- Bank-template fitness follow-ups (consistent tags); prose stays in the template
 - MCP `retain` guardrails, recall rerank, still-true checks, `reflect` vs `recall` vs mental-model routing
 - Firstmate routing and escalation when confidence is low
 - Share / deployment-profile safety before public or Cloud exposure
@@ -399,6 +400,22 @@ Operators override with `--extraction <mode>` or by editing that field.
 An override skips the Jev extraction question.
 Low-confidence Jev answers fall back to the same snapshot heuristic used in tests.
 Jev does not author mission or directive prose.
+
+---
+
+## Mental-model catalog proposals
+
+`orto mental-model propose --judge jev` picks which standing questions to pin ([JEV-20](https://github.com/zanuka/orto/issues/53)).
+
+Titles and `source_query` strings live in an Orto catalog (auth, module boundaries, release process, starters, and related topics).
+Jev only answers noul `should_propose` for each entry that is not already declared in `.orto/hindsight/bank-template.json`.
+State is the catalog entry plus a compact repo snapshot (and a short README excerpt when present).
+
+Confident yes prints a proposal shaped as `{ title, source_query, kind, confidence }`.
+Mid-range answers stay in review.
+Confident no is skipped.
+This command never creates or updates mental models in Hindsight.
+Create selected models later with `orto mental-model create`.
 
 ---
 

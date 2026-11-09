@@ -15,6 +15,7 @@ import {
 import { printInitResult, runInit } from "./commands/init.js";
 import { printMcpResult, runMcp } from "./commands/mcp.js";
 import { runMentalModelCommand } from "./commands/mental-model.js";
+import { runMentalModelProposeCommand } from "./commands/mental-model-propose.js";
 import { runAuditCommand } from "./commands/audit.js";
 import { runPruneCommand } from "./commands/prune.js";
 import { runSeedCommand } from "./commands/seed.js";
@@ -601,6 +602,31 @@ async function main(): Promise<void> {
             ? { hindsightUrl: opts.hindsightUrl }
             : {}),
           ...(opts.apiKey !== undefined ? { apiKey: opts.apiKey } : {}),
+        });
+      },
+    );
+
+  addJudgeCliOptions(
+    mentalModel
+      .command("propose")
+      .description(
+        "Propose standing mental-model catalog questions with --judge jev (does not create in Hindsight)",
+      )
+      .option(
+        "--dry-run",
+        "Print proposals without creating (default behavior; flag kept for consistency)",
+      ),
+  ).action(
+      async (opts: {
+        dryRun?: boolean;
+        judge?: string;
+        confidence?: string;
+        strict?: boolean;
+      }) => {
+        const judgeOpts = judgeOptionsFromCli(opts);
+        await runMentalModelProposeCommand({
+          dryRun: Boolean(opts.dryRun),
+          ...judgeOpts,
         });
       },
     );

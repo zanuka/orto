@@ -99,6 +99,28 @@ orto mental-model refresh --all
 Models with `refresh_after_consolidation: true` may also refresh after Hindsight consolidates new observations.
 `seed --refresh-mental-models` is an explicit opt-in after retain; it is not the default (refresh costs LLM time).
 
+### Propose catalog questions
+
+With `--judge jev`, Orto can suggest which standing questions to pin next (auth, module boundaries, release process, and other curated catalog entries).
+Titles and source queries stay in Orto.
+Jev only scores `should_propose`.
+Ids already in the bank template are skipped.
+Nothing is created in Hindsight.
+
+```bash
+orto mental-model propose --judge jev
+```
+
+Create a selected proposal yourself:
+
+```bash
+orto mental-model create \
+  --id module-boundaries \
+  --name "Module Boundaries" \
+  --source-query "What are the module boundaries and ownership rules?" \
+  --save-template
+```
+
 ### Inspect and edit
 
 ```bash

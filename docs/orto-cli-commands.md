@@ -246,6 +246,17 @@ Post-seed lifecycle for Hindsight mental models on the configured bank.
 | `refresh [id]` | Refresh one id, or `--all` declared template models |
 | `clear <id>` | Clear content so the next refresh is a full re-synthesis |
 | `tags` | List tags (`--source memories\|mental_models`) |
+| `propose` | With `--judge jev`, print standing catalog question proposals (no Hindsight create) |
+
+```bash
+orto mental-model propose --judge jev
+orto mental-model propose --judge jev --dry-run
+```
+
+`propose` scores a curated catalog (`should_propose`) against a compact repo snapshot, skips ids already in the bank template, and prints `{ title, source_query, kind, confidence }` rows.
+It never creates models.
+Missing `ORTO_TYPESAFE_API_KEY` with `--judge jev` is a hard error.
+Create selected models with `orto mental-model create`.
 
 Mutating paths support `--dry-run`. Refresh dry-run uses Hindsight `dry-run-refresh` when available.
 `--save-template` writes create/update declarations back into `bank-template.json`.
