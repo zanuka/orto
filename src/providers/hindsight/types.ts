@@ -85,4 +85,5 @@ export interface BankTemplateInput {
   taggingMode?: MentalModelTaggingMode;
   customTagsByModelId?: Record<string, string[]>;
   refreshPolicy?: MentalModelRefreshPolicy;
+  retainExtractionMode?: RetainExtractionMode;
 }

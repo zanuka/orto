@@ -22,6 +22,16 @@ export const JudgeConfigSchema = z.object({
   priorityWeights: PriorityWeightsSchema.optional(),
 });
 
+export const EXTRACTION_AGGRESSIVENESS = [
+  "conservative",
+  "standard",
+  "greedy",
+] as const;
+
+export const BankTemplateConfigSchema = z.object({
+  extraction: z.enum(EXTRACTION_AGGRESSIVENESS).optional(),
+});
+
 export const ScannerConfigSchema = z.object({
   include: z.array(z.string().min(1)).optional(),
   exclude: z.array(z.string().min(1)).optional(),
@@ -43,14 +53,18 @@ export const OrtoConfigSchema = z.object({
   store: StoreConfigSchema.optional(),
   scanner: ScannerConfigSchema.optional(),
   judge: JudgeConfigSchema.optional(),
+  bankTemplate: BankTemplateConfigSchema.optional(),
 });
 
 export type DockerConfig = z.infer<typeof DockerConfigSchema>;
 export type StoreConfig = z.infer<typeof StoreConfigSchema>;
 export type PriorityWeightsConfig = z.infer<typeof PriorityWeightsSchema>;
 export type JudgeConfig = z.infer<typeof JudgeConfigSchema>;
+export type BankTemplateConfig = z.infer<typeof BankTemplateConfigSchema>;
 export type ScannerConfig = z.infer<typeof ScannerConfigSchema>;
 export type OrtoConfig = z.infer<typeof OrtoConfigSchema>;
+export type ExtractionAggressivenessConfig =
+  (typeof EXTRACTION_AGGRESSIVENESS)[number];
 
 export function createDefaultConfig(input: {
   name: string;

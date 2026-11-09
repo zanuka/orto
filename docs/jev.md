@@ -96,7 +96,8 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Mental-model freshness on that plan (shipped)
 - Apply audit plans with confirmation (shipped on `orto prune --apply --plan`)
 - Bank-template mission / directives fitness (shipped on `configure --judge jev`)
-- Bank-template fitness follow-ups (extraction aggressiveness, mental-model questions, tags); prose stays in the template
+- Extraction aggressiveness from repo shape (shipped on `configure --judge jev`)
+- Bank-template fitness follow-ups (mental-model questions, tags); prose stays in the template
 - MCP `retain` guardrails, recall rerank, still-true checks, `reflect` vs `recall` vs mental-model routing
 - Firstmate routing and escalation when confidence is low
 - Share / deployment-profile safety before public or Cloud exposure
@@ -376,6 +377,28 @@ Pinned mental models and knowledge pages get dedicated questions ([JEV-16](https
 Jev does not write mission or directive prose.
 A low `mission_fit` (0 or 1) at or above `--confidence` prints `review mission before applying` and skips the template write unless `--yes`.
 Default `configure` without `--judge jev` is unchanged.
+
+---
+
+## Extraction aggressiveness
+
+`orto configure --judge jev` also chooses how hard retain should dig ([JEV-19](https://github.com/zanuka/orto/issues/24)).
+
+State is a compact durable-source snapshot (readme / docs / ADR counts, docs byte total, whether an ADR tree exists), not the full repo tree.
+
+One Choice `extraction`:
+
+| Choice | Hindsight `retain_extraction_mode` | Typical shape |
+|--------|--------------------------------------|---------------|
+| `conservative` | `concise` | Tiny library with one README |
+| `standard` | `verbose` | Moderate docs, small ADR set |
+| `greedy` | `verbatim` | Dense `docs/adr` tree |
+
+The choice is written to `.orto/config.json` as `bankTemplate.extraction`.
+Operators override with `--extraction <mode>` or by editing that field.
+An override skips the Jev extraction question.
+Low-confidence Jev answers fall back to the same snapshot heuristic used in tests.
+Jev does not author mission or directive prose.
 
 ---
 

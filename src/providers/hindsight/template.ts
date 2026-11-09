@@ -17,7 +17,7 @@ export function generateHindsightBankTemplate(
         "Ignore: transient debugging output, one-off chat notes, generated lockfile noise,",
         "secrets/credentials, and ephemeral WIP comments.",
       ].join(" "),
-      retain_extraction_mode: "verbose",
+      retain_extraction_mode: input.retainExtractionMode ?? "verbose",
       enable_observations: true,
       observations_mission: [
         `Synthesize stable facts about ${name}: tech stack, architecture patterns,`,

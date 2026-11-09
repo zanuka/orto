@@ -26,7 +26,7 @@ import {
   addJudgeCliOptions,
   judgeOptionsFromCli,
 } from "./judge/cli.js";
-import { parseBudget } from "./judge/index.js";
+import { parseBudget, parseExtractionAggressiveness } from "./judge/index.js";
 import { formatError } from "./utils/errors.js";
 
 function readPackageVersion(): string {
@@ -109,6 +109,10 @@ async function main(): Promise<void> {
         "Mental model refresh: differentiated (default), auto, or manual",
       )
       .option(
+        "--extraction <mode>",
+        "Extraction aggressiveness: conservative, standard, or greedy (overrides bankTemplate.extraction)",
+      )
+      .option(
         "--apply",
         "Apply the bank template to Hindsight (create/update bank, directives, mental models)",
       )
@@ -128,6 +132,7 @@ async function main(): Promise<void> {
         models?: string;
         taggingMode?: string;
         refreshPolicy?: string;
+        extraction?: string;
         apply?: boolean;
         hindsightUrl?: string;
         apiKey?: string;
@@ -147,6 +152,9 @@ async function main(): Promise<void> {
             : {}),
           ...(opts.refreshPolicy !== undefined
             ? { refreshPolicy: opts.refreshPolicy }
+            : {}),
+          ...(opts.extraction !== undefined
+            ? { extraction: parseExtractionAggressiveness(opts.extraction) }
             : {}),
           ...(opts.hindsightUrl !== undefined
             ? { hindsightUrl: opts.hindsightUrl }

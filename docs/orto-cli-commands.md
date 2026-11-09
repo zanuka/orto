@@ -113,13 +113,16 @@ In a TTY, prompts for starter mental models, tagging mode, and refresh policy un
 | `--apply` | Apply the existing (or newly written) template to Hindsight |
 | `--hindsight-url <url>` | Override Hindsight base URL when using `--apply` |
 | `--api-key <key>` | API key when using `--apply` |
-| `--judge <id>` | `off`, `heuristic` (default), or `jev` (scores mission/directives fit) |
-| `--confidence <n>` | Minimum confidence for mission-fit review (default `0.8`) |
+| `--judge <id>` | `off`, `heuristic` (default), or `jev` (scores mission/directives fit and extraction aggressiveness) |
+| `--confidence <n>` | Minimum confidence for mission-fit review and extraction choice (default `0.8`) |
 | `--strict` | With `--judge jev`, fail on TypeSafe errors instead of falling back |
+| `--extraction <mode>` | Operator override: `conservative`, `standard`, or `greedy` (writes `bankTemplate.extraction`) |
 
 With `--judge jev`, configure scores `mission_fit` and `directives_conflict_with_docs` after generating the template.
 A low `mission_fit` (0 or 1) at or above `--confidence` prints `review mission before applying` and skips the write unless `-y` / `--yes`.
-Default configure without `--judge jev` is unchanged.
+It also chooses Choice `extraction` from a compact durable-source snapshot and maps it onto `retain_extraction_mode`, then writes `bankTemplate.extraction` in `.orto/config.json`.
+`--extraction` or an existing `bankTemplate.extraction` value wins over Jev.
+Default configure without `--judge jev` is unchanged unless that config field or `--extraction` is set.
 Jev does not author mission or directive prose.
 
 The template holds mission, directives, mental models, and extraction policy.
