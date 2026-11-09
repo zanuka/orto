@@ -93,6 +93,148 @@
       "trigger": {
         "refresh_after_consolidation": false
       }
+    },
+    {
+      "id": "seed-and-sync",
+      "name": "Seed and Sync Playbook",
+      "source_query": "How should agents and developers keep the orto Hindsight bank current: seed vs store vs prune, dry-run, incremental manifests, and what not to treat as a file-upload sync?",
+      "max_tokens": 2048,
+      "tags": [
+        "knowledge:architecture",
+        "knowledge:domain",
+        "knowledge:overview"
+      ],
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "tags_match": "any"
+      }
+    },
+    {
+      "id": "secrets-and-safety",
+      "name": "Secrets and Safety",
+      "source_query": "How does orto keep secrets and sensitive data out of the bank: scanner denylist, allowlist, Jev secret checks, and what must never be retained?",
+      "max_tokens": 2048,
+      "tags": [
+        "knowledge:standard",
+        "knowledge:architecture"
+      ],
+      "trigger": {
+        "refresh_after_consolidation": false,
+        "tags_match": "any"
+      }
+    },
+    {
+      "id": "jev-judgment",
+      "name": "Jev Judgment Layer",
+      "source_query": "What is Orto's optional Jev judgment layer: when to use --judge jev, what it decides before retain, how it differs from Hindsight's recall reranker, and what it must not do?",
+      "max_tokens": 2048,
+      "tags": [
+        "knowledge:architecture",
+        "knowledge:decision",
+        "knowledge:domain"
+      ],
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "tags_match": "any"
+      }
+    },
+    {
+      "id": "agent-mcp-wiring",
+      "name": "Agent and MCP Wiring",
+      "source_query": "How do agents connect to the orto project bank via MCP: URL shape, ORTO_HINDSIGHT_API_KEY, harness configs, and when to prefer reflect or mental models vs recall?",
+      "max_tokens": 2048,
+      "tags": [
+        "knowledge:overview",
+        "knowledge:architecture",
+        "knowledge:standard"
+      ],
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "tags_match": "any"
+      }
+    },
+    {
+      "id": "cli-module-map",
+      "name": "CLI Module Map",
+      "source_query": "Where should Orto CLI logic live: commands vs scanner, extractor, seeder, providers/hindsight, judge, integration, docker, and config? What must not be collapsed into commands/ or a single opaque pipeline?",
+      "max_tokens": 2048,
+      "tags": [
+        "knowledge:architecture",
+        "knowledge:standard"
+      ],
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "tags_match": "any"
+      }
+    },
+    {
+      "id": "testing-and-verification",
+      "name": "Testing and Verification",
+      "source_query": "How should agents verify Orto changes: unit tests for domain logic, dry-run for mutating commands, build/typecheck expectations, and what not to over-test?",
+      "max_tokens": 2048,
+      "tags": [
+        "knowledge:standard",
+        "knowledge:architecture"
+      ],
+      "trigger": {
+        "refresh_after_consolidation": false,
+        "tags_match": "any"
+      }
+    },
+    {
+      "id": "store-allowlist-workflow",
+      "name": "Store Allowlist Workflow",
+      "source_query": "After bootstrap, how should developers keep the bank current with orto store: allowlist vs seed scan, --files, --propose-adopt, dry-run, and when to use store instead of seed?",
+      "max_tokens": 2048,
+      "tags": [
+        "knowledge:domain",
+        "knowledge:architecture"
+      ],
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "tags_match": "any"
+      }
+    },
+    {
+      "id": "prune-hygiene",
+      "name": "Prune Hygiene",
+      "source_query": "When and how should orto prune be used: path-gone, section-gone, explicit document-id, tombstones, dry-run, and how prune relates to seed/store after renames or heading changes?",
+      "max_tokens": 2048,
+      "tags": [
+        "knowledge:architecture",
+        "knowledge:domain"
+      ],
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "tags_match": "any"
+      }
+    },
+    {
+      "id": "local-hindsight-ops",
+      "name": "Local Hindsight Ops",
+      "source_query": "How does local Hindsight work with Orto: bank id vs Docker container name, orto docker helpers, API key env vars, backup/export, upgrade, and default localhost URL?",
+      "max_tokens": 2048,
+      "tags": [
+        "knowledge:overview",
+        "knowledge:architecture"
+      ],
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "tags_match": "any"
+      }
+    },
+    {
+      "id": "error-and-dx-conventions",
+      "name": "Errors and DX",
+      "source_query": "What error-handling and DX conventions should Orto follow: OrtoError with actionable hints, --dry-run for mutating/network commands, fail-fast user vs system errors, and predictable CLI behavior?",
+      "max_tokens": 2048,
+      "tags": [
+        "knowledge:standard"
+      ],
+      "trigger": {
+        "refresh_after_consolidation": false,
+        "tags_match": "any"
+      }
     }
   ],
   "directives": [
