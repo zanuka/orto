@@ -148,10 +148,12 @@ export {
   MENTAL_MODEL_CATALOG,
   MENTAL_MODEL_CATALOG_KINDS,
   catalogEntriesNotIn,
+  catalogProposalCreateSpec,
   listMentalModelCatalog,
   renderCatalogSourceQuery,
 } from "./mental-model-catalog.js";
 export type {
+  MentalModelCatalogCreateSpec,
   MentalModelCatalogEntry,
   MentalModelCatalogKind,
 } from "./mental-model-catalog.js";

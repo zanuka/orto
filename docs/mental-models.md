@@ -105,21 +105,16 @@ With `--judge jev`, Orto can suggest which standing questions to pin next (auth,
 Titles and source queries stay in Orto.
 Jev only scores `should_propose`.
 Ids already in the bank template are skipped.
-Nothing is created in Hindsight.
 
 ```bash
 orto mental-model propose --judge jev
+orto mental-model propose --judge jev --apply
+orto mental-model propose --judge jev --apply --yes
 ```
 
-Create a selected proposal yourself:
-
-```bash
-orto mental-model create \
-  --id module-boundaries \
-  --name "Module Boundaries" \
-  --source-query "What are the module boundaries and ownership rules?" \
-  --save-template
-```
+`--apply` opens an interactive multi-select over confident proposals (or use `--yes` / `--ids`).
+Selected models are created in Hindsight with catalog tags and written into `bank-template.json` by default.
+Preview with `--apply --dry-run --yes`.
 
 ### Inspect and edit
 

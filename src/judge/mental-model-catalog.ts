@@ -107,3 +107,34 @@ export function renderCatalogSourceQuery(
 ): string {
   return entry.sourceQuery(projectName);
 }
+
+export interface MentalModelCatalogCreateSpec {
+  id: string;
+  name: string;
+  sourceQuery: string;
+  tags: string[];
+  maxTokens: number;
+  refreshAfterConsolidation: boolean;
+}
+
+export function catalogProposalCreateSpec(input: {
+  id: string;
+  title: string;
+  kind: MentalModelCatalogKind;
+  sourceQuery: string;
+}): MentalModelCatalogCreateSpec {
+  const tag = `knowledge:${input.kind}`;
+  const refreshAfterConsolidation =
+    input.kind === "overview" ||
+    input.kind === "architecture" ||
+    input.kind === "decision" ||
+    input.kind === "domain";
+  return {
+    id: input.id,
+    name: input.title,
+    sourceQuery: input.sourceQuery,
+    tags: [tag],
+    maxTokens: input.kind === "standard" ? 1536 : 2048,
+    refreshAfterConsolidation,
+  };
+}

@@ -125,7 +125,7 @@ orto mental-model update <id> …
 orto mental-model refresh <id|--all>
 orto mental-model clear <id>
 orto mental-model tags [--source memories|mental_models]
-orto mental-model propose --judge jev
+orto mental-model propose --judge jev [--apply] [--yes] [--ids …]
 ```
 
 Mutating subcommands support `--dry-run`. Refresh `--dry-run` uses Hindsight `dry-run-refresh` when available. Async create/refresh polls operations like `seed`. Template write-back is opt-in via `--save-template`.

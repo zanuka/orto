@@ -1,9 +1,10 @@
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Judge, JudgeEvaluateInput, JudgeResult } from "../judge/types.js";
 import type { ResolvedJudge } from "../judge/resolve.js";
+import type { HindsightClient } from "../providers/hindsight/client.js";
 import { runMentalModelPropose } from "./mental-model-propose.js";
 
 describe("runMentalModelPropose", () => {
@@ -99,7 +100,6 @@ describe("runMentalModelPropose", () => {
   class RoutingJudge implements Judge {
     readonly id = "jev" as const;
     readonly calls: JudgeEvaluateInput[] = [];
-    created = false;
 
     async evaluate(input: JudgeEvaluateInput): Promise<JudgeResult> {
       this.calls.push(input);
@@ -118,6 +118,14 @@ describe("runMentalModelPropose", () => {
     }
   }
 
+  function mockClient(): HindsightClient {
+    return {
+      createMentalModel: vi.fn(async (_bankId: string, body: { id?: string }) => {
+        return { id: body.id ?? "generated" };
+      }),
+    } as unknown as HindsightClient;
+  }
+
   it("requires --judge jev", async () => {
     const root = await tempProject(false);
     await expect(
@@ -131,10 +139,12 @@ describe("runMentalModelPropose", () => {
   it("prints proposals without creating and skips template ids", async () => {
     const root = await tempProject(true);
     const judge = new RoutingJudge();
+    const client = mockClient();
     const result = await runMentalModelPropose({
       cwd: root,
       judge: "jev",
       resolvedJudge: resolved(judge),
+      client,
     });
 
     expect(result.existingIds).toEqual([
@@ -150,11 +160,103 @@ describe("runMentalModelPropose", () => {
       "auth-and-identity",
       "module-boundaries",
     ]);
-    expect(proposed[0]?.title).toBeTruthy();
-    expect(proposed[0]?.sourceQuery).toBeTruthy();
-    expect(proposed[0]?.kind).toBeTruthy();
-    expect(proposed[0]?.confidence).toBeGreaterThan(0.8);
-    expect(judge.created).toBe(false);
-    expect(judge.calls.length).toBeGreaterThan(0);
+    expect(result.created).toEqual([]);
+    expect(client.createMentalModel).not.toHaveBeenCalled();
+  });
+
+  it("applies selected proposals with --ids and writes the template", async () => {
+    const root = await tempProject(true);
+    const judge = new RoutingJudge();
+    const client = mockClient();
+    const result = await runMentalModelPropose({
+      cwd: root,
+      judge: "jev",
+      resolvedJudge: resolved(judge),
+      apply: true,
+      ids: ["module-boundaries"],
+      client,
+    });
+
+    expect(result.selected.map((item) => item.id)).toEqual(["module-boundaries"]);
+    expect(result.created).toEqual(["module-boundaries"]);
+    expect(result.templateUpdated).toBe(true);
+    expect(client.createMentalModel).toHaveBeenCalledTimes(1);
+    expect(client.createMentalModel).toHaveBeenCalledWith(
+      "fixture",
+      expect.objectContaining({
+        id: "module-boundaries",
+        name: "Module Boundaries",
+        tags: ["knowledge:architecture"],
+      }),
+    );
+    const template = JSON.parse(
+      await readFile(join(root, ".orto", "hindsight", "bank-template.json"), "utf8"),
+    ) as { mental_models: Array<{ id: string }> };
+    expect(template.mental_models.some((model) => model.id === "module-boundaries")).toBe(
+      true,
+    );
+  });
+
+  it("applies all proposals with --yes without prompting", async () => {
+    const root = await tempProject(true);
+    const judge = new RoutingJudge();
+    const client = mockClient();
+    const selectProposals = vi.fn();
+    const result = await runMentalModelPropose({
+      cwd: root,
+      judge: "jev",
+      resolvedJudge: resolved(judge),
+      apply: true,
+      yes: true,
+      client,
+      selectProposals,
+    });
+
+    expect(selectProposals).not.toHaveBeenCalled();
+    expect(result.created.sort()).toEqual([
+      "auth-and-identity",
+      "module-boundaries",
+    ]);
+    expect(client.createMentalModel).toHaveBeenCalledTimes(2);
+  });
+
+  it("uses interactive selection callback when provided", async () => {
+    const root = await tempProject(true);
+    const judge = new RoutingJudge();
+    const client = mockClient();
+    const result = await runMentalModelPropose({
+      cwd: root,
+      judge: "jev",
+      resolvedJudge: resolved(judge),
+      apply: true,
+      client,
+      selectProposals: async (proposed) =>
+        proposed.filter((item) => item.id === "auth-and-identity"),
+    });
+
+    expect(result.created).toEqual(["auth-and-identity"]);
+    expect(client.createMentalModel).toHaveBeenCalledTimes(1);
+  });
+
+  it("dry-run --apply previews create without calling Hindsight", async () => {
+    const root = await tempProject(true);
+    const judge = new RoutingJudge();
+    const client = mockClient();
+    const result = await runMentalModelPropose({
+      cwd: root,
+      judge: "jev",
+      resolvedJudge: resolved(judge),
+      apply: true,
+      yes: true,
+      dryRun: true,
+      client,
+    });
+
+    expect(result.created.sort()).toEqual([
+      "auth-and-identity",
+      "module-boundaries",
+    ]);
+    expect(client.createMentalModel).not.toHaveBeenCalled();
+    expect(result.templateUpdated).toBe(false);
   });
 });

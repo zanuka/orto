@@ -414,8 +414,8 @@ State is the catalog entry plus a compact repo snapshot (and a short README exce
 Confident yes prints a proposal shaped as `{ title, source_query, kind, confidence }`.
 Mid-range answers stay in review.
 Confident no is skipped.
-This command never creates or updates mental models in Hindsight.
-Create selected models later with `orto mental-model create`.
+Without `--apply`, nothing is created in Hindsight.
+With `--apply`, operators multi-select proposals in a TTY (or pass `--yes` / `--ids`) and Orto creates those models with catalog tags, optionally writing `bank-template.json`.
 
 ---
 
