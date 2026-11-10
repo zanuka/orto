@@ -35,6 +35,7 @@ in \`$FM_HOME/.orto/projects.json\` (or \`~/.orto/projects.json\`).
 ## What it must never do
 
 - Never retain from chat. Never mine transcripts.
+- Never MCP-retain session fluff; durable claims go through \`orto seed\` / \`orto store\`.
 - Never call this "promote": it is a recall-only bank card.
 - Never treat \`/stow\` as "run store" (those are unrelated: disk prefs vs.
   bank writes).

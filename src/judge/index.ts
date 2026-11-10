@@ -182,6 +182,24 @@ export type {
   RetainTagChoice,
 } from "./retain-tags.js";
 export {
+  MCP_RETAIN_ACTIONS,
+  MCP_RETAIN_ALLOW_MESSAGE,
+  MCP_RETAIN_DENY_MESSAGE,
+  MCP_RETAIN_SUGGEST_SEED_MESSAGE,
+  formatMcpRetainLines,
+  heuristicDenyMcpRetain,
+  interpretMcpRetain,
+  judgeMcpRetain,
+  looksLikeDurableProjectKnowledge,
+  looksLikeSessionFluff,
+  mcpRetainQuestions,
+} from "./mcp-retain.js";
+export type {
+  McpRetainAction,
+  McpRetainDecision,
+  McpRetainVerdict,
+} from "./mcp-retain.js";
+export {
   assertRetainBudget,
   compositePriority,
   DEFAULT_PRIORITY_WEIGHTS,
