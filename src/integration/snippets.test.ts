@@ -175,6 +175,19 @@ describe("agent rules", () => {
     expect(rule).toContain("orto");
     expect(rule).toContain("Prefer `reflect`");
     expect(rule).toContain("Prefer `recall`");
+    expect(rule).toContain("Never MCP-`retain` chat");
+    expect(rule).toContain("orto seed");
+  });
+
+  it("documents the MCP retain guardrail in AGENTS bank section", () => {
+    const section = upsertAgentsBankSection("", {
+      projectName: "Orto",
+      bankId: "orto",
+      baseUrl: "http://localhost:8888",
+    });
+    expect(section).toContain("Do not use MCP `retain` for chat");
+    expect(section).toContain("orto seed");
+    expect(section).toContain("orto store");
   });
 });
 
