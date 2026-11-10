@@ -261,6 +261,9 @@ describe("seed relevance gate", () => {
       "in_scope",
       "durability",
       "kind",
+      "layer",
+      "domain",
+      "stability",
       "contains_secret",
       "contains_pii",
     ]);

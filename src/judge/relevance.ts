@@ -7,6 +7,11 @@ import type { PreparedSeed } from "../seeder/prepare.js";
 import { knowledgeKindById, knowledgeKindQuestion, listKnowledgeKinds } from "./knowledge-kinds.js";
 import { priorityQuestions, readPrioritySignals } from "./priority.js";
 import { interpretRelation, OBSERVATION_RELATIONS, relationQuestions } from "./relations.js";
+import {
+  composeRetainTags,
+  retainTagQuestions,
+  type RetainTagAxisRead,
+} from "./retain-tags.js";
 import { safetyQuestions } from "./safety.js";
 import { buildJevState, containsInlineSecret, type JevOverlap } from "./state.js";
 import type {
@@ -75,6 +80,7 @@ export interface RelevanceRow {
     probabilities: Record<string, number>;
   };
   bankKind?: BankKindStamp;
+  retainTags?: RetainTagAxisRead[];
   relation?: {
     choice: string;
     confidence: number;
@@ -145,6 +151,7 @@ export function relevanceQuestions(): Record<string, JudgeQuestion> {
       ],
     },
     kind: knowledgeKindQuestion(),
+    ...retainTagQuestions(),
     ...safetyQuestions(),
   };
 }
@@ -589,6 +596,19 @@ function formatRow(row: RelevanceRow, prefix: string, confidence: number): strin
       `${prefix}probabilities: ${formatKindProbabilities(row.kind.probabilities)}`,
     );
   }
+  if (row.retainTags !== undefined && row.retainTags.length > 0) {
+    lines.push(
+      `${prefix}retain-tags: ${row.retainTags
+        .map(
+          (item) =>
+            `${item.tag}(${item.choice} ${item.confidence.toFixed(2)})`,
+        )
+        .join(" ")}`,
+    );
+  }
+  if (row.bankKind !== undefined) {
+    lines.push(`${prefix}bank-tags: ${row.bankKind.tags.join(",")}`);
+  }
   if (row.relation !== undefined) {
     const linking =
       row.relation.choice === "supersedes" || row.relation.choice === "contradicts";
@@ -728,12 +748,44 @@ function finishDecision(
   confidence: number,
   heuristicKept: boolean,
 ): Omit<RelevanceRow, "fact" | "heuristicKept"> {
-  return applySafety(
-    withRelation(decision, result, overlaps, confidence),
-    result,
+  return applyRetainTags(
+    applySafety(
+      withRelation(decision, result, overlaps, confidence),
+      result,
+      confidence,
+      heuristicKept,
+    ),
+    result.answers,
     confidence,
-    heuristicKept,
   );
+}
+
+function applyRetainTags(
+  decision: Omit<RelevanceRow, "fact" | "heuristicKept">,
+  answers: Record<string, JudgeAnswer>,
+  confidence: number,
+): Omit<RelevanceRow, "fact" | "heuristicKept"> {
+  if (decision.action !== "retain" || decision.bankKind === undefined) {
+    return decision;
+  }
+  const composed = composeRetainTags({ answers, confidence });
+  if (composed.axes.length === 0 && composed.tags.length === 0) {
+    return decision;
+  }
+  const tags = [...decision.bankKind.tags];
+  for (const tag of composed.tags) {
+    if (!tags.includes(tag)) {
+      tags.push(tag);
+    }
+  }
+  return {
+    ...decision,
+    bankKind: {
+      id: decision.bankKind.id,
+      tags,
+    },
+    ...(composed.axes.length > 0 ? { retainTags: composed.axes } : {}),
+  };
 }
 
 function applySafety(
@@ -802,6 +854,7 @@ function blockRetain(
   }
   delete next.observationLinks;
   delete next.bankKind;
+  delete next.retainTags;
   return next;
 }
 

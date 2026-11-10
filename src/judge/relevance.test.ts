@@ -93,6 +93,9 @@ function jevResult(input: {
   durabilityConfidence?: number;
   fellBack?: boolean;
   kind?: { choice: string; confidence: number };
+  layer?: { choice: string; confidence: number };
+  domain?: { choice: string; confidence: number };
+  stability?: { choice: string; confidence: number };
   containsSecret?: number;
   containsPii?: number;
   omitSafety?: boolean;
@@ -120,6 +123,38 @@ function jevResult(input: {
       ...(input.kind !== undefined
         ? { kind: kindAnswer(input.kind.choice, input.kind.confidence) }
         : {}),
+      ...(input.layer !== undefined
+        ? {
+            layer: {
+              type: "choice" as const,
+              choice: input.layer.choice,
+              probabilities: { [input.layer.choice]: input.layer.confidence },
+              confidence: input.layer.confidence,
+            },
+          }
+        : {}),
+      ...(input.domain !== undefined
+        ? {
+            domain: {
+              type: "choice" as const,
+              choice: input.domain.choice,
+              probabilities: { [input.domain.choice]: input.domain.confidence },
+              confidence: input.domain.confidence,
+            },
+          }
+        : {}),
+      ...(input.stability !== undefined
+        ? {
+            stability: {
+              type: "choice" as const,
+              choice: input.stability.choice,
+              probabilities: {
+                [input.stability.choice]: input.stability.confidence,
+              },
+              confidence: input.stability.confidence,
+            },
+          }
+        : {}),
     },
   };
 }
@@ -133,6 +168,9 @@ describe("relevanceQuestions", () => {
       "in_scope",
       "durability",
       "kind",
+      "layer",
+      "domain",
+      "stability",
       "contains_secret",
       "contains_pii",
     ]);
@@ -296,6 +334,9 @@ describe("judgeSeedRelevance", () => {
       "in_scope",
       "durability",
       "kind",
+      "layer",
+      "domain",
+      "stability",
       "contains_secret",
       "contains_pii",
     ]);
@@ -634,6 +675,54 @@ describe("knowledge kind on the relevance call", () => {
     expect(applied.prepared.factsToRetain[0]?.id).toBe(
       "orto:README.md#architecture",
     );
+  });
+
+  it("composes layer, domain, and stability tags onto retained bankKind stamps", () => {
+    const decision = decideRelevance(
+      jevResult({
+        ...durable,
+        kind: { choice: "architecture", confidence: 0.92 },
+        layer: { choice: "platform", confidence: 0.9 },
+        domain: { choice: "engineering", confidence: 0.87 },
+        stability: { choice: "frozen", confidence: 0.85 },
+      }),
+      0.8,
+    );
+    expect(decision.action).toBe("retain");
+    expect(decision.bankKind).toEqual({
+      id: "architecture",
+      tags: [
+        "knowledge:architecture",
+        "layer:platform",
+        "domain:engineering",
+        "stability:frozen",
+      ],
+    });
+    expect(decision.retainTags?.map((item) => item.tag)).toEqual([
+      "layer:platform",
+      "domain:engineering",
+      "stability:frozen",
+    ]);
+    const architecture = fact({
+      id: "orto:README.md#architecture",
+      path: "README.md",
+      title: "Architecture",
+      content: ADR_TEXT,
+    });
+    const items = toRetainItems([
+      {
+        ...architecture,
+        bankKind: decision.bankKind,
+      },
+    ]);
+    expect(items[0]?.tags).toEqual([
+      "orto",
+      "kind:docs",
+      "knowledge:architecture",
+      "layer:platform",
+      "domain:engineering",
+      "stability:frozen",
+    ]);
   });
 });
 

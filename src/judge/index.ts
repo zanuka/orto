@@ -168,6 +168,20 @@ export type {
   MentalModelProposeVerdict,
 } from "./mental-model-propose.js";
 export {
+  RETAIN_TAG_AXIS_IDS,
+  composeRetainTags,
+  retainTagCatalog,
+  retainTagQuestions,
+} from "./retain-tags.js";
+export type {
+  ComposedRetainTags,
+  RetainTagAxis,
+  RetainTagAxisId,
+  RetainTagAxisRead,
+  RetainTagCatalog,
+  RetainTagChoice,
+} from "./retain-tags.js";
+export {
   assertRetainBudget,
   compositePriority,
   DEFAULT_PRIORITY_WEIGHTS,
