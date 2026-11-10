@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "axes": [
+    {
+      "id": "layer",
+      "question": "Which project layer does this section mainly describe?",
+      "choices": {
+        "interface": {
+          "tag": "layer:interface",
+          "what": "Caller-facing surface: CLI commands, flags, HTTP routes, or public APIs.",
+          "not_for": "Internal module boundaries (platform), domain vocabulary, or operator runbooks.",
+          "examples": [
+            "seed --dry-run must not retain.",
+            "orto mental-model propose prints catalog proposals."
+          ]
+        },
+        "domain": {
+          "tag": "layer:domain",
+          "what": "Product or domain vocabulary, invariants, and business rules.",
+          "not_for": "CLI contracts (interface), Docker ops (ops), or repo coding standards (docs).",
+          "examples": [
+            "Bank id is not the Docker container name.",
+            "Durable knowledge outlives a single agent session."
+          ]
+        },
+        "platform": {
+          "tag": "layer:platform",
+          "what": "Internal architecture: modules, boundaries, and where a concern lives.",
+          "not_for": "Public CLI flags (interface), or how an operator upgrades Docker (ops).",
+          "examples": [
+            "Scanner, extractor, and seeder stay separate.",
+            "Commands must not own extraction."
+          ]
+        },
+        "ops": {
+          "tag": "layer:ops",
+          "what": "Operator runbooks: install, upgrade, auth, recovery, and deployment profiles.",
+          "not_for": "Module ownership (platform), or contributor coding conventions (docs).",
+          "examples": [
+            "docker upgrade plans a pinned image move.",
+            "ORTO_HINDSIGHT_API_KEY is required for tenant auth."
+          ]
+        },
+        "docs": {
+          "tag": "layer:docs",
+          "what": "Contributor process, coding standards, and how the repo is documented.",
+          "not_for": "Runtime architecture (platform), or product invariants (domain).",
+          "examples": [
+            "Prefer small, focused changes.",
+            "Throw OrtoError and name the next step."
+          ]
+        }
+      }
+    },
+    {
+      "id": "domain",
+      "question": "Which product domain does this section belong to?",
+      "choices": {
+        "product": {
+          "tag": "domain:product",
+          "what": "Core product purpose and user-facing capabilities.",
+          "not_for": "Engineering process, security policy, or generic other topics.",
+          "examples": [
+            "Orto turns durable project knowledge into Hindsight banks.",
+            "Company brain config for AI agents."
+          ]
+        },
+        "engineering": {
+          "tag": "domain:engineering",
+          "what": "How the software is built: TypeScript, tests, module layout, extraction.",
+          "not_for": "Security/auth policy (security), or release/ops process alone (process).",
+          "examples": [
+            "Vitest covers judge and seeder domain logic.",
+            "Strict TypeScript; avoid any."
+          ]
+        },
+        "process": {
+          "tag": "domain:process",
+          "what": "Team process: release, review, roadmap, and contribution workflow.",
+          "not_for": "Code architecture (engineering), or secret handling (security).",
+          "examples": [
+            "Update ROADMAP.md when a phase item ships.",
+            "Prefer --dry-run on mutating commands."
+          ]
+        },
+        "security": {
+          "tag": "domain:security",
+          "what": "Secrets, credentials, auth, and sensitive-data rules.",
+          "not_for": "General coding style (engineering), or product mission (product).",
+          "examples": [
+            "Never retain .env or credential paths.",
+            "API keys stay in the environment, not config.json."
+          ]
+        },
+        "other": {
+          "tag": "domain:other",
+          "what": "Durable knowledge that does not fit product, engineering, process, or security.",
+          "not_for": "Anything that clearly belongs in one of the other domain bins.",
+          "examples": [
+            "Historical context about an archived prototype.",
+            "A cross-cutting note with no single owner domain."
+          ]
+        }
+      }
+    },
+    {
+      "id": "stability",
+      "question": "How stable is this claim for agents?",
+      "choices": {
+        "frozen": {
+          "tag": "stability:frozen",
+          "what": "A settled constraint or decision that should not drift without an explicit ADR.",
+          "not_for": "Guidance that is expected to evolve as the product changes.",
+          "examples": [
+            "Local-first is a non-negotiable default.",
+            "document_id stays orto:<path>#<section>."
+          ]
+        },
+        "evolving": {
+          "tag": "stability:evolving",
+          "what": "True today but expected to change as the product or process matures.",
+          "not_for": "Constitutional invariants that must stay frozen.",
+          "examples": [
+            "Default Hindsight image tag in docker up.",
+            "Starter mental-model catalog contents."
+          ]
+        }
+      }
+    }
+  ]
+}

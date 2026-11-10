@@ -61,7 +61,7 @@ Default generated templates use **topic-scoped tags that seed already emits**, p
 
 | Layer | Tags (example) |
 |-------|----------------|
-| Seed retain | `orto`, `kind:adr`, `knowledge:decision`, … |
+| Seed retain | `orto`, `kind:adr`, `knowledge:decision`, plus optional `layer:*` / `domain:*` / `stability:*` from `seed --judge jev` (see [retain-tags.md](./retain-tags.md)) |
 | `project-context` | `knowledge:overview`, `knowledge:domain`, `knowledge:architecture` with `trigger.tags_match: "any"` (not the shared `orto` tag: that scopes almost the whole bank) |
 | `architecture-decisions` | `knowledge:architecture`, `knowledge:decision` with `trigger.tags_match: "any"` |
 | `coding-standards` | `knowledge:standard` |

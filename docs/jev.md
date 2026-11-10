@@ -98,7 +98,7 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Bank-template mission / directives fitness (shipped on `configure --judge jev`)
 - Extraction aggressiveness from repo shape (shipped on `configure --judge jev`)
 - Mental-model catalog question proposals (shipped on `orto mental-model propose --judge jev`)
-- Bank-template fitness follow-ups (consistent tags); prose stays in the template
+- Consistent retain tags for Reflect filters (shipped on `seed --judge jev`)
 - MCP `retain` guardrails, recall rerank, still-true checks, `reflect` vs `recall` vs mental-model routing
 - Firstmate routing and escalation when confidence is low
 - Share / deployment-profile safety before public or Cloud exposure
@@ -147,6 +147,11 @@ Without `--judge jev`, retain tags stay on the offline heuristic labels (`knowle
 Starter mental models still filter on those heuristic labels.
 `knowledge:architecture` and `knowledge:standard` match the taxonomy ids of the same name.
 `knowledge:adr` does not match a model that only lists `knowledge:decision`.
+
+The same relevance call also asks three retain-tag Choices (`layer`, `domain`, `stability`).
+Confident answers compose into additional tags such as `layer:platform`, `domain:engineering`, and `stability:frozen`.
+The vocabulary is versioned in `src/judge/retain-tags.json` and documented in [retain-tags.md](./retain-tags.md).
+Low-confidence axes are omitted; they do not invent tags.
 
 ---
 

@@ -197,7 +197,8 @@ Scan durable sources, extract high-signal candidates, and retain them into the c
 | `--strict` | With `--judge jev`, fail on TypeSafe errors instead of falling back to heuristics |
 
 `--judge jev` runs the relevance gate once per section (`orto:<path>#<section>`).
-The dry-run prints `document_id`, path, heading, decisions, score, confidence, knowledge kind, probabilities, relation, and heuristic-vs-jev.
+The dry-run prints `document_id`, path, heading, decisions, score, confidence, knowledge kind, probabilities, retain-tags / bank-tags, relation, and heuristic-vs-jev.
+Confident `layer` / `domain` / `stability` Choices compose into retain tags (see [retain-tags.md](./retain-tags.md)).
 It does not retain.
 `--budget N` prints that retain queue in priority order and marks the cutoff.
 Only the top N are retained on a live seed.
