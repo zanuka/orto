@@ -146,6 +146,7 @@ node dist/cli.js mcp --write --dry-run
 | `prune --dry-run` | List path-gone / section-gone / explicit candidates (read-only document list); no deletes |
 | `prune` | Delete selected bank documents; write local tombstones under `.orto/local/` |
 | `prune --plan` / `--apply` | Preview or apply an audit plan (`refresh_mental_model`, archive, supersede provenance; deletes only with `--allow-delete`) |
+| `mental-model propose --judge jev` | Propose standing catalog questions; optional `--apply` multi-selects and creates models (template write by default) |
 | `mcp` | Print ready-to-paste MCP snippets (bank-scoped server names); optional `--write` / `--check` / AGENTS / Cursor rules / Firstmate |
 
 Common flags:

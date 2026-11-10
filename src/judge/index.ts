@@ -145,6 +145,29 @@ export type {
 export { buildRepoShapeSnapshot } from "./repo-shape.js";
 export type { RepoShapeSnapshot } from "./repo-shape.js";
 export {
+  MENTAL_MODEL_CATALOG,
+  MENTAL_MODEL_CATALOG_KINDS,
+  catalogEntriesNotIn,
+  catalogProposalCreateSpec,
+  listMentalModelCatalog,
+  renderCatalogSourceQuery,
+} from "./mental-model-catalog.js";
+export type {
+  MentalModelCatalogCreateSpec,
+  MentalModelCatalogEntry,
+  MentalModelCatalogKind,
+} from "./mental-model-catalog.js";
+export {
+  formatMentalModelProposeLines,
+  interpretMentalModelPropose,
+  judgeMentalModelCatalogEntry,
+  mentalModelProposeQuestions,
+} from "./mental-model-propose.js";
+export type {
+  MentalModelCatalogProposal,
+  MentalModelProposeVerdict,
+} from "./mental-model-propose.js";
+export {
   assertRetainBudget,
   compositePriority,
   DEFAULT_PRIORITY_WEIGHTS,

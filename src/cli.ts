@@ -15,6 +15,7 @@ import {
 import { printInitResult, runInit } from "./commands/init.js";
 import { printMcpResult, runMcp } from "./commands/mcp.js";
 import { runMentalModelCommand } from "./commands/mental-model.js";
+import { runMentalModelProposeCommand } from "./commands/mental-model-propose.js";
 import { runAuditCommand } from "./commands/audit.js";
 import { runPruneCommand } from "./commands/prune.js";
 import { runSeedCommand } from "./commands/seed.js";
@@ -601,6 +602,73 @@ async function main(): Promise<void> {
             ? { hindsightUrl: opts.hindsightUrl }
             : {}),
           ...(opts.apiKey !== undefined ? { apiKey: opts.apiKey } : {}),
+        });
+      },
+    );
+
+  addJudgeCliOptions(
+    mentalModel
+      .command("propose")
+      .description(
+        "Propose standing mental-model catalog questions with --judge jev; optional --apply creates selected models",
+      )
+      .option(
+        "--dry-run",
+        "Print proposals (and with --apply, preview create payloads) without calling Hindsight",
+      )
+      .option(
+        "--apply",
+        "Create selected proposals in Hindsight (interactive multi-select in a TTY)",
+      )
+      .option(
+        "-y, --yes",
+        "With --apply, create all confident proposals without prompting",
+      )
+      .option(
+        "--ids <list>",
+        "With --apply, create only these proposal ids (comma-separated)",
+      )
+      .option(
+        "--no-save-template",
+        "With --apply, create in Hindsight without updating bank-template.json (default writes template)",
+      )
+      .option("--hindsight-url <url>", "Hindsight base URL when using --apply")
+      .option(
+        "--api-key <key>",
+        "Hindsight API key when using --apply (or set ORTO_HINDSIGHT_API_KEY / HINDSIGHT_API_KEY)",
+      ),
+  ).action(
+      async (opts: {
+        dryRun?: boolean;
+        apply?: boolean;
+        yes?: boolean;
+        ids?: string;
+        noSaveTemplate?: boolean;
+        hindsightUrl?: string;
+        apiKey?: string;
+        judge?: string;
+        confidence?: string;
+        strict?: boolean;
+      }) => {
+        const judgeOpts = judgeOptionsFromCli(opts);
+        const ids =
+          opts.ids === undefined
+            ? undefined
+            : opts.ids
+                .split(",")
+                .map((part) => part.trim())
+                .filter((part) => part.length > 0);
+        await runMentalModelProposeCommand({
+          dryRun: Boolean(opts.dryRun),
+          apply: Boolean(opts.apply),
+          yes: Boolean(opts.yes),
+          saveTemplate: !opts.noSaveTemplate,
+          ...(ids !== undefined ? { ids } : {}),
+          ...(opts.hindsightUrl !== undefined
+            ? { hindsightUrl: opts.hindsightUrl }
+            : {}),
+          ...(opts.apiKey !== undefined ? { apiKey: opts.apiKey } : {}),
+          ...judgeOpts,
         });
       },
     );

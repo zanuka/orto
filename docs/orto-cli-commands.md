@@ -246,6 +246,23 @@ Post-seed lifecycle for Hindsight mental models on the configured bank.
 | `refresh [id]` | Refresh one id, or `--all` declared template models |
 | `clear <id>` | Clear content so the next refresh is a full re-synthesis |
 | `tags` | List tags (`--source memories\|mental_models`) |
+| `propose` | With `--judge jev`, print standing catalog question proposals; optional `--apply` creates selected models |
+
+```bash
+orto mental-model propose --judge jev
+orto mental-model propose --judge jev --apply
+orto mental-model propose --judge jev --apply --yes
+orto mental-model propose --judge jev --apply --ids module-boundaries,domain-invariants
+orto mental-model propose --judge jev --apply --dry-run --yes
+```
+
+`propose` scores a curated catalog (`should_propose`) against a compact repo snapshot, skips ids already in the bank template, and prints `{ title, source_query, kind, confidence }` rows.
+Without `--apply`, nothing is created in Hindsight.
+With `--apply` in a TTY, multi-select the proposals to create (same line-based picker as `store` / `prune`).
+`--yes` creates every confident proposal; `--ids` creates an explicit subset.
+Created models get catalog tags (`knowledge:<kind>`) and are written into `bank-template.json` unless `--no-save-template`.
+Missing `ORTO_TYPESAFE_API_KEY` with `--judge jev` is a hard error.
+`--apply` also needs a Hindsight API key when the connection requires one.
 
 Mutating paths support `--dry-run`. Refresh dry-run uses Hindsight `dry-run-refresh` when available.
 `--save-template` writes create/update declarations back into `bank-template.json`.
