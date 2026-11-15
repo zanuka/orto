@@ -102,7 +102,7 @@ Bounded decisions where a typed answer plus confidence is enough:
 - MCP `retain` guardrail (helper shipped: `judgeMcpRetain`; agent rules emitted by `orto mcp`)
 - Recall rerank / context packing (helper shipped: `judgeRecallRanked` / `packRecallContext`; default recall stays pass-through)
 - Recall still-true verification (helper shipped: `judgeRecallVerified`; default off via `ORTO_JEV_RECALL_VERIFY`)
-- `reflect` vs `recall` vs mental-model routing
+- Lookup routing (helper shipped: `judgeLookupRoute`; default off via `ORTO_JEV_LOOKUP_ROUTE`)
 - Firstmate routing and escalation when confidence is low
 - Share / deployment-profile safety before public or Cloud exposure
 - Golden-set eval that scores offline heuristics without requiring Jev at runtime
@@ -446,6 +446,29 @@ When enabled, one batched call asks Noul `still_true_given_current_excerpt` per 
 Harnesses that already hold passages can pre-fill `currentExcerpt` / `sourceStillExists`, or pass `projectRoot` so Orto loads the excerpt via `loadCurrentExcerptForDocumentId`.
 
 `formatRecallVerifyLines` prints stale rows and `latency: Nms vs unverified recall`.
+
+---
+
+## Lookup routing
+
+`judgeLookupRoute` in `src/judge/lookup-route.ts` chooses which Hindsight tool a harness should call for an agent question ([JEV-25](https://github.com/zanuka/orto/issues/26)).
+
+Default path is pass-through:
+
+- Off unless `route: true` or `ORTO_JEV_LOOKUP_ROUTE=1` (`NOCCIOLO_JEV_LOOKUP_ROUTE` alias)
+- No TypeSafe call
+- Verdict stays `unset`
+- Default MCP `reflect`, `recall`, and mental-model tools remain separate
+
+When enabled, one Choice `lookup` asks `mental_model` | `reflect` | `recall` given the question and known model titles. The harness then calls the matching Hindsight API. Jev does not synthesize the answer.
+
+Heuristic fallback (judge off or low confidence):
+
+- Standing question that matches a pinned model title → `mental_model`
+- One-off factual lookup → `recall`
+- Why/how synthesis → `reflect`
+
+`formatLookupRouteLines` prints the chosen route and `latency: Nms vs unrouted lookup`.
 
 ---
 

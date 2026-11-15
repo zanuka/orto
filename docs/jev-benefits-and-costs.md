@@ -345,9 +345,10 @@ These sit on the hot path. A naive “score every recalled passage on every agen
 | `recall` pass-through (default) | $0 Jev | Correct default; `packRecallContext` without `rank: true` |
 | Packed `recall_ranked` on demand (`rank: true`) | One call per pack, not per passage if batched | Budget ~3k–8k tokens/call; typically hundreds of ms vs unranked local packing |
 | `still_true` on every recall (`judgeRecallVerified`) | Cloud hop + tokens every turn | Env flag off by default (`ORTO_JEV_RECALL_VERIFY`); batch up to 8 passages per call |
+| Lookup route (`judgeLookupRoute`) | One small Choice call per routed question | Env flag off by default (`ORTO_JEV_LOOKUP_ROUTE`); default MCP tools stay separate |
 | Firstmate “needs bank?” once per captain request | One small call per task | Usually cheaper than a useless Hindsight reflect |
 
-**Guidance:** enable seed + MCP retain first. Measure. Only then put Jev on recall packing (`packRecallContext({ rank: true })`) or still-true verify (`judgeRecallVerified` / `ORTO_JEV_RECALL_VERIFY=1`). Prefer Hindsight’s native typesafe reranker for server-side ranking when available.
+**Guidance:** enable seed + MCP retain first. Measure. Only then put Jev on recall packing (`packRecallContext({ rank: true })`), still-true verify (`judgeRecallVerified` / `ORTO_JEV_RECALL_VERIFY=1`), or lookup routing (`judgeLookupRoute` / `ORTO_JEV_LOOKUP_ROUTE=1`). Prefer Hindsight’s native typesafe reranker for server-side ranking when available.
 
 #### F. Golden-set eval (JEV-34)
 

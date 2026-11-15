@@ -106,7 +106,7 @@ Do **not** fold mental-model curation into `init` prompts. Keep generation in `c
 - [x] Idempotent apply of declared models from the bank template (stable `id`s; create-or-update; tags / `tags_match` / triggers preserved)
 - [x] Optional post-seed hook: `seed --refresh-mental-models` (opt-in; documents overlap with `refresh_after_consolidation`)
 - [x] Refresh policy presets: differentiated defaults (auto for evolving starters; manual for `coding-standards`); trigger typing includes `mode` / full `tags_match` / optional `min_refresh_interval_seconds` (`delta` still optional later; Jev: [JEV-16](https://github.com/zanuka/orto/issues/51), [JEV-20](https://github.com/zanuka/orto/issues/53))
-- [x] Agent integration hint: AGENTS / Cursor snippets prefer `reflect` / mental models for playbook questions; `recall` for narrow facts ([JEV-25](https://github.com/zanuka/orto/issues/26) routing judge remains optional)
+- [x] Agent integration hint: AGENTS / Cursor snippets prefer `reflect` / mental models for playbook questions; `recall` for narrow facts. Optional routing judge: `judgeLookupRoute` ([JEV-25](https://github.com/zanuka/orto/issues/26))
 - [x] Provider boundary: Hindsight mental-model helpers stay in `src/providers/hindsight/`; no fake Mem0 mental-model surface
 
 **Goal:** After seed, agents get consistent, high-priority answers to the project’s recurring questions: not just a bag of retained facts.
@@ -155,7 +155,7 @@ JEV-1 through JEV-10 are closed on GitHub.
 - [x] MCP `retain` guardrail: `judgeMcpRetain` asks `is_durable_project_knowledge`, `is_session_fluff`, and `action` (`allow` | `deny` | `suggest_seed_instead`). Default deny on fluff / low confidence; judge-off heuristic still denies chat-shaped payloads and allows ADR-shaped ones. `orto mcp` agent/Cursor rules tell agents to use `orto seed` / `store` instead of mid-session retain. ([JEV-22](https://github.com/zanuka/orto/issues/44))
 - [x] Recall rerank before context stuffing: `judgeRecallRanked` / `packRecallContext` score recalled passages for task relevance (batched Score questions). Default path is pass-through (raw MCP `recall` unchanged). Opt in with `rank: true`; confident low scores are omitted from the packed string; judge-off uses token-overlap heuristics. Latency note vs unranked recall is documented. ([JEV-23](https://github.com/zanuka/orto/issues/25))
 - [x] Recall still-true check: `judgeRecallVerified` asks Noul `still_true_given_current_excerpt` per recalled passage when opted in (`verify: true` or `ORTO_JEV_RECALL_VERIFY=1`). Default off / pass-through. Confident contradictions are marked `stale` in the harness result; missing source files mark stale / skip verify without crashing recall. ([JEV-24](https://github.com/zanuka/orto/issues/45))
-- [ ] Recall routing: route `reflect` vs `recall` vs mental-model lookup. ([JEV-25](https://github.com/zanuka/orto/issues/26))
+- [x] Lookup routing: `judgeLookupRoute` asks Choice `lookup` (`mental_model` | `reflect` | `recall`) from the agent question + known model titles. Default off / pass-through (`route: true` or `ORTO_JEV_LOOKUP_ROUTE=1`). Standing title matches prefer mental_model; one-off facts prefer recall; why/how synthesis prefers reflect. Harness calls the matching Hindsight API; Jev does not synthesize the answer. ([JEV-25](https://github.com/zanuka/orto/issues/26))
 - [ ] Firstmate routing: whether a task needs the project bank, which bank, knowledge update vs PR vs both, escalate vs dispatch, and whether a scout report is seedable. Low confidence escalates to the captain. ([JEV-26](https://github.com/zanuka/orto/issues/27), [JEV-27](https://github.com/zanuka/orto/issues/33), [JEV-28](https://github.com/zanuka/orto/issues/34), [JEV-29](https://github.com/zanuka/orto/issues/35), [JEV-30](https://github.com/zanuka/orto/issues/46))
 - [ ] Share safety and destination kind: route by destination kind (Hindsight remains first-class) and gate a public or Cloud share on a safety check before anything is exposed. ([JEV-31](https://github.com/zanuka/orto/issues/55), [JEV-33](https://github.com/zanuka/orto/issues/56))
 - [ ] Heuristic eval: a golden-set judge that scores the offline heuristics so the default path improves without requiring Jev at runtime. ([JEV-34](https://github.com/zanuka/orto/issues/48))
@@ -168,7 +168,7 @@ Deferred (still tracked under the Jev epic; land with later phases):
 ### Jev issue index
 
 Issue index as of 2 November 2026.
-JEV-1 through JEV-24 are done in the checklist (JEV-12, JEV-13, JEV-22, JEV-23, and JEV-24 helpers included).
+JEV-1 through JEV-25 are done in the checklist (JEV-12, JEV-13, and JEV-22 through JEV-25 helpers included).
 JEV-1 through JEV-10 are closed on GitHub.
 Open [`jev`-labeled issues](https://github.com/zanuka/orto/issues?q=is%3Aissue+is%3Aopen+label%3Ajev) are the rest of the table.
 Closed duplicate epic [#19](https://github.com/zanuka/orto/issues/19) is superseded by [#58](https://github.com/zanuka/orto/issues/58).
