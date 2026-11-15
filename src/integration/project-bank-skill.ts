@@ -21,11 +21,11 @@ On-demand Firstmate skill, not an always-on persona. First mate does not write p
 Before spawning a crewmate on a project that has a Hindsight bank registered
 in \`$FM_HOME/.orto/projects.json\` (or \`~/.orto/projects.json\`).
 
-Optional captain gate: when \`ORTO_JEV_FIRSTMATE_NEEDS_BANK=1\`, call
-\`judgeFirstmateNeedsBank\` (Noul \`needs_project_bank\`, default
-\`--confidence 0.8\`) first. Confident no (\`skip_bank\`) means do not attach
-this bank card and do not recall/reflect; treat the request as pure code.
-Uncertain answers escalate to the captain. Default is off (judge not required).
+Optional harness gate: when \`ORTO_JEV_NEEDS_BANK=1\`, call \`judgeNeedsBank\`
+(Noul \`needs_project_bank\`, default \`--confidence 0.8\`) first. Confident no
+(\`skip_bank\`) means do not attach this bank card and do not recall/reflect;
+treat the request as pure code. Uncertain answers escalate to the operator.
+Default is off (judge not required). Works with Firstmate or any orchestrator.
 
 ## What it does
 

@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
-  firstmateNeedsBankQuestions,
-  formatFirstmateNeedsBankLines,
-  heuristicFirstmateNeedsBank,
-  interpretFirstmateNeedsBank,
-  judgeFirstmateNeedsBank,
+  formatNeedsBankLines,
+  heuristicNeedsBank,
+  interpretNeedsBank,
+  judgeNeedsBank,
+  needsBankQuestions,
   parseNeedsBankEnabled,
-  passThroughFirstmateNeedsBank,
+  passThroughNeedsBank,
   resolveNeedsBankEnabled,
-} from "./firstmate-needs-bank.js";
+} from "./needs-bank.js";
 import type { Judge, JudgeEvaluateInput, JudgeResult } from "./types.js";
 
 class ScriptedJudge implements Judge {
@@ -29,44 +29,39 @@ class ScriptedJudge implements Judge {
   }
 }
 
-describe("firstmate needs_project_bank", () => {
+describe("needs_project_bank", () => {
   it("asks needs_project_bank", () => {
-    expect(Object.keys(firstmateNeedsBankQuestions())).toEqual([
-      "needs_project_bank",
-    ]);
-    expect(firstmateNeedsBankQuestions().needs_project_bank?.type).toBe("noul");
+    expect(Object.keys(needsBankQuestions())).toEqual(["needs_project_bank"]);
+    expect(needsBankQuestions().needs_project_bank?.type).toBe("noul");
   });
 
   it("is off by default via env parser", () => {
     expect(parseNeedsBankEnabled({})).toBe(false);
-    expect(parseNeedsBankEnabled({ ORTO_JEV_FIRSTMATE_NEEDS_BANK: "0" })).toBe(
-      false,
-    );
-    expect(parseNeedsBankEnabled({ ORTO_JEV_FIRSTMATE_NEEDS_BANK: "1" })).toBe(
+    expect(parseNeedsBankEnabled({ ORTO_JEV_NEEDS_BANK: "0" })).toBe(false);
+    expect(parseNeedsBankEnabled({ ORTO_JEV_NEEDS_BANK: "1" })).toBe(true);
+    expect(parseNeedsBankEnabled({ ORTO_JEV_FIRSTMATE_NEEDS_BANK: "true" })).toBe(
       true,
     );
-    expect(
-      parseNeedsBankEnabled({ NOCCIOLO_JEV_FIRSTMATE_NEEDS_BANK: "true" }),
-    ).toBe(true);
+    expect(parseNeedsBankEnabled({ NOCCIOLO_JEV_NEEDS_BANK: "on" })).toBe(true);
     expect(resolveNeedsBankEnabled({})).toBe(false);
     expect(resolveNeedsBankEnabled({ needsBank: true })).toBe(true);
     expect(
       resolveNeedsBankEnabled({
         needsBank: false,
-        env: { ORTO_JEV_FIRSTMATE_NEEDS_BANK: "1" },
+        env: { ORTO_JEV_NEEDS_BANK: "1" },
       }),
     ).toBe(false);
   });
 
   it("pass-through leaves verdict unset", () => {
-    const decision = passThroughFirstmateNeedsBank();
+    const decision = passThroughNeedsBank();
     expect(decision.verdict).toBe("unset");
     expect(decision.source).toBe("pass_through");
   });
 
-  it("default judgeFirstmateNeedsBank stays pass-through and skips TypeSafe", async () => {
+  it("default judgeNeedsBank stays pass-through and skips TypeSafe", async () => {
     const judge = new ScriptedJudge();
-    const result = await judgeFirstmateNeedsBank({
+    const result = await judgeNeedsBank({
       request: "Why do we keep the bank local-first?",
       judge,
       confidence: 0.8,
@@ -78,32 +73,32 @@ describe("firstmate needs_project_bank", () => {
 
   it("heuristically skips bank for pure code tasks", () => {
     expect(
-      heuristicFirstmateNeedsBank("Fix typo in README and add unit tests").verdict,
+      heuristicNeedsBank("Fix typo in README and add unit tests").verdict,
     ).toBe("skip_bank");
-    expect(
-      heuristicFirstmateNeedsBank("Refactor parseFoo and add tests").verdict,
-    ).toBe("skip_bank");
+    expect(heuristicNeedsBank("Refactor parseFoo and add tests").verdict).toBe(
+      "skip_bank",
+    );
   });
 
   it("heuristically uses bank for architecture / playbook asks", () => {
     expect(
-      heuristicFirstmateNeedsBank(
+      heuristicNeedsBank(
         "Why do we use Postgres instead of MySQL for the company brain?",
       ).verdict,
     ).toBe("use_bank");
     expect(
-      heuristicFirstmateNeedsBank("Implement feature X per ADR-12 boundaries").verdict,
+      heuristicNeedsBank("Implement feature X per ADR-12 boundaries").verdict,
     ).toBe("use_bank");
   });
 
   it("heuristically escalates on ambiguous requests", () => {
-    expect(heuristicFirstmateNeedsBank("Do the thing").verdict).toBe("escalate");
+    expect(heuristicNeedsBank("Do the thing").verdict).toBe("escalate");
   });
 
   it("marks confident no as skip_bank when enabled", async () => {
     const judge = new ScriptedJudge();
     judge.noul = 0.05;
-    const result = await judgeFirstmateNeedsBank({
+    const result = await judgeNeedsBank({
       request: "Fix lint errors in src/cli.ts",
       judge,
       confidence: 0.8,
@@ -118,7 +113,7 @@ describe("firstmate needs_project_bank", () => {
   it("marks confident yes as use_bank when enabled", async () => {
     const judge = new ScriptedJudge();
     judge.noul = 0.94;
-    const result = await judgeFirstmateNeedsBank({
+    const result = await judgeNeedsBank({
       request: "Why do we keep Hindsight local-first?",
       judge,
       confidence: 0.8,
@@ -129,7 +124,7 @@ describe("firstmate needs_project_bank", () => {
   });
 
   it("escalates when needs_project_bank is uncertain", () => {
-    const decision = interpretFirstmateNeedsBank({
+    const decision = interpretNeedsBank({
       confidence: 0.8,
       answers: {
         needs_project_bank: { type: "noul", noul: 0.5 },
@@ -143,7 +138,7 @@ describe("firstmate needs_project_bank", () => {
     const judge = new ScriptedJudge();
     judge.fellBackFromJev = true;
     judge.noul = 0.99;
-    const result = await judgeFirstmateNeedsBank({
+    const result = await judgeNeedsBank({
       request: "Bump the lodash dependency",
       judge,
       confidence: 0.8,
@@ -153,11 +148,11 @@ describe("firstmate needs_project_bank", () => {
     expect(result.decision.verdict).toBe("skip_bank");
   });
 
-  it("enables from ORTO_JEV_FIRSTMATE_NEEDS_BANK", async () => {
-    const result = await judgeFirstmateNeedsBank({
+  it("enables from ORTO_JEV_NEEDS_BANK", async () => {
+    const result = await judgeNeedsBank({
       request: "Fix typo in AGENTS.md",
       confidence: 0.8,
-      env: { ORTO_JEV_FIRSTMATE_NEEDS_BANK: "1" },
+      env: { ORTO_JEV_NEEDS_BANK: "1" },
     });
     expect(result.enabled).toBe(true);
     expect(result.decision.verdict).toBe("skip_bank");
@@ -165,7 +160,7 @@ describe("firstmate needs_project_bank", () => {
 
   it("skips TypeSafe when the request contains a secret", async () => {
     const judge = new ScriptedJudge();
-    const result = await judgeFirstmateNeedsBank({
+    const result = await judgeNeedsBank({
       request: "Rotate sk-ant-api03-abcdefghijklmnopqrstuvwxyz in docs",
       judge,
       confidence: 0.8,
@@ -175,24 +170,22 @@ describe("firstmate needs_project_bank", () => {
     expect(result.decision.source).toBe("heuristic");
   });
 
-  it("formatFirstmateNeedsBankLines includes verdict and latency", () => {
-    const decision = interpretFirstmateNeedsBank({
+  it("formatNeedsBankLines includes verdict and latency", () => {
+    const decision = interpretNeedsBank({
       confidence: 0.8,
       answers: {
         needs_project_bank: { type: "noul", noul: 0.1 },
       },
     });
-    const lines = formatFirstmateNeedsBankLines({
+    const lines = formatNeedsBankLines({
       decision,
       latencyMs: 12,
     });
+    expect(lines.some((line) => line.includes("Needs bank: skip_bank"))).toBe(
+      true,
+    );
     expect(
-      lines.some((line) => line.includes("Firstmate needs_bank: skip_bank")),
-    ).toBe(true);
-    expect(
-      lines.some((line) =>
-        line.includes("latency: 12ms vs ungated captain request"),
-      ),
+      lines.some((line) => line.includes("latency: 12ms vs ungated request")),
     ).toBe(true);
   });
 });

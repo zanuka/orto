@@ -267,23 +267,23 @@ export type {
 export {
   NEEDS_BANK_DEFAULT_CONFIDENCE,
   NEEDS_BANK_ENV,
-  NEEDS_BANK_ENV_ALIAS,
+  NEEDS_BANK_ENV_ALIASES,
   NEEDS_BANK_REQUEST_MAX_CHARS,
-  firstmateNeedsBankQuestions,
-  formatFirstmateNeedsBankLines,
-  heuristicFirstmateNeedsBank,
-  interpretFirstmateNeedsBank,
-  judgeFirstmateNeedsBank,
+  formatNeedsBankLines,
+  heuristicNeedsBank,
+  interpretNeedsBank,
+  judgeNeedsBank,
+  needsBankQuestions,
   parseNeedsBankEnabled,
-  passThroughFirstmateNeedsBank,
+  passThroughNeedsBank,
   resolveNeedsBankEnabled,
-} from "./firstmate-needs-bank.js";
+} from "./needs-bank.js";
 export type {
-  FirstmateNeedsBankDecision,
-  FirstmateNeedsBankResult,
-  FirstmateNeedsBankSource,
-  FirstmateNeedsBankVerdict,
-} from "./firstmate-needs-bank.js";
+  NeedsBankDecision,
+  NeedsBankResult,
+  NeedsBankSource,
+  NeedsBankVerdict,
+} from "./needs-bank.js";
 export {
   assertRetainBudget,
   compositePriority,

@@ -103,8 +103,8 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Recall rerank / context packing (helper shipped: `judgeRecallRanked` / `packRecallContext`; default recall stays pass-through)
 - Recall still-true verification (helper shipped: `judgeRecallVerified`; default off via `ORTO_JEV_RECALL_VERIFY`)
 - Lookup routing (helper shipped: `judgeLookupRoute`; default off via `ORTO_JEV_LOOKUP_ROUTE`)
-- Firstmate needs-bank gate (helper shipped: `judgeFirstmateNeedsBank`; default off via `ORTO_JEV_FIRSTMATE_NEEDS_BANK`; policy notes on `orto mcp --harness firstmate`)
-- Firstmate routing (which bank, knowledge vs PR, escalate vs dispatch, scout seedability)
+- Needs-bank gate (helper shipped: `judgeNeedsBank`; default off via `ORTO_JEV_NEEDS_BANK`; harness-agnostic; Firstmate snippet also prints the policy)
+- Firstmate-specific routing still planned (which bank, knowledge vs PR, escalate vs dispatch, scout seedability)
 - Share / deployment-profile safety before public or Cloud exposure
 - Golden-set eval that scores offline heuristics without requiring Jev at runtime
 
@@ -473,30 +473,30 @@ Heuristic fallback (judge off or low confidence):
 
 ---
 
-## Firstmate: needs project bank?
+## Needs project bank?
 
-`judgeFirstmateNeedsBank` in `src/judge/firstmate-needs-bank.ts` decides whether a captain request needs the project bank ([JEV-26](https://github.com/zanuka/orto/issues/27)).
+`judgeNeedsBank` in `src/judge/needs-bank.ts` decides whether an agent task needs the project bank ([JEV-26](https://github.com/zanuka/orto/issues/27)).
 
-Firstmate is the command layer. Jev is a reflex for the mate, not a crewmate.
+This is a harness-agnostic helper. Cursor, Claude Code, Firstmate, or a custom orchestrator can call it before recall, reflect, or attaching bank context. Jev does not run the coding agent; it only answers the gate question.
 
 Default path is pass-through:
 
-- Off unless `needsBank: true` or `ORTO_JEV_FIRSTMATE_NEEDS_BANK=1` (`NOCCIOLO_JEV_FIRSTMATE_NEEDS_BANK` alias)
+- Off unless `needsBank: true` or `ORTO_JEV_NEEDS_BANK=1` (aliases: `ORTO_JEV_FIRSTMATE_NEEDS_BANK`, `NOCCIOLO_JEV_NEEDS_BANK`)
 - No TypeSafe call
 - Verdict stays `unset`
-- `orto mcp --harness firstmate` still works with the judge off
+- Existing MCP / harness flows keep working with the judge off
 
-When enabled, one Noul `needs_project_bank` scores the captain request (default `--confidence 0.8`):
+When enabled, one Noul `needs_project_bank` scores the task request (default `--confidence 0.8`):
 
-| Band | Verdict | Captain behavior |
+| Band | Verdict | Harness behavior |
 |------|---------|------------------|
-| Confident no | `skip_bank` | Skip recall/reflect; do not attach `project-bank`; pure code dispatch |
-| Confident yes | `use_bank` | May recall/reflect / attach `project-bank` |
-| Uncertain | `escalate` | Ask the captain; do not guess |
+| Confident no | `skip_bank` | Skip recall/reflect; do not attach bank context; treat as pure code |
+| Confident yes | `use_bank` | May recall/reflect / attach bank context |
+| Uncertain | `escalate` | Ask the operator; do not guess |
 
-`orto mcp --harness firstmate` emits policy notes documenting the question, threshold, env flag, and outcomes. Do not embed TypeSafe keys in the repo; wire `ORTO_TYPESAFE_API_KEY` in the captain environment when enabling the gate.
+`orto mcp --harness firstmate` also prints these policy notes (question, threshold, env flag, outcomes) as one consumer. Other harnesses can import `judgeNeedsBank` / `buildNeedsBankPolicyNotes` the same way. Do not embed TypeSafe keys in the repo; wire `ORTO_TYPESAFE_API_KEY` in the harness environment when enabling the gate.
 
-`formatFirstmateNeedsBankLines` prints the verdict and `latency: Nms vs ungated captain request`.
+`formatNeedsBankLines` prints the verdict and `latency: Nms vs ungated request`.
 
 ---
 

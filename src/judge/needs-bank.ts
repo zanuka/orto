@@ -1,17 +1,17 @@
 /*
-Firstmate needs-bank gate decides whether a captain request needs the project
-Hindsight bank. The captain calls judgeFirstmateNeedsBank before recall,
-reflect, or attaching a project-bank card. Jev is a reflex for the mate, not
-a crewmate.
+Needs-bank gate decides whether an agent task needs the project Hindsight
+bank. Any harness (Cursor, Claude Code, Firstmate, custom orchestrators) can
+call judgeNeedsBank before recall, reflect, or attaching bank context.
 
-Default path is pass-through: no TypeSafe call, verdict unset, Firstmate
-behaves as today. Opt in with needsBank:true or ORTO_JEV_FIRSTMATE_NEEDS_BANK=1
-(NOCCIOLO_JEV_FIRSTMATE_NEEDS_BANK alias). One Noul needs_project_bank scores
-the captain request. Confident no skips recall/reflect (pure code task).
-Confident yes may use the bank. Uncertain escalates to the captain. When the
-judge is off, or Jev falls back, heuristicFirstmateNeedsBank still separates
-narrow code edits from architecture/playbook asks. This module does not host
-or proxy MCP and does not embed TypeSafe keys.
+Default path is pass-through: no TypeSafe call, verdict unset, workflows
+behave as today. Opt in with needsBank:true or ORTO_JEV_NEEDS_BANK=1
+(ORTO_JEV_FIRSTMATE_NEEDS_BANK / NOCCIOLO_* aliases). One Noul
+needs_project_bank scores the task request. Confident no skips
+recall/reflect (pure code task). Confident yes may use the bank. Uncertain
+escalates to the operator. When the judge is off, or Jev falls back,
+heuristicNeedsBank still separates narrow code edits from
+architecture/playbook asks. This module does not host or proxy MCP and does
+not embed TypeSafe keys.
 */
 
 import { noulBand, type NoulBand } from "./relevance.js";
@@ -27,29 +27,29 @@ import type {
   NoulQuestion,
 } from "./types.js";
 
-export const NEEDS_BANK_ENV = "ORTO_JEV_FIRSTMATE_NEEDS_BANK";
-export const NEEDS_BANK_ENV_ALIAS = "NOCCIOLO_JEV_FIRSTMATE_NEEDS_BANK";
+export const NEEDS_BANK_ENV = "ORTO_JEV_NEEDS_BANK";
+export const NEEDS_BANK_ENV_ALIASES = [
+  "ORTO_JEV_FIRSTMATE_NEEDS_BANK",
+  "NOCCIOLO_JEV_NEEDS_BANK",
+  "NOCCIOLO_JEV_FIRSTMATE_NEEDS_BANK",
+] as const;
 export const NEEDS_BANK_REQUEST_MAX_CHARS = JEV_SECTION_MAX_CHARS;
 export const NEEDS_BANK_DEFAULT_CONFIDENCE = 0.8;
 
-export type FirstmateNeedsBankVerdict =
-  | "use_bank"
-  | "skip_bank"
-  | "escalate"
-  | "unset";
+export type NeedsBankVerdict = "use_bank" | "skip_bank" | "escalate" | "unset";
 
-export type FirstmateNeedsBankSource = "jev" | "heuristic" | "pass_through";
+export type NeedsBankSource = "jev" | "heuristic" | "pass_through";
 
-export interface FirstmateNeedsBankDecision {
-  verdict: FirstmateNeedsBankVerdict;
+export interface NeedsBankDecision {
+  verdict: NeedsBankVerdict;
   reason: string;
-  source: FirstmateNeedsBankSource;
+  source: NeedsBankSource;
   needsProjectBank?: number;
   needsProjectBankBand?: NoulBand;
 }
 
-export interface FirstmateNeedsBankResult {
-  decision: FirstmateNeedsBankDecision;
+export interface NeedsBankResult {
+  decision: NeedsBankDecision;
   latencyMs: number;
   enabled: boolean;
 }
@@ -57,7 +57,11 @@ export interface FirstmateNeedsBankResult {
 export function parseNeedsBankEnabled(
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
-  const raw = env[NEEDS_BANK_ENV] ?? env[NEEDS_BANK_ENV_ALIAS];
+  const raw =
+    env[NEEDS_BANK_ENV] ??
+    NEEDS_BANK_ENV_ALIASES.map((key) => env[key]).find(
+      (value) => value !== undefined,
+    );
   if (raw === undefined) {
     return false;
   }
@@ -83,13 +87,13 @@ export function resolveNeedsBankEnabled(input: {
   return parseNeedsBankEnabled(input.env);
 }
 
-export function firstmateNeedsBankQuestions(): Record<string, JudgeQuestion> {
+export function needsBankQuestions(): Record<string, JudgeQuestion> {
   return {
     needs_project_bank: needsProjectBankQuestion(),
   };
 }
 
-export function passThroughFirstmateNeedsBank(): FirstmateNeedsBankDecision {
+export function passThroughNeedsBank(): NeedsBankDecision {
   return {
     verdict: "unset",
     reason: "needs-bank gate off",
@@ -97,14 +101,12 @@ export function passThroughFirstmateNeedsBank(): FirstmateNeedsBankDecision {
   };
 }
 
-export function heuristicFirstmateNeedsBank(
-  request: string,
-): FirstmateNeedsBankDecision {
+export function heuristicNeedsBank(request: string): NeedsBankDecision {
   const trimmed = request.trim();
   if (trimmed.length === 0) {
     return {
       verdict: "escalate",
-      reason: "empty captain request",
+      reason: "empty task request",
       source: "heuristic",
     };
   }
@@ -189,15 +191,15 @@ export function heuristicFirstmateNeedsBank(
   }
   return {
     verdict: "escalate",
-    reason: "heuristic uncertain; escalate to captain",
+    reason: "heuristic uncertain; escalate to operator",
     source: "heuristic",
   };
 }
 
-export function interpretFirstmateNeedsBank(input: {
+export function interpretNeedsBank(input: {
   answers: Record<string, JudgeAnswer>;
   confidence: number;
-}): FirstmateNeedsBankDecision {
+}): NeedsBankDecision {
   const needs = readNoul(input.answers.needs_project_bank);
   if (needs === undefined) {
     return {
@@ -227,20 +229,20 @@ export function interpretFirstmateNeedsBank(input: {
   }
   return {
     verdict: "escalate",
-    reason: `needs_project_bank uncertain at ${input.confidence.toFixed(2)}; escalate to captain`,
+    reason: `needs_project_bank uncertain at ${input.confidence.toFixed(2)}; escalate to operator`,
     source: "jev",
     needsProjectBank: needs,
     needsProjectBankBand: band,
   };
 }
 
-export async function judgeFirstmateNeedsBank(input: {
+export async function judgeNeedsBank(input: {
   request: string;
   judge?: Judge;
   confidence: number;
   needsBank?: boolean;
   env?: NodeJS.ProcessEnv;
-}): Promise<FirstmateNeedsBankResult> {
+}): Promise<NeedsBankResult> {
   const started = Date.now();
   const enabled = resolveNeedsBankEnabled({
     ...(input.needsBank !== undefined ? { needsBank: input.needsBank } : {}),
@@ -249,7 +251,7 @@ export async function judgeFirstmateNeedsBank(input: {
 
   if (!enabled) {
     return {
-      decision: passThroughFirstmateNeedsBank(),
+      decision: passThroughNeedsBank(),
       latencyMs: Date.now() - started,
       enabled: false,
     };
@@ -257,7 +259,7 @@ export async function judgeFirstmateNeedsBank(input: {
 
   if (containsInlineSecret(input.request)) {
     return {
-      decision: heuristicFirstmateNeedsBank(input.request),
+      decision: heuristicNeedsBank(input.request),
       latencyMs: Date.now() - started,
       enabled: true,
     };
@@ -269,14 +271,14 @@ export async function judgeFirstmateNeedsBank(input: {
     input.judge.id !== "jev"
   ) {
     return {
-      decision: heuristicFirstmateNeedsBank(input.request),
+      decision: heuristicNeedsBank(input.request),
       latencyMs: Date.now() - started,
       enabled: true,
     };
   }
 
   const state = {
-    type: "firstmate_needs_bank",
+    type: "needs_bank",
     request: input.request.slice(0, NEEDS_BANK_REQUEST_MAX_CHARS),
   };
 
@@ -284,7 +286,7 @@ export async function judgeFirstmateNeedsBank(input: {
     assertJevStateSendable(state);
   } catch {
     return {
-      decision: heuristicFirstmateNeedsBank(input.request),
+      decision: heuristicNeedsBank(input.request),
       latencyMs: Date.now() - started,
       enabled: true,
     };
@@ -292,18 +294,18 @@ export async function judgeFirstmateNeedsBank(input: {
 
   const result = await input.judge.evaluate({
     state,
-    questions: firstmateNeedsBankQuestions(),
+    questions: needsBankQuestions(),
   });
   if (result.fellBackFromJev === true || result.judgeId !== "jev") {
     return {
-      decision: heuristicFirstmateNeedsBank(input.request),
+      decision: heuristicNeedsBank(input.request),
       latencyMs: Date.now() - started,
       enabled: true,
     };
   }
 
   return {
-    decision: interpretFirstmateNeedsBank({
+    decision: interpretNeedsBank({
       answers: result.answers,
       confidence: input.confidence,
     }),
@@ -312,14 +314,14 @@ export async function judgeFirstmateNeedsBank(input: {
   };
 }
 
-export function formatFirstmateNeedsBankLines(input: {
-  decision: FirstmateNeedsBankDecision;
+export function formatNeedsBankLines(input: {
+  decision: NeedsBankDecision;
   latencyMs?: number;
   dryRun?: boolean;
 }): string[] {
   const prefix = input.dryRun === true ? "[dry-run] " : "";
   const lines = [
-    `${prefix}Firstmate needs_bank: ${input.decision.verdict} (${input.decision.source})`,
+    `${prefix}Needs bank: ${input.decision.verdict} (${input.decision.source})`,
     `${prefix}reason: ${input.decision.reason}`,
   ];
   if (
@@ -331,9 +333,7 @@ export function formatFirstmateNeedsBankLines(input: {
     );
   }
   if (input.latencyMs !== undefined) {
-    lines.push(
-      `${prefix}latency: ${input.latencyMs}ms vs ungated captain request`,
-    );
+    lines.push(`${prefix}latency: ${input.latencyMs}ms vs ungated request`);
   }
   return lines;
 }
@@ -342,7 +342,7 @@ function needsProjectBankQuestion(): NoulQuestion {
   return {
     type: "noul",
     instructions:
-      "Does this captain request need project bank context (architecture, decisions, standards, playbook) beyond what is already in the open files and repo tree?",
+      "Does this agent task need project bank context (architecture, decisions, standards, playbook) beyond what is already in the open files and repo tree?",
     criteria: {
       true: "The task depends on durable project knowledge: ADRs, architecture, coding standards, invariants, or how-we-work playbook answers.",
       false:
