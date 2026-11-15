@@ -106,7 +106,7 @@ Do **not** fold mental-model curation into `init` prompts. Keep generation in `c
 - [x] Idempotent apply of declared models from the bank template (stable `id`s; create-or-update; tags / `tags_match` / triggers preserved)
 - [x] Optional post-seed hook: `seed --refresh-mental-models` (opt-in; documents overlap with `refresh_after_consolidation`)
 - [x] Refresh policy presets: differentiated defaults (auto for evolving starters; manual for `coding-standards`); trigger typing includes `mode` / full `tags_match` / optional `min_refresh_interval_seconds` (`delta` still optional later; Jev: [JEV-16](https://github.com/zanuka/orto/issues/51), [JEV-20](https://github.com/zanuka/orto/issues/53))
-- [x] Agent integration hint: AGENTS / Cursor snippets prefer `reflect` / mental models for playbook questions; `recall` for narrow facts ([JEV-25](https://github.com/zanuka/orto/issues/26) routing judge remains optional)
+- [x] Agent integration hint: AGENTS / Cursor snippets prefer `reflect` / mental models for playbook questions; `recall` for narrow facts. Optional routing judge: `judgeLookupRoute` ([JEV-25](https://github.com/zanuka/orto/issues/26))
 - [x] Provider boundary: Hindsight mental-model helpers stay in `src/providers/hindsight/`; no fake Mem0 mental-model surface
 
 **Goal:** After seed, agents get consistent, high-priority answers to the project’s recurring questions: not just a bag of retained facts.
