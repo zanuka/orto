@@ -106,6 +106,21 @@ describe("generateMcpSnippets", () => {
     expect(firstmate!.notes.join(" ")).toMatch(/scouts or ships/);
     expect(firstmate!.notes.join(" ")).toMatch(/not write MCP config/);
     expect(firstmate!.notes.join(" ")).toMatch(/Register this git project/);
+    expect(firstmate!.notes.join(" ")).toMatch(/needs_project_bank/);
+    expect(firstmate!.notes.join(" ")).toMatch(/--confidence 0\.8/);
+    expect(firstmate!.notes.join(" ")).toMatch(/ORTO_JEV_FIRSTMATE_NEEDS_BANK/);
+    expect(firstmate!.notes.join(" ")).toMatch(/skip_bank/);
+  });
+
+  it("documents needs_project_bank without requiring a TypeSafe key", () => {
+    const firstmate = generateMcpSnippets(input).find(
+      (s) => s.harness === "firstmate",
+    );
+    const notes = firstmate!.notes.join("\n");
+    expect(notes).toContain("needs_project_bank");
+    expect(notes).toContain("judgeFirstmateNeedsBank");
+    expect(notes).not.toMatch(/sk-[a-z0-9]{8,}/i);
+    expect(notes).not.toMatch(/ORTO_TYPESAFE_API_KEY=\S+/);
   });
 
   it("adds env placeholder auth headers for Firstmate with --include-auth", () => {

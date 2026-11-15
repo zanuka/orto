@@ -103,7 +103,8 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Recall rerank / context packing (helper shipped: `judgeRecallRanked` / `packRecallContext`; default recall stays pass-through)
 - Recall still-true verification (helper shipped: `judgeRecallVerified`; default off via `ORTO_JEV_RECALL_VERIFY`)
 - Lookup routing (helper shipped: `judgeLookupRoute`; default off via `ORTO_JEV_LOOKUP_ROUTE`)
-- Firstmate routing and escalation when confidence is low
+- Firstmate needs-bank gate (helper shipped: `judgeFirstmateNeedsBank`; default off via `ORTO_JEV_FIRSTMATE_NEEDS_BANK`; policy notes on `orto mcp --harness firstmate`)
+- Firstmate routing (which bank, knowledge vs PR, escalate vs dispatch, scout seedability)
 - Share / deployment-profile safety before public or Cloud exposure
 - Golden-set eval that scores offline heuristics without requiring Jev at runtime
 
@@ -469,6 +470,33 @@ Heuristic fallback (judge off or low confidence):
 - Why/how synthesis → `reflect`
 
 `formatLookupRouteLines` prints the chosen route and `latency: Nms vs unrouted lookup`.
+
+---
+
+## Firstmate: needs project bank?
+
+`judgeFirstmateNeedsBank` in `src/judge/firstmate-needs-bank.ts` decides whether a captain request needs the project bank ([JEV-26](https://github.com/zanuka/orto/issues/27)).
+
+Firstmate is the command layer. Jev is a reflex for the mate, not a crewmate.
+
+Default path is pass-through:
+
+- Off unless `needsBank: true` or `ORTO_JEV_FIRSTMATE_NEEDS_BANK=1` (`NOCCIOLO_JEV_FIRSTMATE_NEEDS_BANK` alias)
+- No TypeSafe call
+- Verdict stays `unset`
+- `orto mcp --harness firstmate` still works with the judge off
+
+When enabled, one Noul `needs_project_bank` scores the captain request (default `--confidence 0.8`):
+
+| Band | Verdict | Captain behavior |
+|------|---------|------------------|
+| Confident no | `skip_bank` | Skip recall/reflect; do not attach `project-bank`; pure code dispatch |
+| Confident yes | `use_bank` | May recall/reflect / attach `project-bank` |
+| Uncertain | `escalate` | Ask the captain; do not guess |
+
+`orto mcp --harness firstmate` emits policy notes documenting the question, threshold, env flag, and outcomes. Do not embed TypeSafe keys in the repo; wire `ORTO_TYPESAFE_API_KEY` in the captain environment when enabling the gate.
+
+`formatFirstmateNeedsBankLines` prints the verdict and `latency: Nms vs ungated captain request`.
 
 ---
 

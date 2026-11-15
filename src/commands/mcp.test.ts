@@ -73,6 +73,8 @@ describe("runMcp --write-firstmate", () => {
     const skill = await readFile(skillPath, "utf8");
     expect(skill).toContain("project-bank");
     expect(skill).toContain("recall");
+    expect(skill).toContain("needs_project_bank");
+    expect(skill).toContain("ORTO_JEV_FIRSTMATE_NEEDS_BANK");
 
     const registryPath = join(fmHome, ".orto", "projects.json");
     const registry = JSON.parse(await readFile(registryPath, "utf8")) as {
@@ -110,6 +112,56 @@ describe("runMcp --write-firstmate", () => {
     await expect(
       readFile(join(root, ".agents", "skills", "project-bank", "SKILL.md"), "utf8"),
     ).rejects.toThrow();
+  });
+});
+
+describe("runMcp --harness firstmate (judge off)", () => {
+  const dirs: string[] = [];
+
+  afterEach(async () => {
+    await Promise.all(
+      dirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })),
+    );
+  });
+
+  it("emits firstmate snippets with needs_project_bank policy and no TypeSafe call", async () => {
+    const root = await mkdtemp(join(tmpdir(), "orto-mcp-fm-"));
+    dirs.push(root);
+    await mkdir(join(root, ".orto"), { recursive: true });
+    await writeFile(
+      join(root, ".orto", "config.json"),
+      JSON.stringify({
+        version: 1,
+        name: "fixture",
+        provider: "hindsight",
+        bankId: "fixture-bank",
+        root: ".",
+        createdAt: new Date().toISOString(),
+      }),
+      "utf8",
+    );
+
+    const previousKey = process.env.ORTO_TYPESAFE_API_KEY;
+    delete process.env.ORTO_TYPESAFE_API_KEY;
+    try {
+      const result = await runMcp({
+        cwd: root,
+        harness: "firstmate",
+      });
+      const notes = result.snippets
+        .filter((snippet) => snippet.harness === "firstmate")
+        .flatMap((snippet) => snippet.notes)
+        .join("\n");
+      expect(notes).toContain("needs_project_bank");
+      expect(notes).toContain("--confidence 0.8");
+      expect(result.writes).toEqual([]);
+    } finally {
+      if (previousKey === undefined) {
+        delete process.env.ORTO_TYPESAFE_API_KEY;
+      } else {
+        process.env.ORTO_TYPESAFE_API_KEY = previousKey;
+      }
+    }
   });
 });
 

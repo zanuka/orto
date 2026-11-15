@@ -1,3 +1,4 @@
+import { buildFirstmateNeedsBankPolicyNotes } from "./firstmate-jev-policy.js";
 import { buildSingleBankMcpUrl, defaultMcpServerName } from "./mcp-url.js";
 
 export type McpHarness =
@@ -192,6 +193,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         "Captain-only: do not wire scouts or ships to this MCP server.",
         "Do not write MCP config into this product repo.",
         "Register this git project in Firstmate separately (this snippet only wires the MCP server).",
+        ...buildFirstmateNeedsBankPolicyNotes(),
       ],
     },
   ];

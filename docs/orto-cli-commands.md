@@ -473,7 +473,8 @@ Harnesses can call `judgeMcpRetain` (`src/judge/mcp-retain.ts`) before forwardin
 After `recall`, harnesses that pack context can optionally call `packRecallContext` / `judgeRecallRanked` (`src/judge/recall-rank.ts`) with `rank: true` to drop confident low-relevance passages; default packing stays pass-through so raw MCP `recall` is unchanged.
 Harnesses can also call `judgeRecallVerified` (`src/judge/recall-verify.ts`) with `verify: true` or `ORTO_JEV_RECALL_VERIFY=1` to mark superseded recalled claims `stale` when the source excerpt contradicts them; default is off.
 To choose which Hindsight tool to call for an agent question, harnesses can call `judgeLookupRoute` (`src/judge/lookup-route.ts`) with `route: true` or `ORTO_JEV_LOOKUP_ROUTE=1` (`mental_model` | `reflect` | `recall`); default MCP tools stay separate and routing stays off.
-See the [Hindsight MCP tools](../README.md#hindsight-mcp-tools-any-agent) section in the README, [jev.md](./jev.md#mcp-retain-guardrail), [recall context packing](./jev.md#recall-context-packing), [recall still-true verification](./jev.md#recall-still-true-verification), and [lookup routing](./jev.md#lookup-routing).
+`--harness firstmate` also prints optional Jev policy notes for Noul `needs_project_bank` (`judgeFirstmateNeedsBank`, default `--confidence 0.8`, opt-in `ORTO_JEV_FIRSTMATE_NEEDS_BANK=1`). The print path does not call TypeSafe and works with the judge off.
+See the [Hindsight MCP tools](../README.md#hindsight-mcp-tools-any-agent) section in the README, [jev.md](./jev.md#mcp-retain-guardrail), [recall context packing](./jev.md#recall-context-packing), [recall still-true verification](./jev.md#recall-still-true-verification), [lookup routing](./jev.md#lookup-routing), and [Firstmate needs project bank](./jev.md#firstmate-needs-project-bank).
 
 ---
 
