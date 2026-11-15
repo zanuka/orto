@@ -21,7 +21,7 @@ Default Hindsight will retain whatever you hand it and extract facts from it. Th
 | Facts are extracted from whatever you send | Heuristics already prefer decisions, invariants, architecture over changelogs, TOCs, badge walls |
 | Full re-ingest if you want freshness | Hash-gated incremental `seed` — only changed sections are re-retained |
 | Provenance is whatever you attach | Source path + commit are first-class |
-| MCP is yours to wire | `orto mcp` emits ready configs/rules for Cursor, Claude Code, etc. |
+| MCP is yours to wire | `orto mcp` emits ready configs/rules for Claude Code, Codex, Cursor, Pi, and other popular harnesses |
 | Bank mission / directives are manual | `init` / `configure` generate a bank template from the repo shape |
 | Stale items stay until you clean them | `prune` groups path-gone / section-gone and tombstones so the same text doesn’t come back |
 | Local / Docker is a separate setup | `orto docker` + local-first defaults |

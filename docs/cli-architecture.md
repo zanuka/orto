@@ -380,7 +380,7 @@ Defaults: container `hindsight`, API `8888`, UI `9999`, volume `hindsight-data`.
 
 | Command | Behavior |
 |---------|----------|
-| `orto mcp` | Print Cursor, Claude Code, Claude Desktop, Roo, Codex, Kiro snippets |
+| `orto mcp` | Print Cursor, Claude Code, Claude Desktop, Roo, Codex, Pi, Kiro snippets |
 | `orto mcp --write` | Merge `.cursor/mcp.json` |
 | `orto mcp --write-roo` / `--write-kiro` | Project Roo / Kiro MCP JSON |
 | `orto mcp --write-agents` | Idempotent AGENTS.md section (HTML comment markers) |

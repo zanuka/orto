@@ -535,8 +535,8 @@ By default `mcp` **prints** ready-to-paste configs. It does not detect your IDE:
 
 | Flag | What it does |
 |------|----------------|
-| *(none)* | Print snippets for Cursor, Claude Code, Claude Desktop, Roo, Codex, and Kiro |
-| `--harness <list>` | Limit output: `cursor`, `claude-code`, `claude-desktop`, `roo`, `codex`, `kiro`, `firstmate`, or `all` (comma-separated) |
+| *(none)* | Print snippets for Cursor, Claude Code, Claude Desktop, Roo, Codex, Pi, and Kiro |
+| `--harness <list>` | Limit output: `cursor`, `claude-code`, `claude-desktop`, `roo`, `codex`, `pi`, `kiro`, `firstmate`, or `all` (comma-separated) |
 | `--write` | Write/merge project `.cursor/mcp.json` |
 | `--write-roo` | Write/merge project `.roo/mcp.json` (`type: streamable-http`) |
 | `--write-kiro` | Write/merge project `.kiro/settings/mcp.json` |

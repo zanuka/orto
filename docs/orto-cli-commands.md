@@ -445,7 +445,7 @@ Emission follows the active deployment profile from `orto share` / `config.deplo
 
 | Flag | Description |
 |------|-------------|
-| `--harness <list>` | Limit output: `cursor`, `claude-code`, `claude-desktop`, `roo`, `codex`, `kiro`, `firstmate`, or `all` (comma-separated) |
+| `--harness <list>` | Limit output: `cursor`, `claude-code`, `claude-desktop`, `roo`, `codex`, `pi`, `kiro`, `firstmate`, or `all` (comma-separated) |
 | `--write` | Write/merge project `.cursor/mcp.json` |
 | `--write-roo` | Write/merge project `.roo/mcp.json` |
 | `--write-kiro` | Write/merge project `.kiro/settings/mcp.json` |
@@ -473,7 +473,7 @@ Harnesses can call `judgeMcpRetain` (`src/judge/mcp-retain.ts`) before forwardin
 After `recall`, harnesses that pack context can optionally call `packRecallContext` / `judgeRecallRanked` (`src/judge/recall-rank.ts`) with `rank: true` to drop confident low-relevance passages; default packing stays pass-through so raw MCP `recall` is unchanged.
 Harnesses can also call `judgeRecallVerified` (`src/judge/recall-verify.ts`) with `verify: true` or `ORTO_JEV_RECALL_VERIFY=1` to mark superseded recalled claims `stale` when the source excerpt contradicts them; default is off.
 To choose which Hindsight tool to call for an agent question, harnesses can call `judgeLookupRoute` (`src/judge/lookup-route.ts`) with `route: true` or `ORTO_JEV_LOOKUP_ROUTE=1` (`mental_model` | `reflect` | `recall`); default MCP tools stay separate and routing stays off.
-Any harness can call `judgeNeedsBank` (`src/judge/needs-bank.ts`) with `needsBank: true` or `ORTO_JEV_NEEDS_BANK=1` (Noul `needs_project_bank`, default `--confidence 0.8`) before recall/reflect. `--harness firstmate` also prints those policy notes as one consumer. The print path does not call TypeSafe and works with the judge off.
+Any harness can call `judgeNeedsBank` (`src/judge/needs-bank.ts`) with `needsBank: true` or `ORTO_JEV_NEEDS_BANK=1` (Noul `needs_project_bank`, default `--confidence 0.8`) before recall/reflect. `orto mcp` prints those policy notes for Claude Code, Codex, Cursor, Pi, and the other harness snippets. The print path does not call TypeSafe and works with the judge off.
 See the [Hindsight MCP tools](../README.md#hindsight-mcp-tools-any-agent) section in the README, [jev.md](./jev.md#mcp-retain-guardrail), [recall context packing](./jev.md#recall-context-packing), [recall still-true verification](./jev.md#recall-still-true-verification), [lookup routing](./jev.md#lookup-routing), and [needs project bank](./jev.md#needs-project-bank).
 
 ---

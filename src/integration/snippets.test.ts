@@ -110,18 +110,37 @@ describe("generateMcpSnippets", () => {
     expect(firstmate!.notes.join(" ")).toMatch(/--confidence 0\.8/);
     expect(firstmate!.notes.join(" ")).toMatch(/ORTO_JEV_NEEDS_BANK/);
     expect(firstmate!.notes.join(" ")).toMatch(/skip_bank/);
-    expect(firstmate!.notes.join(" ")).toMatch(/any harness|Cursor|orchestrator/);
+    expect(firstmate!.notes.join(" ")).toMatch(/Claude Code/);
+    expect(firstmate!.notes.join(" ")).toMatch(/\bPi\b/);
   });
 
-  it("documents needs_project_bank without requiring a TypeSafe key", () => {
-    const firstmate = generateMcpSnippets(input).find(
-      (s) => s.harness === "firstmate",
-    );
-    const notes = firstmate!.notes.join("\n");
-    expect(notes).toContain("needs_project_bank");
-    expect(notes).toContain("judgeNeedsBank");
-    expect(notes).not.toMatch(/sk-[a-z0-9]{8,}/i);
-    expect(notes).not.toMatch(/ORTO_TYPESAFE_API_KEY=\S+/);
+  it("emits Pi shell with project-local mcp add", () => {
+    const pi = generateMcpSnippets(input).find((s) => s.harness === "pi");
+    expect(pi).toBeDefined();
+    expect(pi!.format).toBe("shell");
+    expect(pi!.body).toContain("pi mcp add -l hindsight-orto --url ");
+    expect(pi!.body).toContain("http://localhost:8888/mcp/orto/");
+    expect(pi!.notes.join(" ")).toMatch(/needs_project_bank/);
+  });
+
+  it("adds bearer env for Pi with --include-auth", () => {
+    const pi = generateMcpSnippets({
+      ...input,
+      includeAuth: true,
+    }).find((s) => s.harness === "pi");
+    expect(pi!.body).toContain("--bearer-token-env-var ORTO_HINDSIGHT_API_KEY");
+  });
+
+  it("documents needs_project_bank on popular harnesses without a TypeSafe key", () => {
+    for (const harness of ["cursor", "claude-code", "codex", "pi"] as const) {
+      const snippet = generateMcpSnippets(input).find((s) => s.harness === harness);
+      const notes = snippet!.notes.join("\n");
+      expect(notes).toContain("needs_project_bank");
+      expect(notes).toContain("judgeNeedsBank");
+      expect(notes).toMatch(/Claude Code/);
+      expect(notes).not.toMatch(/sk-[a-z0-9]{8,}/i);
+      expect(notes).not.toMatch(/ORTO_TYPESAFE_API_KEY=\S+/);
+    }
   });
 
   it("adds env placeholder auth headers for Firstmate with --include-auth", () => {
@@ -150,12 +169,13 @@ describe("parseHarnessList", () => {
     expect(() => parseHarnessList("cursor,nope")).toThrow(/Unknown harness/);
   });
 
-  it("still errors on --harness nope and lists firstmate in the valid harnesses", () => {
+  it("still errors on --harness nope and lists pi and firstmate in the valid harnesses", () => {
     expect(() => parseHarnessList("nope")).toThrow(/Unknown harness "nope"/);
     try {
       parseHarnessList("nope");
       throw new Error("expected parseHarnessList to throw");
     } catch (error) {
+      expect((error as Error).message).toContain("pi");
       expect((error as Error).message).toContain("firstmate");
     }
   });
@@ -193,6 +213,9 @@ describe("agent rules", () => {
     expect(rule).toContain("Prefer `recall`");
     expect(rule).toContain("Never MCP-`retain` chat");
     expect(rule).toContain("orto seed");
+    expect(rule).toContain("judgeNeedsBank");
+    expect(rule).toContain("Claude Code");
+    expect(rule).toContain("Pi");
   });
 
   it("documents the MCP retain guardrail in AGENTS bank section", () => {
@@ -204,6 +227,10 @@ describe("agent rules", () => {
     expect(section).toContain("Do not use MCP `retain` for chat");
     expect(section).toContain("orto seed");
     expect(section).toContain("orto store");
+    expect(section).toContain("judgeNeedsBank");
+    expect(section).toContain("harness-agnostic");
+    expect(section).toContain("Claude Code");
+    expect(section).toContain("Pi");
   });
 });
 

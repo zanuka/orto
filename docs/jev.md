@@ -477,7 +477,7 @@ Heuristic fallback (judge off or low confidence):
 
 `judgeNeedsBank` in `src/judge/needs-bank.ts` decides whether an agent task needs the project bank ([JEV-26](https://github.com/zanuka/orto/issues/27)).
 
-This is a harness-agnostic helper. Cursor, Claude Code, Firstmate, or a custom orchestrator can call it before recall, reflect, or attaching bank context. Jev does not run the coding agent; it only answers the gate question.
+This is a harness-agnostic helper. Claude Code, Codex, Cursor, Pi, and other popular agentic workflows can call it before recall, reflect, or attaching bank context. Firstmate and custom orchestrators use the same API. Jev does not run the coding agent; it only answers the gate question.
 
 Default path is pass-through:
 
@@ -494,7 +494,7 @@ When enabled, one Noul `needs_project_bank` scores the task request (default `--
 | Confident yes | `use_bank` | May recall/reflect / attach bank context |
 | Uncertain | `escalate` | Ask the operator; do not guess |
 
-`orto mcp --harness firstmate` also prints these policy notes (question, threshold, env flag, outcomes) as one consumer. Other harnesses can import `judgeNeedsBank` / `buildNeedsBankPolicyNotes` the same way. Do not embed TypeSafe keys in the repo; wire `ORTO_TYPESAFE_API_KEY` in the harness environment when enabling the gate.
+`orto mcp` prints these policy notes on Cursor, Claude Code, Codex, Pi, Kiro, and Firstmate snippets. `orto mcp --write-agents` / `--write-cursor-rules` also mention the optional gate. Do not embed TypeSafe keys in the repo; wire `ORTO_TYPESAFE_API_KEY` in the harness environment when enabling the gate.
 
 `formatNeedsBankLines` prints the verdict and `latency: Nms vs ungated request`.
 
