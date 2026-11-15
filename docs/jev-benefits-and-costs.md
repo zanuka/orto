@@ -342,12 +342,12 @@ These sit on the hot path. A naive “score every recalled passage on every agen
 
 | Pattern | Risk | Planning note |
 |---|---|---|
-| `recall` pass-through (default) | $0 Jev | Correct default |
-| Packed `recall_ranked` on demand | One call per pack, not per passage if batched | Budget ~3k–8k tokens/call if you send several passages as one state |
+| `recall` pass-through (default) | $0 Jev | Correct default; `packRecallContext` without `rank: true` |
+| Packed `recall_ranked` on demand (`rank: true`) | One call per pack, not per passage if batched | Budget ~3k–8k tokens/call; typically hundreds of ms vs unranked local packing |
 | `still_true` on every recall | Cloud hop + tokens every turn | Env flag off by default (`ORTO_JEV_RECALL_VERIFY`) |
 | Firstmate “needs bank?” once per captain request | One small call per task | Usually cheaper than a useless Hindsight reflect |
 
-**Guidance:** enable seed + MCP retain first. Measure. Only then put Jev on recall.
+**Guidance:** enable seed + MCP retain first. Measure. Only then put Jev on recall packing (`packRecallContext({ rank: true })`). Prefer Hindsight’s native typesafe reranker for server-side ranking when available.
 
 #### F. Golden-set eval (JEV-34)
 

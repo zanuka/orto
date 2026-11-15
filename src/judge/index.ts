@@ -200,6 +200,27 @@ export type {
   McpRetainVerdict,
 } from "./mcp-retain.js";
 export {
+  DEFAULT_MIN_RELEVANCE,
+  RECALL_RANK_MAX_PASSAGES,
+  RECALL_RANK_SCORE_MAX,
+  RECALL_RANK_TASK_MAX_CHARS,
+  formatRecallRankLines,
+  heuristicRankRecalledPassages,
+  interpretRecallRank,
+  judgeRecallRanked,
+  packRecallContext,
+  passThroughRecallPassages,
+  recallRankQuestions,
+  relevanceKey,
+} from "./recall-rank.js";
+export type {
+  PackRecallContextResult,
+  RankedRecallPassage,
+  RecallPassage,
+  RecallRankResult,
+  RecallRankSource,
+} from "./recall-rank.js";
+export {
   assertRetainBudget,
   compositePriority,
   DEFAULT_PRIORITY_WEIGHTS,
