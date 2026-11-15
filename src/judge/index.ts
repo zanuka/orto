@@ -242,6 +242,29 @@ export type {
   VerifiedRecallPassage,
 } from "./recall-verify.js";
 export {
+  LOOKUP_ROUTES,
+  LOOKUP_ROUTE_ENV,
+  LOOKUP_ROUTE_ENV_ALIAS,
+  LOOKUP_ROUTE_MAX_MODELS,
+  LOOKUP_ROUTE_QUESTION_MAX_CHARS,
+  formatLookupRouteLines,
+  heuristicLookupRoute,
+  interpretLookupRoute,
+  judgeLookupRoute,
+  lookupRouteQuestions,
+  matchMentalModel,
+  parseLookupRouteEnabled,
+  passThroughLookupRoute,
+  resolveLookupRouteEnabled,
+} from "./lookup-route.js";
+export type {
+  LookupRoute,
+  LookupRouteDecision,
+  LookupRouteResult,
+  LookupRouteSource,
+  MentalModelRef,
+} from "./lookup-route.js";
+export {
   assertRetainBudget,
   compositePriority,
   DEFAULT_PRIORITY_WEIGHTS,

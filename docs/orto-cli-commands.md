@@ -472,7 +472,8 @@ Treat MCP `retain` as gated: do not dump chat or session scratch into the bank.
 Harnesses can call `judgeMcpRetain` (`src/judge/mcp-retain.ts`) before forwarding retain (default deny on fluff; heuristic deny when Jev is off).
 After `recall`, harnesses that pack context can optionally call `packRecallContext` / `judgeRecallRanked` (`src/judge/recall-rank.ts`) with `rank: true` to drop confident low-relevance passages; default packing stays pass-through so raw MCP `recall` is unchanged.
 Harnesses can also call `judgeRecallVerified` (`src/judge/recall-verify.ts`) with `verify: true` or `ORTO_JEV_RECALL_VERIFY=1` to mark superseded recalled claims `stale` when the source excerpt contradicts them; default is off.
-See the [Hindsight MCP tools](../README.md#hindsight-mcp-tools-any-agent) section in the README, [jev.md](./jev.md#mcp-retain-guardrail), [recall context packing](./jev.md#recall-context-packing), and [recall still-true verification](./jev.md#recall-still-true-verification).
+To choose which Hindsight tool to call for an agent question, harnesses can call `judgeLookupRoute` (`src/judge/lookup-route.ts`) with `route: true` or `ORTO_JEV_LOOKUP_ROUTE=1` (`mental_model` | `reflect` | `recall`); default MCP tools stay separate and routing stays off.
+See the [Hindsight MCP tools](../README.md#hindsight-mcp-tools-any-agent) section in the README, [jev.md](./jev.md#mcp-retain-guardrail), [recall context packing](./jev.md#recall-context-packing), [recall still-true verification](./jev.md#recall-still-true-verification), and [lookup routing](./jev.md#lookup-routing).
 
 ---
 
