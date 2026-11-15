@@ -221,6 +221,27 @@ export type {
   RecallRankSource,
 } from "./recall-rank.js";
 export {
+  RECALL_VERIFY_ENV,
+  RECALL_VERIFY_ENV_ALIAS,
+  RECALL_VERIFY_MAX_PASSAGES,
+  enrichRecallVerifyPassages,
+  formatRecallVerifyLines,
+  interpretRecallVerify,
+  judgeRecallVerified,
+  parseRecallVerifyEnabled,
+  passThroughRecallVerify,
+  recallVerifyQuestions,
+  resolveRecallVerifyEnabled,
+  stillTrueKey,
+} from "./recall-verify.js";
+export type {
+  RecallVerifyPassage,
+  RecallVerifyResult,
+  RecallVerifySource,
+  RecallVerifyStatus,
+  VerifiedRecallPassage,
+} from "./recall-verify.js";
+export {
   assertRetainBudget,
   compositePriority,
   DEFAULT_PRIORITY_WEIGHTS,

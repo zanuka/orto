@@ -471,7 +471,8 @@ Treat MCP `retain` as gated: do not dump chat or session scratch into the bank.
 `--write-agents` / `--write-cursor-rules` tell agents to prefer `orto seed` / `orto store` for durable knowledge.
 Harnesses can call `judgeMcpRetain` (`src/judge/mcp-retain.ts`) before forwarding retain (default deny on fluff; heuristic deny when Jev is off).
 After `recall`, harnesses that pack context can optionally call `packRecallContext` / `judgeRecallRanked` (`src/judge/recall-rank.ts`) with `rank: true` to drop confident low-relevance passages; default packing stays pass-through so raw MCP `recall` is unchanged.
-See the [Hindsight MCP tools](../README.md#hindsight-mcp-tools-any-agent) section in the README, [jev.md](./jev.md#mcp-retain-guardrail), and [recall context packing](./jev.md#recall-context-packing).
+Harnesses can also call `judgeRecallVerified` (`src/judge/recall-verify.ts`) with `verify: true` or `ORTO_JEV_RECALL_VERIFY=1` to mark superseded recalled claims `stale` when the source excerpt contradicts them; default is off.
+See the [Hindsight MCP tools](../README.md#hindsight-mcp-tools-any-agent) section in the README, [jev.md](./jev.md#mcp-retain-guardrail), [recall context packing](./jev.md#recall-context-packing), and [recall still-true verification](./jev.md#recall-still-true-verification).
 
 ---
 

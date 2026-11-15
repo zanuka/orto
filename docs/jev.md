@@ -101,7 +101,8 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Consistent retain tags for Reflect filters (shipped on `seed --judge jev`)
 - MCP `retain` guardrail (helper shipped: `judgeMcpRetain`; agent rules emitted by `orto mcp`)
 - Recall rerank / context packing (helper shipped: `judgeRecallRanked` / `packRecallContext`; default recall stays pass-through)
-- Still-true checks, `reflect` vs `recall` vs mental-model routing
+- Recall still-true verification (helper shipped: `judgeRecallVerified`; default off via `ORTO_JEV_RECALL_VERIFY`)
+- `reflect` vs `recall` vs mental-model routing
 - Firstmate routing and escalation when confidence is low
 - Share / deployment-profile safety before public or Cloud exposure
 - Golden-set eval that scores offline heuristics without requiring Jev at runtime
@@ -426,6 +427,25 @@ Opt in with `rank: true` (and a Jev judge when available). One batched call scor
 Benchmark note: unranked packing is local and roughly free. Ranked packing adds one TypeSafe round-trip for the batch (typically hundreds of milliseconds plus a few thousand tokens), not one call per passage. Prefer Hindsight's native typesafe reranker for server-side listwise ranking when available; use this helper when the harness already holds passages and needs confidence-gated drops plus a char budget.
 
 `formatRecallRankLines` prints keep/drop rows and `latency: Nms vs unranked recall` for dry-run review.
+
+---
+
+## Recall still-true verification
+
+`judgeRecallVerified` in `src/judge/recall-verify.ts` annotates recalled passages when the on-disk source no longer supports the claim ([JEV-24](https://github.com/zanuka/orto/issues/45)).
+
+Default path is pass-through:
+
+- Off unless `verify: true` or `ORTO_JEV_RECALL_VERIFY=1` (`NOCCIOLO_JEV_RECALL_VERIFY` alias)
+- No TypeSafe call
+- `stale` stays false
+- Raw MCP `recall` stays unchanged
+
+When enabled, one batched call asks Noul `still_true_given_current_excerpt` per passage (with the recalled text and current excerpt). A confident no marks `stale: true` in the harness tool result so agents do not act on a superseded ADR that has not been pruned yet. Missing source files mark stale / skip verify and never crash recall. Secrets skip the TypeSafe send.
+
+Harnesses that already hold passages can pre-fill `currentExcerpt` / `sourceStillExists`, or pass `projectRoot` so Orto loads the excerpt via `loadCurrentExcerptForDocumentId`.
+
+`formatRecallVerifyLines` prints stale rows and `latency: Nms vs unverified recall`.
 
 ---
 
