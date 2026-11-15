@@ -112,3 +112,44 @@ describe("runMcp --write-firstmate", () => {
     ).rejects.toThrow();
   });
 });
+
+describe("runMcp --write-agents", () => {
+  const dirs: string[] = [];
+
+  afterEach(async () => {
+    await Promise.all(
+      dirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })),
+    );
+  });
+
+  it("dry-run previews retain-guardrail bullets without writing AGENTS.md", async () => {
+    const root = await mkdtemp(join(tmpdir(), "orto-mcp-agents-"));
+    dirs.push(root);
+    await mkdir(join(root, ".orto"), { recursive: true });
+    await writeFile(
+      join(root, ".orto", "config.json"),
+      JSON.stringify({
+        version: 1,
+        name: "fixture",
+        provider: "hindsight",
+        bankId: "fixture-bank",
+        root: ".",
+        createdAt: new Date().toISOString(),
+      }),
+      "utf8",
+    );
+
+    const result = await runMcp({
+      cwd: root,
+      harness: "cursor",
+      writeAgents: true,
+      dryRun: true,
+    });
+
+    const preview = result.writes[0]?.preview ?? "";
+    expect(preview).toContain("Do not use MCP `retain` for chat");
+    expect(preview).toContain("orto seed");
+    expect(preview).toContain("MCP retain is gated");
+    await expect(readFile(join(root, "AGENTS.md"), "utf8")).rejects.toThrow();
+  });
+});

@@ -466,8 +466,11 @@ Cursor must see `ORTO_HINDSIGHT_API_KEY` / `HINDSIGHT_API_KEY` in the **Cursor p
 
 `--harness firstmate` still prints a `cd` into the Firstmate home followed by a `claude mcp add --transport http …` command wired to this project's single-bank Hindsight URL. The wiring itself stays captain-only (do not wire scouts or ships) and is never written into this product repo. `--write-firstmate` adds one more write path alongside that: the on-demand `project-bank` skill (see [Firstmate `project-bank` skill](../docs/firstmate/project-bank/SKILL.md)), plus the project-to-bank map Firstmate reads before a crewmate spawn. That skill is on-demand, not an always-on persona, and a crewmate that reads its bank card recalls from Hindsight only: it does not seed or store.
 
-Once wired, agents use Hindsight MCP tools such as `recall`, `reflect`, and `retain`.
-See the [Hindsight MCP tools](../README.md#hindsight-mcp-tools-any-agent) section in the README.
+Once wired, agents use Hindsight MCP tools such as `recall` and `reflect`.
+Treat MCP `retain` as gated: do not dump chat or session scratch into the bank.
+`--write-agents` / `--write-cursor-rules` tell agents to prefer `orto seed` / `orto store` for durable knowledge.
+Harnesses can call `judgeMcpRetain` (`src/judge/mcp-retain.ts`) before forwarding retain (default deny on fluff; heuristic deny when Jev is off).
+See the [Hindsight MCP tools](../README.md#hindsight-mcp-tools-any-agent) section in the README and [jev.md](./jev.md#mcp-retain-guardrail).
 
 ---
 

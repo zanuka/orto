@@ -55,7 +55,12 @@ export interface McpResult {
   profile: string;
   snippets: McpSnippet[];
   dryRun: boolean;
-  writes: Array<{ path: string; wrote: boolean; dryRun: boolean }>;
+  writes: Array<{
+    path: string;
+    wrote: boolean;
+    dryRun: boolean;
+    preview?: string;
+  }>;
   firstmateSkill?: InstallProjectBankSkillResult;
   check?: { ok: boolean; status: number; detail: string };
 }
@@ -183,31 +188,39 @@ export async function runMcp(options: McpOptions = {}): Promise<McpResult> {
   }
 
   if (writeAgents) {
-    writes.push(
-      await writeAgentsPreference(
-        projectRoot,
-        {
-          projectName: config.name,
-          bankId: config.bankId,
-          baseUrl: connection.baseUrl,
-        },
-        { dryRun },
-      ),
+    const agents = await writeAgentsPreference(
+      projectRoot,
+      {
+        projectName: config.name,
+        bankId: config.bankId,
+        baseUrl: connection.baseUrl,
+      },
+      { dryRun },
     );
+    writes.push({
+      path: agents.path,
+      wrote: agents.wrote,
+      dryRun: agents.dryRun,
+      ...(dryRun ? { preview: agents.preview } : {}),
+    });
   }
 
   if (writeCursorRules) {
-    writes.push(
-      await writeCursorBankRule(
-        projectRoot,
-        {
-          projectName: config.name,
-          bankId: config.bankId,
-          baseUrl: connection.baseUrl,
-        },
-        { dryRun, force },
-      ),
+    const rule = await writeCursorBankRule(
+      projectRoot,
+      {
+        projectName: config.name,
+        bankId: config.bankId,
+        baseUrl: connection.baseUrl,
+      },
+      { dryRun, force },
     );
+    writes.push({
+      path: rule.path,
+      wrote: rule.wrote,
+      dryRun: rule.dryRun,
+      ...(dryRun ? { preview: rule.content } : {}),
+    });
   }
 
   let firstmateSkill: InstallProjectBankSkillResult | undefined;
@@ -296,6 +309,11 @@ export function printMcpResult(result: McpResult): void {
     for (const w of result.writes) {
       const verb = result.dryRun ? "Would write" : "Wrote";
       console.log(`${prefix}${verb}: ${w.path}`);
+      if (result.dryRun && w.preview) {
+        console.log("--- preview ---");
+        console.log(w.preview.trimEnd());
+        console.log("--- /preview ---");
+      }
     }
     if (result.dryRun) {
       console.log("No files were written.");

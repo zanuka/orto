@@ -99,7 +99,8 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Extraction aggressiveness from repo shape (shipped on `configure --judge jev`)
 - Mental-model catalog question proposals (shipped on `orto mental-model propose --judge jev`)
 - Consistent retain tags for Reflect filters (shipped on `seed --judge jev`)
-- MCP `retain` guardrails, recall rerank, still-true checks, `reflect` vs `recall` vs mental-model routing
+- MCP `retain` guardrail (helper shipped: `judgeMcpRetain`; agent rules emitted by `orto mcp`)
+- Recall rerank, still-true checks, `reflect` vs `recall` vs mental-model routing
 - Firstmate routing and escalation when confidence is low
 - Share / deployment-profile safety before public or Cloud exposure
 - Golden-set eval that scores offline heuristics without requiring Jev at runtime
@@ -383,6 +384,28 @@ Pinned mental models and knowledge pages get dedicated questions ([JEV-16](https
 Jev does not write mission or directive prose.
 A low `mission_fit` (0 or 1) at or above `--confidence` prints `review mission before applying` and skips the template write unless `--yes`.
 Default `configure` without `--judge jev` is unchanged.
+
+---
+
+## MCP retain guardrail
+
+`judgeMcpRetain` in `src/judge/mcp-retain.ts` gates mid-session Hindsight `retain` attempts ([JEV-22](https://github.com/zanuka/orto/issues/44)).
+
+One call asks:
+
+- Noul `is_durable_project_knowledge`
+- Noul `is_session_fluff` (chat, diffs, "I just tried X")
+- Choice `action`: `allow`, `deny`, or `suggest_seed_instead`
+
+Policy:
+
+- Default deny on fluff or low confidence
+- Confident allow only when `action=allow` and durability is a confident yes
+- `suggest_seed_instead` denies MCP retain and tells the agent to use `orto seed` / `orto store`
+- When the judge is off (or Jev falls back), `heuristicDenyMcpRetain` still denies chat-shaped payloads and allows clear ADR-shaped markdown
+
+`orto mcp --write-agents` / `--write-cursor-rules` emit the same policy so agents do not treat MCP retain as a scratch pad.
+Orto does not host the Hindsight MCP server; harnesses and proxies call this helper before forwarding retain.
 
 ---
 
