@@ -11,7 +11,7 @@ Hindsight’s Jev support (0.10.1+) is a strong, opt-in *recall* reranker. Orto�
 ## Hindsight’s Jev reranker (0.10.1+)
 
 - **Scope**: Recall only. Set `HINDSIGHT_API_RERANKER_PROVIDER=typesafe` (optional prune via `HINDSIGHT_API_RERANKER_TYPESAFE_PRUNE_CANDIDATES=true`). Default remains the local MiniLM cross-encoder.
-- **Mechanism**: Listwise Choice — one request with the whole candidate pool as options. Probabilities sum to 1 and become the ranking. (Per-candidate Noul was tried and rejected; relative judgment is better and far cheaper.) Optional second Score question cuts the ranked shortlist where relevance ends (no “nothing” escape hatch). Prune is off by default and caps results at ~12.
+- **Mechanism**: Listwise Choice: one request with the whole candidate pool as options. Probabilities sum to 1 and become the ranking. (Per-candidate Noul was tried and rejected; relative judgment is better and far cheaper.) Optional second Score question cuts the ranked shortlist where relevance ends (no "nothing" escape hatch). Prune is off by default and caps results at ~12.
 - **Results** (LoCoMo, gold = dataset evidence turns, vs local MiniLM):
   - 30 candidates: recall@1 0.950 vs 0.800, NDCG@10 0.957 vs 0.850, ~0.027 s vs 0.12 s per query.
   - Larger pools widen the gap.
@@ -33,8 +33,8 @@ Jev is an **opt-in judge** (`--judge jev` or key) for bounded decisions. Orto ow
 - Store: allowlist proposals are on `store --propose-adopt --judge jev` ([JEV-10](https://github.com/zanuka/orto/issues/41)). `seed --budget N --judge jev` ranks the retain queue ([JEV-11](https://github.com/zanuka/orto/issues/50)). `store --judge jev` gates wording-only edits and workarounds ([JEV-12](https://github.com/zanuka/orto/issues/31)). The watcher high-signal gate helper ships ([JEV-13](https://github.com/zanuka/orto/issues/42)); there is no default `watch` CLI.
 - Audit plan ships on `orto audit --judge jev` ([JEV-14](https://github.com/zanuka/orto/issues/32)). Layer-specific aging ships on that planner ([JEV-15](https://github.com/zanuka/orto/issues/43)). Mental-model freshness ships on audit ([JEV-16](https://github.com/zanuka/orto/issues/51)). Apply-with-confirm ships on `orto prune --apply --plan` ([JEV-17](https://github.com/zanuka/orto/issues/52)).
 - Bank-template mission/directives fitness ships on `configure --judge jev` ([JEV-18](https://github.com/zanuka/orto/issues/23)). Extraction aggressiveness from repo shape ships on the same command ([JEV-19](https://github.com/zanuka/orto/issues/24)). Mental-model catalog proposals ship on `orto mental-model propose --judge jev` ([JEV-20](https://github.com/zanuka/orto/issues/53)). Consistent retain tags (`layer` / `domain` / `stability`) ship on `seed --judge jev` ([JEV-21](https://github.com/zanuka/orto/issues/54)).
-- MCP `retain` guardrail helper ships (`judgeMcpRetain`) with agent-rule emission ([JEV-22](https://github.com/zanuka/orto/issues/44)). **Recall guards** (JEV-23–25): rerank recalled passages, check “still true?”, route reflect vs recall vs mental-model lookup.
-- Firstmate routing (JEV-26–30), share safety (JEV-31/33), heuristic golden-set eval (JEV-34).
+- MCP `retain` guardrail helper ships (`judgeMcpRetain`) with agent-rule emission ([JEV-22](https://github.com/zanuka/orto/issues/44)). Recall rerank / context packing ships as `judgeRecallRanked` / `packRecallContext` ([JEV-23](https://github.com/zanuka/orto/issues/25)); default MCP `recall` stays pass-through. Remaining recall guards (JEV-24 and JEV-25): check "still true?", route reflect vs recall vs mental-model lookup.
+- Firstmate routing (JEV-26 through JEV-30), share safety (JEV-31/33), heuristic golden-set eval (JEV-34).
 
 ---
 
@@ -43,7 +43,7 @@ Jev is an **opt-in judge** (`--judge jev` or key) for bounded decisions. Orto ow
 | Dimension | Vanilla Hindsight (+ Jev reranker) | Orto + optional Jev layer | Developer benefit of Orto |
 |---|---|---|---|
 | **What enters the bank** | Whatever you (or an agent) `retain`. Quality = extraction from the input. | Scanner + heuristics + optional Jev relevance/durability gate *before* retain. Section-level keep/skip. | Spend retain (and future recall) on durable decisions/invariants/architecture, not changelogs, TOCs, badge walls, or session fluff. |
-| **Recall ranking** | Strong listwise Jev reranker (opt-in). Better order + optional prune. | Can use Hindsight’s built-in. Additional planned guards (JEV-23 etc.): still-true check, routing, MCP retain blocking. | Hindsight already solves ranking. Orto adds gates around *how* and *when* recall is used. |
+| **Recall ranking** | Strong listwise Jev reranker (opt-in). Better order + optional prune. | Prefer Hindsight’s built-in when available. Orto `packRecallContext` (`rank: true`) adds confidence-gated drops + char budget after recall ([JEV-23](https://github.com/zanuka/orto/issues/25)). Still-true and routing guards remain planned. | Hindsight ranks what is stored. Orto packs/gates how harnesses stuff context and (planned) when recall is used. |
 | **Bank hygiene / prune** | Manual or your own scripts. | Existing `prune` (path/section-gone + tombstones). `orto audit --judge jev` plans keep/refresh/supersede/archive/delete-candidate without mutating the bank; apply is separate. | Structured, confidence-gated cleanup instead of ad-hoc Hindsight cleanup. |
 | **Incremental / provenance** | You manage re-ingest. | Hash-gated incremental seed; source path + commit are first-class. | Agents inherit stable, attributable institutional knowledge. |
 | **Agent / MCP surface** | You wire MCP. Agents can retain freely. | Emits ready MCP configs. Planned Jev gates on unsafe retains and routing (reflect/recall/mental-model). | Safer company-brain usage; less session junk in the shared bank. |
@@ -61,8 +61,8 @@ Hindsight’s Jev reranker makes *recall* better. It does not solve the upstream
 The highest-leverage remaining Orto work is therefore:
 
 1. Prune annotation (so the bank stays clean).
-2. Treating Hindsight’s native Jev reranker as the default ranking path (JEV-23 can become “prefer Hindsight’s typesafe provider when available; add Orto-specific still-true / routing checks on top”).
-3. MCP retain blocking and Firstmate routing (things Hindsight’s reranker never touches).
+2. Prefer Hindsight’s native Jev reranker for server-side listwise ranking; use Orto `packRecallContext` when the harness already holds passages and needs confidence-gated drops. Still-true / routing checks (JEV-24/25) sit on top.
+3. Firstmate routing (things Hindsight’s reranker never touches). MCP retain blocking already ships (JEV-22).
 
 That positioning keeps Orto relevant: developers get a curated, provenance-aware company brain whose contents are worth ranking, rather than just a better sort of whatever happened to land in retain.
 

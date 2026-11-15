@@ -100,7 +100,8 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Mental-model catalog question proposals (shipped on `orto mental-model propose --judge jev`)
 - Consistent retain tags for Reflect filters (shipped on `seed --judge jev`)
 - MCP `retain` guardrail (helper shipped: `judgeMcpRetain`; agent rules emitted by `orto mcp`)
-- Recall rerank, still-true checks, `reflect` vs `recall` vs mental-model routing
+- Recall rerank / context packing (helper shipped: `judgeRecallRanked` / `packRecallContext`; default recall stays pass-through)
+- Still-true checks, `reflect` vs `recall` vs mental-model routing
 - Firstmate routing and escalation when confidence is low
 - Share / deployment-profile safety before public or Cloud exposure
 - Golden-set eval that scores offline heuristics without requiring Jev at runtime
@@ -406,6 +407,25 @@ Policy:
 
 `orto mcp --write-agents` / `--write-cursor-rules` emit the same policy so agents do not treat MCP retain as a scratch pad.
 Orto does not host the Hindsight MCP server; harnesses and proxies call this helper before forwarding retain.
+
+---
+
+## Recall context packing
+
+`judgeRecallRanked` and `packRecallContext` in `src/judge/recall-rank.ts` rerank recalled passages before a harness stuffs them into context ([JEV-23](https://github.com/zanuka/orto/issues/25)).
+
+Default path is pass-through:
+
+- No TypeSafe call
+- Input order preserved
+- No low-score drops
+- Raw MCP `recall` stays unchanged unless a harness opts in
+
+Opt in with `rank: true` (and a Jev judge when available). One batched call scores `relevance_to_task` per passage (0-4). Confident scores below `minRelevance` (default 2) are omitted from the packed string. When the judge is off, or Jev falls back, token-overlap heuristics still drop obvious noise.
+
+Benchmark note: unranked packing is local and roughly free. Ranked packing adds one TypeSafe round-trip for the batch (typically hundreds of milliseconds plus a few thousand tokens), not one call per passage. Prefer Hindsight's native typesafe reranker for server-side listwise ranking when available; use this helper when the harness already holds passages and needs confidence-gated drops plus a char budget.
+
+`formatRecallRankLines` prints keep/drop rows and `latency: Nms vs unranked recall` for dry-run review.
 
 ---
 
