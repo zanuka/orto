@@ -157,7 +157,8 @@ JEV-1 through JEV-10 are closed on GitHub.
 - [x] Recall still-true check: `judgeRecallVerified` asks Noul `still_true_given_current_excerpt` per recalled passage when opted in (`verify: true` or `ORTO_JEV_RECALL_VERIFY=1`). Default off / pass-through. Confident contradictions are marked `stale` in the harness result; missing source files mark stale / skip verify without crashing recall. ([JEV-24](https://github.com/zanuka/orto/issues/45))
 - [x] Lookup routing: `judgeLookupRoute` asks Choice `lookup` (`mental_model` | `reflect` | `recall`) from the agent question + known model titles. Default off / pass-through (`route: true` or `ORTO_JEV_LOOKUP_ROUTE=1`). Standing title matches prefer mental_model; one-off facts prefer recall; why/how synthesis prefers reflect. Harness calls the matching Hindsight API; Jev does not synthesize the answer. ([JEV-25](https://github.com/zanuka/orto/issues/26))
 - [x] Needs-bank gate: `judgeNeedsBank` asks Noul `needs_project_bank` on an agent task request. Harness-agnostic for Claude Code, Codex, Cursor, Pi, and other popular agentic workflows (Firstmate optional). Default off (`needsBank: true` or `ORTO_JEV_NEEDS_BANK=1`). Confident no → `skip_bank` (pure code, no recall/reflect). Confident yes → `use_bank`. Uncertain → escalate to the operator. `orto mcp` prints the policy notes on those harness snippets and still works with the judge off. ([JEV-26](https://github.com/zanuka/orto/issues/27))
-- [ ] Firstmate routing (remaining): which bank, knowledge update vs PR vs both, escalate vs dispatch, and whether a scout report is seedable. ([JEV-27](https://github.com/zanuka/orto/issues/33), [JEV-28](https://github.com/zanuka/orto/issues/34), [JEV-29](https://github.com/zanuka/orto/issues/35), [JEV-30](https://github.com/zanuka/orto/issues/46))
+- [x] Task follow-up gate: `judgeTaskFollowup` asks Choice `followup` (`retain_to_bank` | `pr_only` | `both`) after a PR/merge/task summary. Harness-agnostic for Claude Code, Codex, Cursor, Pi, and other popular agentic workflows (Firstmate optional). Default off (`followup: true` or `ORTO_JEV_TASK_FOLLOWUP=1`). ADR/standards merges → `retain_to_bank` or `both` (queue `orto store`/`seed`; never MCP-retain). Pure bugfix PRs → `pr_only`. Uncertain → escalate. `orto mcp` prints the policy notes and still works with the judge off. ([JEV-28](https://github.com/zanuka/orto/issues/34))
+- [ ] Firstmate routing (remaining): which bank, escalate vs dispatch, and whether a scout report is seedable. ([JEV-27](https://github.com/zanuka/orto/issues/33), [JEV-29](https://github.com/zanuka/orto/issues/35), [JEV-30](https://github.com/zanuka/orto/issues/46))
 - [ ] Share safety and destination kind: route by destination kind (Hindsight remains first-class) and gate a public or Cloud share on a safety check before anything is exposed. ([JEV-31](https://github.com/zanuka/orto/issues/55), [JEV-33](https://github.com/zanuka/orto/issues/56))
 - [ ] Heuristic eval: a golden-set judge that scores the offline heuristics so the default path improves without requiring Jev at runtime. ([JEV-34](https://github.com/zanuka/orto/issues/48))
 
@@ -169,7 +170,7 @@ Deferred (still tracked under the Jev epic; land with later phases):
 ### Jev issue index
 
 Issue index as of 2 November 2026.
-JEV-1 through JEV-26 are done in the checklist (JEV-12, JEV-13, and JEV-22 through JEV-26 helpers included).
+JEV-1 through JEV-26 and JEV-28 are done in the checklist (JEV-12, JEV-13, and JEV-22 through JEV-26 plus JEV-28 helpers included).
 JEV-1 through JEV-10 are closed on GitHub.
 Open [`jev`-labeled issues](https://github.com/zanuka/orto/issues?q=is%3Aissue+is%3Aopen+label%3Ajev) are the rest of the table.
 Closed duplicate epic [#19](https://github.com/zanuka/orto/issues/19) is superseded by [#58](https://github.com/zanuka/orto/issues/58).
@@ -202,9 +203,9 @@ Closed duplicate epic [#19](https://github.com/zanuka/orto/issues/19) is superse
 | JEV-23 | [#25](https://github.com/zanuka/orto/issues/25) | Rerank recalled passages before context stuffing |
 | JEV-24 | [#45](https://github.com/zanuka/orto/issues/45) | Still-true check at recall time |
 | JEV-25 | [#26](https://github.com/zanuka/orto/issues/26) | Route `reflect` vs `recall` vs mental-model lookup |
-| JEV-26 | [#27](https://github.com/zanuka/orto/issues/27) | Firstmate: does this task need the project bank? |
+| JEV-26 | [#27](https://github.com/zanuka/orto/issues/27) | Needs-bank gate: does this task need the project bank? |
 | JEV-27 | [#33](https://github.com/zanuka/orto/issues/33) | Firstmate: which Orto project bank? |
-| JEV-28 | [#34](https://github.com/zanuka/orto/issues/34) | Firstmate: knowledge update vs PR-only vs both |
+| JEV-28 | [#34](https://github.com/zanuka/orto/issues/34) | Task follow-up: knowledge update vs PR-only vs both |
 | JEV-29 | [#35](https://github.com/zanuka/orto/issues/35) | Firstmate: escalate vs dispatch, and which crewmate |
 | JEV-30 | [#46](https://github.com/zanuka/orto/issues/46) | Firstmate: scout report seedability + official TypeSafe skill pointer |
 | JEV-31 | [#55](https://github.com/zanuka/orto/issues/55) | Destination-kind router (not vendor lock-in) |

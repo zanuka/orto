@@ -1,4 +1,5 @@
 import { buildNeedsBankPolicyNotes } from "./needs-bank-policy.js";
+import { buildTaskFollowupPolicyNotes } from "./task-followup-policy.js";
 import { buildSingleBankMcpUrl, defaultMcpServerName } from "./mcp-url.js";
 
 export type McpHarness =
@@ -98,6 +99,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         "API keys must be in the Cursor process environment (login shell / desktop env), not only an integrated terminal.",
         "Accepted env vars: ORTO_HINDSIGHT_API_KEY or HINDSIGHT_API_KEY.",
         ...buildNeedsBankPolicyNotes(),
+        ...buildTaskFollowupPolicyNotes(),
       ],
     },
     {
@@ -110,6 +112,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         "Runs `claude mcp add` for the current project/user scope.",
         "Single-bank URL pins tools to this project's bank.",
         ...buildNeedsBankPolicyNotes(),
+        ...buildTaskFollowupPolicyNotes(),
       ],
     },
     {
@@ -164,6 +167,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         "Append to ~/.codex/config.toml or project .codex/config.toml.",
         "Codex uses mcp_servers (underscore) and bearer_token_env_var for auth.",
         ...buildNeedsBankPolicyNotes(),
+        ...buildTaskFollowupPolicyNotes(),
       ],
     },
     {
@@ -176,6 +180,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         "Runs `pi mcp add -l` for project-local MCP config (see https://pi.dev/docs/latest/mcp).",
         "Single-bank URL pins tools to this project's bank.",
         ...buildNeedsBankPolicyNotes(),
+        ...buildTaskFollowupPolicyNotes(),
       ],
     },
     {
@@ -198,6 +203,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
       notes: [
         "Workspace: .kiro/settings/mcp.json or ~/.kiro/settings/mcp.json.",
         ...buildNeedsBankPolicyNotes(),
+        ...buildTaskFollowupPolicyNotes(),
       ],
     },
     {
@@ -212,6 +218,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         "Do not write MCP config into this product repo.",
         "Register this git project in Firstmate separately (this snippet only wires the MCP server).",
         ...buildNeedsBankPolicyNotes(),
+        ...buildTaskFollowupPolicyNotes(),
       ],
     },
   ];

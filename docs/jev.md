@@ -104,7 +104,8 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Recall still-true verification (helper shipped: `judgeRecallVerified`; default off via `ORTO_JEV_RECALL_VERIFY`)
 - Lookup routing (helper shipped: `judgeLookupRoute`; default off via `ORTO_JEV_LOOKUP_ROUTE`)
 - Needs-bank gate (helper shipped: `judgeNeedsBank`; default off via `ORTO_JEV_NEEDS_BANK`; harness-agnostic; Firstmate snippet also prints the policy)
-- Firstmate-specific routing still planned (which bank, knowledge vs PR, escalate vs dispatch, scout seedability)
+- Task follow-up gate (helper shipped: `judgeTaskFollowup`; default off via `ORTO_JEV_TASK_FOLLOWUP`; harness-agnostic; Choice `followup` retain_to_bank | pr_only | both)
+- Firstmate-specific routing still planned (which bank, escalate vs dispatch, scout seedability)
 - Share / deployment-profile safety before public or Cloud exposure
 - Golden-set eval that scores offline heuristics without requiring Jev at runtime
 
@@ -497,6 +498,33 @@ When enabled, one Noul `needs_project_bank` scores the task request (default `--
 `orto mcp` prints these policy notes on Cursor, Claude Code, Codex, Pi, Kiro, and Firstmate snippets. `orto mcp --write-agents` / `--write-cursor-rules` also mention the optional gate. Do not embed TypeSafe keys in the repo; wire `ORTO_TYPESAFE_API_KEY` in the harness environment when enabling the gate.
 
 `formatNeedsBankLines` prints the verdict and `latency: Nms vs ungated request`.
+
+---
+
+## Task follow-up (retain vs PR vs both)
+
+`judgeTaskFollowup` in `src/judge/task-followup.ts` chooses post-task follow-up after a PR, merge, or task summary ([JEV-28](https://github.com/zanuka/orto/issues/34)).
+
+This is a harness-agnostic helper. Claude Code, Codex, Cursor, Pi, and other popular agentic workflows can call it after work lands. Firstmate and custom orchestrators use the same API. Jev does not open the PR or retain; it only answers the Choice.
+
+Default path is pass-through:
+
+- Off unless `followup: true` or `ORTO_JEV_TASK_FOLLOWUP=1` (aliases: `ORTO_JEV_FIRSTMATE_FOLLOWUP`, `NOCCIOLO_JEV_TASK_FOLLOWUP`)
+- One Choice `followup` with bins `retain_to_bank` | `pr_only` | `both` (default `--confidence 0.8`)
+
+| Verdict | Meaning |
+|---------|---------|
+| `retain_to_bank` | Queue `orto store` / `orto seed` for durable docs/ADRs; never MCP-retain |
+| `pr_only` | Ship the PR only; no bank retain queue |
+| `both` | Ship the PR and queue store/seed for durable knowledge that also changed |
+| `escalate` | Ask the operator; below threshold or ambiguous |
+| `unset` | Gate off; no routing policy applied |
+
+Heuristics (when Jev is off or falls back): ADR/standards merges prefer `retain_to_bank` or `both`; pure bugfix PRs prefer `pr_only`.
+
+`orto mcp` prints these policy notes on Cursor, Claude Code, Codex, Pi, Kiro, and Firstmate snippets. `orto mcp --write-agents` / `--write-cursor-rules` also mention the optional gate. Do not embed TypeSafe keys in the repo.
+
+`formatTaskFollowupLines` prints the verdict and `latency: Nms vs ungated followup`.
 
 ---
 

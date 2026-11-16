@@ -110,6 +110,10 @@ describe("generateMcpSnippets", () => {
     expect(firstmate!.notes.join(" ")).toMatch(/--confidence 0\.8/);
     expect(firstmate!.notes.join(" ")).toMatch(/ORTO_JEV_NEEDS_BANK/);
     expect(firstmate!.notes.join(" ")).toMatch(/skip_bank/);
+    expect(firstmate!.notes.join(" ")).toMatch(/ORTO_JEV_TASK_FOLLOWUP/);
+    expect(firstmate!.notes.join(" ")).toMatch(/judgeTaskFollowup/);
+    expect(firstmate!.notes.join(" ")).toMatch(/retain_to_bank/);
+    expect(firstmate!.notes.join(" ")).toMatch(/pr_only/);
     expect(firstmate!.notes.join(" ")).toMatch(/Claude Code/);
     expect(firstmate!.notes.join(" ")).toMatch(/\bPi\b/);
   });
@@ -121,6 +125,7 @@ describe("generateMcpSnippets", () => {
     expect(pi!.body).toContain("pi mcp add -l hindsight-orto --url ");
     expect(pi!.body).toContain("http://localhost:8888/mcp/orto/");
     expect(pi!.notes.join(" ")).toMatch(/needs_project_bank/);
+    expect(pi!.notes.join(" ")).toMatch(/judgeTaskFollowup/);
   });
 
   it("adds bearer env for Pi with --include-auth", () => {
@@ -131,12 +136,15 @@ describe("generateMcpSnippets", () => {
     expect(pi!.body).toContain("--bearer-token-env-var ORTO_HINDSIGHT_API_KEY");
   });
 
-  it("documents needs_project_bank on popular harnesses without a TypeSafe key", () => {
+  it("documents needs_project_bank and task followup on popular harnesses without a TypeSafe key", () => {
     for (const harness of ["cursor", "claude-code", "codex", "pi"] as const) {
       const snippet = generateMcpSnippets(input).find((s) => s.harness === harness);
       const notes = snippet!.notes.join("\n");
       expect(notes).toContain("needs_project_bank");
       expect(notes).toContain("judgeNeedsBank");
+      expect(notes).toContain("judgeTaskFollowup");
+      expect(notes).toContain("retain_to_bank");
+      expect(notes).toContain("ORTO_JEV_TASK_FOLLOWUP");
       expect(notes).toMatch(/Claude Code/);
       expect(notes).not.toMatch(/sk-[a-z0-9]{8,}/i);
       expect(notes).not.toMatch(/ORTO_TYPESAFE_API_KEY=\S+/);
@@ -214,6 +222,7 @@ describe("agent rules", () => {
     expect(rule).toContain("Never MCP-`retain` chat");
     expect(rule).toContain("orto seed");
     expect(rule).toContain("judgeNeedsBank");
+    expect(rule).toContain("judgeTaskFollowup");
     expect(rule).toContain("Claude Code");
     expect(rule).toContain("Pi");
   });
@@ -228,6 +237,7 @@ describe("agent rules", () => {
     expect(section).toContain("orto seed");
     expect(section).toContain("orto store");
     expect(section).toContain("judgeNeedsBank");
+    expect(section).toContain("judgeTaskFollowup");
     expect(section).toContain("harness-agnostic");
     expect(section).toContain("Claude Code");
     expect(section).toContain("Pi");
