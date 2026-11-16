@@ -265,6 +265,26 @@ export type {
   MentalModelRef,
 } from "./lookup-route.js";
 export {
+  NEEDS_BANK_DEFAULT_CONFIDENCE,
+  NEEDS_BANK_ENV,
+  NEEDS_BANK_ENV_ALIASES,
+  NEEDS_BANK_REQUEST_MAX_CHARS,
+  formatNeedsBankLines,
+  heuristicNeedsBank,
+  interpretNeedsBank,
+  judgeNeedsBank,
+  needsBankQuestions,
+  parseNeedsBankEnabled,
+  passThroughNeedsBank,
+  resolveNeedsBankEnabled,
+} from "./needs-bank.js";
+export type {
+  NeedsBankDecision,
+  NeedsBankResult,
+  NeedsBankSource,
+  NeedsBankVerdict,
+} from "./needs-bank.js";
+export {
   assertRetainBudget,
   compositePriority,
   DEFAULT_PRIORITY_WEIGHTS,

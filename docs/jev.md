@@ -103,7 +103,8 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Recall rerank / context packing (helper shipped: `judgeRecallRanked` / `packRecallContext`; default recall stays pass-through)
 - Recall still-true verification (helper shipped: `judgeRecallVerified`; default off via `ORTO_JEV_RECALL_VERIFY`)
 - Lookup routing (helper shipped: `judgeLookupRoute`; default off via `ORTO_JEV_LOOKUP_ROUTE`)
-- Firstmate routing and escalation when confidence is low
+- Needs-bank gate (helper shipped: `judgeNeedsBank`; default off via `ORTO_JEV_NEEDS_BANK`; harness-agnostic; Firstmate snippet also prints the policy)
+- Firstmate-specific routing still planned (which bank, knowledge vs PR, escalate vs dispatch, scout seedability)
 - Share / deployment-profile safety before public or Cloud exposure
 - Golden-set eval that scores offline heuristics without requiring Jev at runtime
 
@@ -469,6 +470,33 @@ Heuristic fallback (judge off or low confidence):
 - Why/how synthesis → `reflect`
 
 `formatLookupRouteLines` prints the chosen route and `latency: Nms vs unrouted lookup`.
+
+---
+
+## Needs project bank?
+
+`judgeNeedsBank` in `src/judge/needs-bank.ts` decides whether an agent task needs the project bank ([JEV-26](https://github.com/zanuka/orto/issues/27)).
+
+This is a harness-agnostic helper. Claude Code, Codex, Cursor, Pi, and other popular agentic workflows can call it before recall, reflect, or attaching bank context. Firstmate and custom orchestrators use the same API. Jev does not run the coding agent; it only answers the gate question.
+
+Default path is pass-through:
+
+- Off unless `needsBank: true` or `ORTO_JEV_NEEDS_BANK=1` (aliases: `ORTO_JEV_FIRSTMATE_NEEDS_BANK`, `NOCCIOLO_JEV_NEEDS_BANK`)
+- No TypeSafe call
+- Verdict stays `unset`
+- Existing MCP / harness flows keep working with the judge off
+
+When enabled, one Noul `needs_project_bank` scores the task request (default `--confidence 0.8`):
+
+| Band | Verdict | Harness behavior |
+|------|---------|------------------|
+| Confident no | `skip_bank` | Skip recall/reflect; do not attach bank context; treat as pure code |
+| Confident yes | `use_bank` | May recall/reflect / attach bank context |
+| Uncertain | `escalate` | Ask the operator; do not guess |
+
+`orto mcp` prints these policy notes on Cursor, Claude Code, Codex, Pi, Kiro, and Firstmate snippets. `orto mcp --write-agents` / `--write-cursor-rules` also mention the optional gate. Do not embed TypeSafe keys in the repo; wire `ORTO_TYPESAFE_API_KEY` in the harness environment when enabling the gate.
+
+`formatNeedsBankLines` prints the verdict and `latency: Nms vs ungated request`.
 
 ---
 

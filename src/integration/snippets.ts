@@ -1,3 +1,4 @@
+import { buildNeedsBankPolicyNotes } from "./needs-bank-policy.js";
 import { buildSingleBankMcpUrl, defaultMcpServerName } from "./mcp-url.js";
 
 export type McpHarness =
@@ -6,6 +7,7 @@ export type McpHarness =
   | "claude-desktop"
   | "roo"
   | "codex"
+  | "pi"
   | "kiro"
   | "firstmate";
 
@@ -15,6 +17,7 @@ export const ALL_HARNESSES: readonly McpHarness[] = [
   "claude-desktop",
   "roo",
   "codex",
+  "pi",
   "kiro",
   "firstmate",
 ] as const;
@@ -94,6 +97,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         "Reload MCP servers in Cursor Settings after writing.",
         "API keys must be in the Cursor process environment (login shell / desktop env), not only an integrated terminal.",
         "Accepted env vars: ORTO_HINDSIGHT_API_KEY or HINDSIGHT_API_KEY.",
+        ...buildNeedsBankPolicyNotes(),
       ],
     },
     {
@@ -105,6 +109,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
       notes: [
         "Runs `claude mcp add` for the current project/user scope.",
         "Single-bank URL pins tools to this project's bank.",
+        ...buildNeedsBankPolicyNotes(),
       ],
     },
     {
@@ -158,6 +163,19 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
       notes: [
         "Append to ~/.codex/config.toml or project .codex/config.toml.",
         "Codex uses mcp_servers (underscore) and bearer_token_env_var for auth.",
+        ...buildNeedsBankPolicyNotes(),
+      ],
+    },
+    {
+      harness: "pi",
+      title: "Pi",
+      targetPath: "(pi mcp add -l)",
+      format: "shell",
+      body: buildPiCommand(serverName, mcpUrl, input),
+      notes: [
+        "Runs `pi mcp add -l` for project-local MCP config (see https://pi.dev/docs/latest/mcp).",
+        "Single-bank URL pins tools to this project's bank.",
+        ...buildNeedsBankPolicyNotes(),
       ],
     },
     {
@@ -178,7 +196,8 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         2,
       ),
       notes: [
-        "Workspace: .kiro/settings/mcp.json — or ~/.kiro/settings/mcp.json.",
+        "Workspace: .kiro/settings/mcp.json or ~/.kiro/settings/mcp.json.",
+        ...buildNeedsBankPolicyNotes(),
       ],
     },
     {
@@ -188,10 +207,11 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
       format: "shell",
       body: buildFirstmateCommand(serverName, mcpUrl, headers),
       notes: [
-        "Print-only: run this from the Firstmate home, not from this product repo.",
+        "Optional multi-agent captain workflow. Print-only: run this from the Firstmate home, not from this product repo.",
         "Captain-only: do not wire scouts or ships to this MCP server.",
         "Do not write MCP config into this product repo.",
         "Register this git project in Firstmate separately (this snippet only wires the MCP server).",
+        ...buildNeedsBankPolicyNotes(),
       ],
     },
   ];
@@ -267,6 +287,19 @@ function buildFirstmateCommand(
     }
   }
   return ["cd \"$FIRSTMATE_HOME\"", claudeParts.join(" ")].join("\n");
+}
+
+function buildPiCommand(
+  serverName: string,
+  mcpUrl: string,
+  input: McpSnippetInput,
+): string {
+  const parts = ["pi", "mcp", "add", "-l", serverName, "--url", mcpUrl];
+  if (input.includeAuth) {
+    const envVar = input.apiKeyEnvVar ?? DEFAULT_API_KEY_ENV;
+    parts.push("--bearer-token-env-var", envVar);
+  }
+  return parts.join(" ");
 }
 
 function buildCodexToml(

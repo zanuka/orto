@@ -10,6 +10,7 @@
 - Amplify existing engineering practices (ADRs, standards, architecture docs): do not replace them
 - CLI is the primary interface; keep it fast and predictable
 - Hindsight is the first-class target. Other providers must not compromise the Hindsight experience
+- Stay harness-agnostic: Claude Code, Codex, Cursor, Pi, and other popular agentic workflows are first-class; Firstmate is optional
 
 ### Architecture Boundaries
 

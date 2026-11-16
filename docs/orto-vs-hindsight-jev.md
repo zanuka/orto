@@ -34,7 +34,7 @@ Jev is an **opt-in judge** (`--judge jev` or key) for bounded decisions. Orto ow
 - Audit plan ships on `orto audit --judge jev` ([JEV-14](https://github.com/zanuka/orto/issues/32)). Layer-specific aging ships on that planner ([JEV-15](https://github.com/zanuka/orto/issues/43)). Mental-model freshness ships on audit ([JEV-16](https://github.com/zanuka/orto/issues/51)). Apply-with-confirm ships on `orto prune --apply --plan` ([JEV-17](https://github.com/zanuka/orto/issues/52)).
 - Bank-template mission/directives fitness ships on `configure --judge jev` ([JEV-18](https://github.com/zanuka/orto/issues/23)). Extraction aggressiveness from repo shape ships on the same command ([JEV-19](https://github.com/zanuka/orto/issues/24)). Mental-model catalog proposals ship on `orto mental-model propose --judge jev` ([JEV-20](https://github.com/zanuka/orto/issues/53)). Consistent retain tags (`layer` / `domain` / `stability`) ship on `seed --judge jev` ([JEV-21](https://github.com/zanuka/orto/issues/54)).
 - MCP `retain` guardrail helper ships (`judgeMcpRetain`) with agent-rule emission ([JEV-22](https://github.com/zanuka/orto/issues/44)). Recall rerank / context packing ships as `judgeRecallRanked` / `packRecallContext` ([JEV-23](https://github.com/zanuka/orto/issues/25)); default MCP `recall` stays pass-through. Recall still-true verification ships as `judgeRecallVerified` ([JEV-24](https://github.com/zanuka/orto/issues/45)); default off via `ORTO_JEV_RECALL_VERIFY`. Lookup routing ships as `judgeLookupRoute` ([JEV-25](https://github.com/zanuka/orto/issues/26)); default off via `ORTO_JEV_LOOKUP_ROUTE`.
-- Firstmate routing (JEV-26 through JEV-30), share safety (JEV-31/33), heuristic golden-set eval (JEV-34).
+- Needs-bank gate ships as harness-agnostic `judgeNeedsBank` ([JEV-26](https://github.com/zanuka/orto/issues/27)); default off via `ORTO_JEV_NEEDS_BANK`. Claude Code, Codex, Cursor, Pi, and other MCP snippets document it. Remaining Firstmate-specific routing (JEV-27 through JEV-30), share safety (JEV-31/33), heuristic golden-set eval (JEV-34).
 
 ---
 
@@ -47,7 +47,7 @@ Jev is an **opt-in judge** (`--judge jev` or key) for bounded decisions. Orto ow
 | **Bank hygiene / prune** | Manual or your own scripts. | Existing `prune` (path/section-gone + tombstones). `orto audit --judge jev` plans keep/refresh/supersede/archive/delete-candidate without mutating the bank; apply is separate. | Structured, confidence-gated cleanup instead of ad-hoc Hindsight cleanup. |
 | **Incremental / provenance** | You manage re-ingest. | Hash-gated incremental seed; source path + commit are first-class. | Agents inherit stable, attributable institutional knowledge. |
 | **Agent / MCP surface** | You wire MCP. Agents can retain freely. | Emits ready MCP configs. Planned Jev gates on unsafe retains and routing (reflect/recall/mental-model). | Safer company-brain usage; less session junk in the shared bank. |
-| **Firstmate / multi-agent** | Out of scope. | Planned routing decisions (needs bank? which bank? escalate vs dispatch? seedable?). | Keeps agent crews from thrashing the bank. |
+| **Harness / multi-agent** | Out of scope. | `judgeNeedsBank` skips bank load on pure-code tasks. Further Firstmate-specific routing still planned (which bank? escalate vs dispatch?). | Any workflow can avoid thrashing the bank on code-only work. |
 | **Default / privacy** | Local MiniLM free and private. Jev reranker is hosted. | Fully local-first by default. Jev is strictly opt-in. | Same local default; extra judgment only when you want it. |
 | **Cost model** | Reranker: input tokens only, listwise is cheap. | Judge calls on sections / candidates (typically ≪ $0.0001 each). Recurring only on changes or MCP attempts. | Cheap second opinion on the expensive step (retain) and on prune. |
 | **Overlap / complementarity** | Excellent at ranking what is already stored. | Decides what is worth storing, annotates what should leave, and adds operational gates. | Complementary. Orto’s pre-retain and hygiene value remains even when you turn on Hindsight’s Jev reranker. |
@@ -62,7 +62,7 @@ The highest-leverage remaining Orto work is therefore:
 
 1. Prune annotation (so the bank stays clean).
 2. Prefer Hindsight’s native Jev reranker for server-side listwise ranking; use Orto `packRecallContext` when the harness already holds passages and needs confidence-gated drops. Still-true verification ships as `judgeRecallVerified` (JEV-24, default off). Lookup routing ships as `judgeLookupRoute` (JEV-25, default off).
-3. Firstmate routing (things Hindsight’s reranker never touches). MCP retain blocking already ships (JEV-22).
+3. Harness gates Hindsight’s reranker never touches (needs-bank, MCP retain). MCP retain blocking already ships (JEV-22); needs-bank ships as `judgeNeedsBank` (JEV-26).
 
 That positioning keeps Orto relevant: developers get a curated, provenance-aware company brain whose contents are worth ranking, rather than just a better sort of whatever happened to land in retain.
 

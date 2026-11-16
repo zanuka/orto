@@ -878,7 +878,7 @@ async function main(): Promise<void> {
     .description("Emit MCP / agent config snippets for the project bank")
     .option(
       "--harness <list>",
-      "Comma-separated harnesses: cursor,claude-code,claude-desktop,roo,codex,kiro,firstmate,all",
+      "Comma-separated harnesses: cursor,claude-code,claude-desktop,roo,codex,pi,kiro,firstmate,all",
     )
     .option("--write", "Write/merge .cursor/mcp.json for the project bank")
     .option("--write-roo", "Write/merge .roo/mcp.json")
