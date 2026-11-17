@@ -1,3 +1,4 @@
+import { buildEscalateDispatchPolicyNotes } from "./escalate-dispatch-policy.js";
 import { buildNeedsBankPolicyNotes } from "./needs-bank-policy.js";
 import { buildTaskFollowupPolicyNotes } from "./task-followup-policy.js";
 import { buildSingleBankMcpUrl, defaultMcpServerName } from "./mcp-url.js";
@@ -100,6 +101,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         "Accepted env vars: ORTO_HINDSIGHT_API_KEY or HINDSIGHT_API_KEY.",
         ...buildNeedsBankPolicyNotes(),
         ...buildTaskFollowupPolicyNotes(),
+        ...buildEscalateDispatchPolicyNotes(),
       ],
     },
     {
@@ -113,6 +115,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         "Single-bank URL pins tools to this project's bank.",
         ...buildNeedsBankPolicyNotes(),
         ...buildTaskFollowupPolicyNotes(),
+        ...buildEscalateDispatchPolicyNotes(),
       ],
     },
     {
@@ -168,6 +171,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         "Codex uses mcp_servers (underscore) and bearer_token_env_var for auth.",
         ...buildNeedsBankPolicyNotes(),
         ...buildTaskFollowupPolicyNotes(),
+        ...buildEscalateDispatchPolicyNotes(),
       ],
     },
     {
@@ -181,6 +185,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         "Single-bank URL pins tools to this project's bank.",
         ...buildNeedsBankPolicyNotes(),
         ...buildTaskFollowupPolicyNotes(),
+        ...buildEscalateDispatchPolicyNotes(),
       ],
     },
     {
@@ -204,6 +209,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         "Workspace: .kiro/settings/mcp.json or ~/.kiro/settings/mcp.json.",
         ...buildNeedsBankPolicyNotes(),
         ...buildTaskFollowupPolicyNotes(),
+        ...buildEscalateDispatchPolicyNotes(),
       ],
     },
     {
@@ -219,6 +225,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         "Register this git project in Firstmate separately (this snippet only wires the MCP server).",
         ...buildNeedsBankPolicyNotes(),
         ...buildTaskFollowupPolicyNotes(),
+        ...buildEscalateDispatchPolicyNotes(),
       ],
     },
   ];

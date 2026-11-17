@@ -312,6 +312,34 @@ export type {
   TaskFollowupVerdict,
 } from "./task-followup.js";
 export {
+  ASK_CAPTAIN,
+  ESCALATE_DISPATCH_DEFAULT_CONFIDENCE,
+  ESCALATE_DISPATCH_DISPATCH_MESSAGE,
+  ESCALATE_DISPATCH_ENV,
+  ESCALATE_DISPATCH_ENV_ALIASES,
+  ESCALATE_DISPATCH_ESCALATE_MESSAGE,
+  ESCALATE_DISPATCH_MAX_CHARTERS,
+  ESCALATE_DISPATCH_REQUEST_MAX_CHARS,
+  ESCALATE_DISPATCH_UNSET_MESSAGE,
+  buildCrewmateCriteria,
+  escalateDispatchQuestions,
+  formatEscalateDispatchLines,
+  heuristicEscalateDispatch,
+  interpretEscalateDispatch,
+  judgeEscalateDispatch,
+  normalizeCrewmateCharters,
+  parseEscalateDispatchEnabled,
+  passThroughEscalateDispatch,
+  resolveEscalateDispatchEnabled,
+} from "./escalate-dispatch.js";
+export type {
+  CrewmateCharter,
+  EscalateDispatchDecision,
+  EscalateDispatchResult,
+  EscalateDispatchSource,
+  EscalateDispatchVerdict,
+} from "./escalate-dispatch.js";
+export {
   assertRetainBudget,
   compositePriority,
   DEFAULT_PRIORITY_WEIGHTS,
