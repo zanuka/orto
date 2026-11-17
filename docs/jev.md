@@ -106,7 +106,8 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Needs-bank gate (helper shipped: `judgeNeedsBank`; default off via `ORTO_JEV_NEEDS_BANK`; harness-agnostic; Firstmate snippet also prints the policy)
 - Task follow-up gate (helper shipped: `judgeTaskFollowup`; default off via `ORTO_JEV_TASK_FOLLOWUP`; harness-agnostic; Choice `followup` retain_to_bank | pr_only | both)
 - Escalate vs dispatch gate (helper shipped: `judgeEscalateDispatch`; default off via `ORTO_JEV_ESCALATE_DISPATCH`; Noul `needs_captain` + Choice `crewmate` from the distro charter list)
-- Firstmate-specific routing still planned (which bank, scout seedability)
+- Scout-report seedability (helper shipped: `judgeScoutSeedability`; default off via `ORTO_JEV_SCOUT_SEEDABILITY`; docs point at official TypeSafe agent skill only)
+- Firstmate-specific routing still planned (which bank)
 - Share / deployment-profile safety before public or Cloud exposure
 - Golden-set eval that scores offline heuristics without requiring Jev at runtime
 
@@ -553,6 +554,48 @@ Heuristics (when Jev is off or falls back): architecture-invariant / decision wo
 `orto mcp` prints these policy notes on Cursor, Claude Code, Codex, Pi, Kiro, and Firstmate snippets. `orto mcp --write-agents` / `--write-cursor-rules` also mention the optional gate. Do not embed TypeSafe keys in the repo.
 
 `formatEscalateDispatchLines` prints the verdict and `latency: Nms vs ungated escalate/dispatch`.
+
+---
+
+## Scout-report seedability
+
+`judgeScoutSeedability` in `src/judge/scout-seedability.ts` decides whether a scout/investigation report is durable enough to queue into `orto store` / `orto seed` ([JEV-30](https://github.com/zanuka/orto/issues/46)).
+
+Typical path shape is `data/<id>/report.md` (Firstmate scout output). Other harnesses that land investigation reports can call the same helper. Jev does not retain; a `seed` verdict means queue Orto's normal seed/store path (never MCP-retain).
+
+Default path is pass-through:
+
+- Off unless `scoutSeed: true` or `ORTO_JEV_SCOUT_SEEDABILITY=1` (aliases: `ORTO_JEV_FIRSTMATE_SCOUT_SEED`, `NOCCIOLO_JEV_SCOUT_SEEDABILITY`)
+- One call asks Noul `is_durable_scout_report`, Noul `is_scratch_pad`, and Choice `action` (`seed` | `skip` | `review`) at default `--confidence 0.8`
+
+| Verdict | Meaning |
+|---------|---------|
+| `seed` | Durable findings; queue `orto store` / `orto seed` |
+| `skip` | Scratch pad or secret-bearing; do not seed |
+| `review` | Ask the captain/operator |
+| `unset` | Gate off; no policy applied |
+
+Heuristics (when Jev is off or falls back): ADR/architecture/decision-shaped findings prefer `seed`; WIP/TODO/transcript scratch prefers `skip`; mixed or short reports prefer `review`. Paths that are not `data/<id>/report.md` stay in `review`.
+
+`orto mcp` prints these policy notes on Cursor, Claude Code, Codex, Pi, Kiro, and Firstmate snippets. `orto mcp --write-agents` / `--write-cursor-rules` also mention the optional gate.
+
+`formatScoutSeedabilityLines` prints the verdict and `latency: Nms vs ungated scout seedability`.
+
+---
+
+## Firstmate + TypeSafe skill
+
+Captains who want TypeSafe's official agent skill for Claude Code or Codex should follow TypeSafe's own install steps.
+
+- Official skill doc: [https://docs.typesafe.ai/agent-skill.md](https://docs.typesafe.ai/agent-skill.md)
+- HTML overview: [https://docs.typesafe.ai/agent-skill](https://docs.typesafe.ai/agent-skill)
+
+Orto must not wrap TypeSafe's marketplace, plugin installer, or skill package.
+Point at those URLs only.
+Do not vendor their skill into this repo.
+Wire `ORTO_TYPESAFE_API_KEY` in the harness environment when using Jev; never commit keys.
+
+Same installer rule as Graphiti: thin pointers to official URLs, no wrap of their install path.
 
 ---
 

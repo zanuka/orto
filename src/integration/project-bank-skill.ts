@@ -35,6 +35,12 @@ Optional harness gates (default off; works with Firstmate or any orchestrator):
   \`needs_captain\` + Choice \`crewmate\`, plus \`ask_captain\`). Never invent
   crewmates. Empty charter list → \`ask_captain\` only. Architecture-invariant
   work escalates; typo/test-fix can dispatch to a listed implementer.
+- When \`ORTO_JEV_SCOUT_SEEDABILITY=1\`, before seeding a scout report under
+  \`data/<id>/report.md\`, call \`judgeScoutSeedability\` (Noul
+  \`is_durable_scout_report\` / \`is_scratch_pad\` + Choice \`seed\`|\`skip\`|\`review\`).
+  Durable findings queue \`orto store\`/\`seed\`; scratch pads skip. Captains may
+  install TypeSafe's official agent skill from
+  https://docs.typesafe.ai/agent-skill.md (Orto does not wrap that installer).
 
 ## What it does
 

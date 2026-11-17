@@ -349,8 +349,9 @@ These sit on the hot path. A naive “score every recalled passage on every agen
 | Needs bank? (`judgeNeedsBank`) | One small Noul call per agent task | Env flag off by default (`ORTO_JEV_NEEDS_BANK`); usually cheaper than a useless Hindsight reflect |
 | Task follow-up (`judgeTaskFollowup`) | One small Choice call after a PR/merge/task | Env flag off by default (`ORTO_JEV_TASK_FOLLOWUP`); queues store/seed instead of MCP retain |
 | Escalate vs dispatch (`judgeEscalateDispatch`) | One call (Noul + Choice) before worker spawn | Env flag off by default (`ORTO_JEV_ESCALATE_DISPATCH`); charter list required; never invents workers |
+| Scout seedability (`judgeScoutSeedability`) | One call before seeding a scout report | Env flag off by default (`ORTO_JEV_SCOUT_SEEDABILITY`); queues store/seed, never MCP-retain |
 
-**Guidance:** enable seed + MCP retain first. Measure. Only then put Jev on recall packing (`packRecallContext({ rank: true })`), still-true verify (`judgeRecallVerified` / `ORTO_JEV_RECALL_VERIFY=1`), lookup routing (`judgeLookupRoute` / `ORTO_JEV_LOOKUP_ROUTE=1`), needs-bank (`judgeNeedsBank` / `ORTO_JEV_NEEDS_BANK=1`), task follow-up (`judgeTaskFollowup` / `ORTO_JEV_TASK_FOLLOWUP=1`), or escalate/dispatch (`judgeEscalateDispatch` / `ORTO_JEV_ESCALATE_DISPATCH=1`). Prefer Hindsight’s native typesafe reranker for server-side ranking when available.
+**Guidance:** enable seed + MCP retain first. Measure. Only then put Jev on recall packing (`packRecallContext({ rank: true })`), still-true verify (`judgeRecallVerified` / `ORTO_JEV_RECALL_VERIFY=1`), lookup routing (`judgeLookupRoute` / `ORTO_JEV_LOOKUP_ROUTE=1`), needs-bank (`judgeNeedsBank` / `ORTO_JEV_NEEDS_BANK=1`), task follow-up (`judgeTaskFollowup` / `ORTO_JEV_TASK_FOLLOWUP=1`), escalate/dispatch (`judgeEscalateDispatch` / `ORTO_JEV_ESCALATE_DISPATCH=1`), or scout seedability (`judgeScoutSeedability` / `ORTO_JEV_SCOUT_SEEDABILITY=1`). Prefer Hindsight’s native typesafe reranker for server-side ranking when available.
 
 #### F. Golden-set eval (JEV-34)
 

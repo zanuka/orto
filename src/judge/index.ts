@@ -340,6 +340,34 @@ export type {
   EscalateDispatchVerdict,
 } from "./escalate-dispatch.js";
 export {
+  SCOUT_REPORT_PATH_RE,
+  SCOUT_SEEDABILITY_DEFAULT_CONFIDENCE,
+  SCOUT_SEEDABILITY_ENV,
+  SCOUT_SEEDABILITY_ENV_ALIASES,
+  SCOUT_SEEDABILITY_TEXT_MAX_CHARS,
+  SCOUT_SEED_ACTIONS,
+  SCOUT_SEED_REVIEW_MESSAGE,
+  SCOUT_SEED_SEED_MESSAGE,
+  SCOUT_SEED_SKIP_MESSAGE,
+  SCOUT_SEED_UNSET_MESSAGE,
+  formatScoutSeedabilityLines,
+  heuristicScoutSeedability,
+  interpretScoutSeedability,
+  judgeScoutSeedability,
+  looksLikeScoutReportPath,
+  parseScoutSeedabilityEnabled,
+  passThroughScoutSeedability,
+  resolveScoutSeedabilityEnabled,
+  scoutSeedabilityQuestions,
+} from "./scout-seedability.js";
+export type {
+  ScoutSeedAction,
+  ScoutSeedDecision,
+  ScoutSeedResult,
+  ScoutSeedSource,
+  ScoutSeedVerdict,
+} from "./scout-seedability.js";
+export {
   assertRetainBudget,
   compositePriority,
   DEFAULT_PRIORITY_WEIGHTS,
