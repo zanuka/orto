@@ -285,6 +285,33 @@ export type {
   NeedsBankVerdict,
 } from "./needs-bank.js";
 export {
+  TASK_FOLLOWUP_BINS,
+  TASK_FOLLOWUP_BOTH_MESSAGE,
+  TASK_FOLLOWUP_DEFAULT_CONFIDENCE,
+  TASK_FOLLOWUP_DESCRIPTION_MAX_CHARS,
+  TASK_FOLLOWUP_ENV,
+  TASK_FOLLOWUP_ENV_ALIASES,
+  TASK_FOLLOWUP_ESCALATE_MESSAGE,
+  TASK_FOLLOWUP_PR_ONLY_MESSAGE,
+  TASK_FOLLOWUP_RETAIN_MESSAGE,
+  TASK_FOLLOWUP_UNSET_MESSAGE,
+  formatTaskFollowupLines,
+  heuristicTaskFollowup,
+  interpretTaskFollowup,
+  judgeTaskFollowup,
+  parseTaskFollowupEnabled,
+  passThroughTaskFollowup,
+  resolveTaskFollowupEnabled,
+  taskFollowupQuestions,
+} from "./task-followup.js";
+export type {
+  TaskFollowupBin,
+  TaskFollowupDecision,
+  TaskFollowupResult,
+  TaskFollowupSource,
+  TaskFollowupVerdict,
+} from "./task-followup.js";
+export {
   assertRetainBudget,
   compositePriority,
   DEFAULT_PRIORITY_WEIGHTS,

@@ -347,8 +347,9 @@ These sit on the hot path. A naive “score every recalled passage on every agen
 | `still_true` on every recall (`judgeRecallVerified`) | Cloud hop + tokens every turn | Env flag off by default (`ORTO_JEV_RECALL_VERIFY`); batch up to 8 passages per call |
 | Lookup route (`judgeLookupRoute`) | One small Choice call per routed question | Env flag off by default (`ORTO_JEV_LOOKUP_ROUTE`); default MCP tools stay separate |
 | Needs bank? (`judgeNeedsBank`) | One small Noul call per agent task | Env flag off by default (`ORTO_JEV_NEEDS_BANK`); usually cheaper than a useless Hindsight reflect |
+| Task follow-up (`judgeTaskFollowup`) | One small Choice call after a PR/merge/task | Env flag off by default (`ORTO_JEV_TASK_FOLLOWUP`); queues store/seed instead of MCP retain |
 
-**Guidance:** enable seed + MCP retain first. Measure. Only then put Jev on recall packing (`packRecallContext({ rank: true })`), still-true verify (`judgeRecallVerified` / `ORTO_JEV_RECALL_VERIFY=1`), lookup routing (`judgeLookupRoute` / `ORTO_JEV_LOOKUP_ROUTE=1`), or needs-bank (`judgeNeedsBank` / `ORTO_JEV_NEEDS_BANK=1`). Prefer Hindsight’s native typesafe reranker for server-side ranking when available.
+**Guidance:** enable seed + MCP retain first. Measure. Only then put Jev on recall packing (`packRecallContext({ rank: true })`), still-true verify (`judgeRecallVerified` / `ORTO_JEV_RECALL_VERIFY=1`), lookup routing (`judgeLookupRoute` / `ORTO_JEV_LOOKUP_ROUTE=1`), needs-bank (`judgeNeedsBank` / `ORTO_JEV_NEEDS_BANK=1`), or task follow-up (`judgeTaskFollowup` / `ORTO_JEV_TASK_FOLLOWUP=1`). Prefer Hindsight’s native typesafe reranker for server-side ranking when available.
 
 #### F. Golden-set eval (JEV-34)
 
