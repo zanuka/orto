@@ -79,6 +79,10 @@ describe("runMcp --write-firstmate", () => {
     expect(skill).toContain("ORTO_JEV_TASK_FOLLOWUP");
     expect(skill).toContain("judgeTaskFollowup");
     expect(skill).toContain("retain_to_bank");
+    expect(skill).toContain("ORTO_JEV_ESCALATE_DISPATCH");
+    expect(skill).toContain("judgeEscalateDispatch");
+    expect(skill).toContain("needs_captain");
+    expect(skill).toContain("ask_captain");
 
     const registryPath = join(fmHome, ".orto", "projects.json");
     const registry = JSON.parse(await readFile(registryPath, "utf8")) as {

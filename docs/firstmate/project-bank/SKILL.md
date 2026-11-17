@@ -16,6 +16,11 @@ Optional harness gates (default off; works with Firstmate or any orchestrator):
   `judgeTaskFollowup` (Choice `followup`: `retain_to_bank` | `pr_only` |
   `both`). ADR/standards merges → retain or both (queue `orto store`/`seed`;
   never MCP-retain). Pure bugfix PRs → `pr_only`.
+- When `ORTO_JEV_ESCALATE_DISPATCH=1`, before spawning a crewmate call
+  `judgeEscalateDispatch` with this distro's charter list (Noul
+  `needs_captain` + Choice `crewmate`, plus `ask_captain`). Never invent
+  crewmates. Empty charter list → `ask_captain` only. Architecture-invariant
+  work escalates; typo/test-fix can dispatch to a listed implementer.
 
 ## What it does
 

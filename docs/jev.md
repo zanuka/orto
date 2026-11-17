@@ -105,7 +105,8 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Lookup routing (helper shipped: `judgeLookupRoute`; default off via `ORTO_JEV_LOOKUP_ROUTE`)
 - Needs-bank gate (helper shipped: `judgeNeedsBank`; default off via `ORTO_JEV_NEEDS_BANK`; harness-agnostic; Firstmate snippet also prints the policy)
 - Task follow-up gate (helper shipped: `judgeTaskFollowup`; default off via `ORTO_JEV_TASK_FOLLOWUP`; harness-agnostic; Choice `followup` retain_to_bank | pr_only | both)
-- Firstmate-specific routing still planned (which bank, escalate vs dispatch, scout seedability)
+- Escalate vs dispatch gate (helper shipped: `judgeEscalateDispatch`; default off via `ORTO_JEV_ESCALATE_DISPATCH`; Noul `needs_captain` + Choice `crewmate` from the distro charter list)
+- Firstmate-specific routing still planned (which bank, scout seedability)
 - Share / deployment-profile safety before public or Cloud exposure
 - Golden-set eval that scores offline heuristics without requiring Jev at runtime
 
@@ -525,6 +526,33 @@ Heuristics (when Jev is off or falls back): ADR/standards merges prefer `retain_
 `orto mcp` prints these policy notes on Cursor, Claude Code, Codex, Pi, Kiro, and Firstmate snippets. `orto mcp --write-agents` / `--write-cursor-rules` also mention the optional gate. Do not embed TypeSafe keys in the repo.
 
 `formatTaskFollowupLines` prints the verdict and `latency: Nms vs ungated followup`.
+
+---
+
+## Escalate vs dispatch
+
+`judgeEscalateDispatch` in `src/judge/escalate-dispatch.ts` chooses whether a multi-agent harness should escalate a task to the captain/operator or dispatch it to a listed worker charter ([JEV-29](https://github.com/zanuka/orto/issues/35)).
+
+This helper is for multi-agent workflows. Firstmate is the primary consumer; Claude Code, Codex, Cursor, Pi, and custom orchestrators can call the same API when they have a captain + worker charter list. Jev does not spawn agents; it only answers the gate questions.
+
+Default path is pass-through:
+
+- Off unless `dispatch: true` or `ORTO_JEV_ESCALATE_DISPATCH=1` (aliases: `ORTO_JEV_FIRSTMATE_DISPATCH`, `NOCCIOLO_JEV_ESCALATE_DISPATCH`)
+- One call asks Noul `needs_captain` and Choice `crewmate` (default `--confidence 0.8`)
+- Crewmate criteria come only from the provided charter ids, plus always-present `ask_captain`
+- Empty or missing charter list → only `ask_captain` (never invent crewmates)
+
+| Verdict | Meaning |
+|---------|---------|
+| `escalate` | Ask the captain/operator (`crewmate` = `ask_captain`) |
+| `dispatch` | Dispatch to a listed charter id |
+| `unset` | Gate off; no routing policy applied |
+
+Heuristics (when Jev is off or falls back): architecture-invariant / decision work escalates; typo / test-fix can dispatch to a listed implementer-like charter.
+
+`orto mcp` prints these policy notes on Cursor, Claude Code, Codex, Pi, Kiro, and Firstmate snippets. `orto mcp --write-agents` / `--write-cursor-rules` also mention the optional gate. Do not embed TypeSafe keys in the repo.
+
+`formatEscalateDispatchLines` prints the verdict and `latency: Nms vs ungated escalate/dispatch`.
 
 ---
 
