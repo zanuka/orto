@@ -368,6 +368,34 @@ export type {
   ScoutSeedVerdict,
 } from "./scout-seedability.js";
 export {
+  BANK_ROUTE_ASK,
+  BANK_ROUTE_CURRENT,
+  BANK_ROUTE_DEFAULT_CONFIDENCE,
+  BANK_ROUTE_ENV,
+  BANK_ROUTE_ENV_ALIASES,
+  BANK_ROUTE_MAX_BANKS,
+  BANK_ROUTE_TEXT_MAX_CHARS,
+  bankRouteApplies,
+  bankRouteQuestions,
+  buildBankRouteCriteria,
+  formatBankRouteLines,
+  heuristicBankRoute,
+  interpretBankRoute,
+  judgeBankRoute,
+  normalizeCompanyBanks,
+  parseBankRouteEnabled,
+  passThroughBankRoute,
+  resolveBankRouteEnabled,
+} from "./bank-route.js";
+export type {
+  BankRouteChoice,
+  BankRouteDecision,
+  BankRouteResult,
+  BankRouteSource,
+  BankRouteVerdict,
+  CompanyBankRef,
+} from "./bank-route.js";
+export {
   assertRetainBudget,
   compositePriority,
   DEFAULT_PRIORITY_WEIGHTS,
