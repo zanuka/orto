@@ -110,7 +110,7 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Multi-bank fact routing (helper shipped: `judgeBankRoute`; default off via `ORTO_JEV_BANK_ROUTE`; single-bank projects keep `in_scope` and never see the prompt)
 - Destination-kind router (helper shipped: `judgeDestinationKind`; default off via `ORTO_JEV_DESTINATION_KIND`; Hindsight stays the default; Mem0 and Graphiti only when configured)
 - Firstmate-specific routing still planned (which registered project bank)
-- Share / deployment-profile safety before public or Cloud exposure
+- Share / deployment-profile safety (helper shipped: `judgeShareSafety` on `orto share --profile public --judge jev` and `hindsight-cloud`; default share stays on Phase 4 checks)
 - Golden-set eval that scores offline heuristics without requiring Jev at runtime
 
 Detail and sequencing: [jev-integration.md](./jev-integration.md) and the Phase 7 checklist in [ROADMAP.md](../ROADMAP.md).
@@ -651,6 +651,25 @@ The Choice is the kind, not a vendor name.
 Mem0 and Graphiti seed adapters are not wired yet. This helper only decides the route.
 
 `formatDestinationKindLines` prints the kind, the provider, any warning, and `latency: Nms vs ungated destination kind`.
+
+---
+
+## Share safety
+
+`judgeShareSafety` in `src/judge/share-safety.ts` runs before Orto writes a public or Cloud profile ([JEV-33](https://github.com/zanuka/orto/issues/56)).
+
+`orto share --profile public --judge jev` and `orto share --profile hindsight-cloud --judge jev` ask, in one call:
+
+- Noul `safe_outside_trusted_network`
+- Noul `leaks_internal_urls_or_customers`
+- Score `sensitivity` from 0 to 3
+- Choice `profile_ok`: `local_only` | `vpn` | `public_ok`
+
+Orto applies the profile. Jev does not publish.
+
+An internal runbook that names a private hostname cannot pass `public_ok`, even when the Choice is confident. A public-by-design standards doc can. A refused public profile is not written.
+
+`orto share` without `--judge` keeps the Phase 4 profile checks only (required base URL, localhost rule, Cloud URL). It does not call TypeSafe.
 
 ---
 

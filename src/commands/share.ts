@@ -1,3 +1,5 @@
+import { readdir, readFile } from "node:fs/promises";
+import { join } from "node:path";
 import {
   loadConfig,
   loadShareConfig,
@@ -15,6 +17,12 @@ import {
   MCP_AUTH_MODES,
 } from "../config/profiles.js";
 import { detectProjectRoot } from "../project/detect-root.js";
+import {
+  formatShareSafetyLines,
+  judgeShareSafety,
+  type ShareSafetyDecision,
+} from "../judge/share-safety.js";
+import type { Judge, JudgeId } from "../judge/types.js";
 import { OrtoError } from "../utils/errors.js";
 
 export interface ShareOptions {
@@ -24,6 +32,10 @@ export interface ShareOptions {
   profile?: string;
   baseUrl?: string;
   mcpAuth?: string;
+  judge?: Judge;
+  judgeId?: JudgeId;
+  confidence?: number;
+  safetyText?: string;
 }
 
 export interface ShareResult {
@@ -39,6 +51,7 @@ export interface ShareResult {
   mcpAuth: McpAuthMode;
   securityNotes: string[];
   share: ReturnType<typeof createShareConfig> | null;
+  shareSafety?: ShareSafetyDecision;
 }
 
 function parseMcpAuth(value: string | undefined): McpAuthMode | undefined {
@@ -66,6 +79,29 @@ export async function runShare(options: ShareOptions = {}): Promise<ShareResult>
 
   let share = existingShare;
   let wrote = false;
+  let shareSafety: ShareSafetyDecision | undefined;
+
+  const resolvedProfile = parseDeploymentProfile(
+    options.profile ?? existingShare?.profile ?? config.deploymentProfile ?? "local",
+  );
+  if (
+    options.judgeId === "jev" &&
+    (resolvedProfile === "public" || resolvedProfile === "hindsight-cloud")
+  ) {
+    const text =
+      options.safetyText ?? (await loadShareSafetyExcerpt(projectRoot));
+    shareSafety = await judgeShareSafety({
+      text,
+      ...(options.judge !== undefined ? { judge: options.judge } : {}),
+      confidence: options.confidence ?? 0.8,
+    });
+    if (!shareSafety.allowPublic) {
+      throw new OrtoError(
+        `Refusing ${resolvedProfile} share: ${shareSafety.reason}`,
+        "Orto applies the profile. Jev does not publish. Use --profile local or --profile vpn, or remove private hostnames from the docs.",
+      );
+    }
+  }
 
   if (options.profile !== undefined || options.baseUrl !== undefined || options.mcpAuth !== undefined) {
     if (validateOnly) {
@@ -152,6 +188,7 @@ export async function runShare(options: ShareOptions = {}): Promise<ShareResult>
     mcpAuth: connection.mcpAuth,
     securityNotes: profileSecurityNotes(connection.profile),
     share,
+    ...(shareSafety !== undefined ? { shareSafety } : {}),
   };
 }
 
@@ -175,6 +212,15 @@ export function printShareResult(result: ShareResult): void {
   console.log(`${prefix}Server name: ${result.serverName}`);
   console.log(`${prefix}MCP auth:    ${result.mcpAuth}`);
   console.log("");
+  if (result.shareSafety !== undefined) {
+    console.log("");
+    for (const line of formatShareSafetyLines({
+      decision: result.shareSafety,
+      dryRun: result.dryRun,
+    })) {
+      console.log(line);
+    }
+  }
   console.log("Security defaults / trade-offs:");
   for (const note of result.securityNotes) {
     console.log(`- ${note}`);
@@ -190,4 +236,30 @@ export function printShareResult(result: ShareResult): void {
   console.log(
     "Emit agent wiring with `orto mcp --write --include-auth` (profile-aware URLs/server names).",
   );
+}
+
+async function loadShareSafetyExcerpt(root: string): Promise<string> {
+  const paths = [join(root, "README.md")];
+  try {
+    const names = await readdir(join(root, "docs"));
+    for (const name of names) {
+      if (name.endsWith(".md")) {
+        paths.push(join(root, "docs", name));
+      }
+    }
+  } catch {
+    void 0;
+  }
+  const parts: string[] = [];
+  for (const path of paths) {
+    try {
+      parts.push(await readFile(path, "utf8"));
+    } catch {
+      continue;
+    }
+    if (parts.join("\n").length >= 8000) {
+      break;
+    }
+  }
+  return parts.join("\n").slice(0, 8000);
 }

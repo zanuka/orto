@@ -164,7 +164,7 @@ Anything sent to TypeSafe leaves the machine. The benefit only holds if state is
 - never attach the full bank, a huge file, a secret-bearing patch, or MCP conversation logs
 - second-pass Noul `contains_secret` / `contains_pii` on candidates that already passed the path filter
 
-**User-visible result:** a pasted `sk-` / PEM block in an otherwise seedable ADR is skipped and the warning names the path without reprinting the secret. Public share still waits on a Orto safety check (JEV-33).
+**User-visible result:** a pasted `sk-` / PEM block in an otherwise seedable ADR is skipped and the warning names the path without reprinting the secret. Public share is gated by `orto share --profile public --judge jev` (JEV-33). Orto applies or refuses the profile.
 
 ### 3.9 Make the default (offline) path better, even if you rarely turn Jev on
 
@@ -393,7 +393,7 @@ TypeSafe cents are not the interesting number. The costs Jev is designed to cut:
 | Bank pollution → every future `recall` / `reflect` is worse and longer | MCP retain deny; section-level skip |
 | Human time cleaning Hindsight by hand | Audit plan + confidence-gated prune |
 | Firstmate / Maglio loops that load the bank for a pure-code task | `needs_project_bank` Noul |
-| Accidental public share of internal runbooks | JEV-33 profile gate (still Orto applies the profile) |
+| Accidental public share of internal runbooks | JEV-33 profile gate (Orto applies or refuses the profile) |
 | Using a frontier LLM as an ad-hoc JSON judge | Typed primitives, free output, no parser |
 
 A single bad MCP retain of a 2,000-token chat blob is “free” at write time and then paid back on every agent session that recalls it. That is why JEV-22 is in the first slice and why its TypeSafe bill is the wrong thing to minimize in isolation.

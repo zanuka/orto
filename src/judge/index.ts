@@ -426,6 +426,25 @@ export type {
   DestinationProviderId,
 } from "./destination-kind.js";
 export {
+  SHARE_PROFILE_OK,
+  SHARE_SAFETY_BLOCK_MESSAGE,
+  SHARE_SAFETY_HIGH_SENSITIVITY,
+  SHARE_SAFETY_PUBLIC_MESSAGE,
+  SHARE_SAFETY_SENSITIVITY_MAX,
+  SHARE_SAFETY_TEXT_MAX_CHARS,
+  containsPrivateHostname,
+  formatShareSafetyLines,
+  heuristicShareSafety,
+  interpretShareSafety,
+  judgeShareSafety,
+  shareSafetyQuestions,
+} from "./share-safety.js";
+export type {
+  ShareProfileOk,
+  ShareSafetyDecision,
+  ShareSafetySource,
+} from "./share-safety.js";
+export {
   assertRetainBudget,
   compositePriority,
   DEFAULT_PRIORITY_WEIGHTS,
