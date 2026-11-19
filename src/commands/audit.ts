@@ -6,13 +6,16 @@ import {
 import { bankTemplatePath } from "../config/paths.js";
 import {
   createJudge,
+  driftFromAuditDecisions,
   formatAuditTable,
+  formatDriftLine,
   freshnessToAuditDecision,
   judgeAuditItem,
   judgeMentalModelFreshness,
   observationRecallQuery,
   recalledToOverlaps,
   type AuditDecision,
+  type DriftSummary,
   type ResolvedJudge,
 } from "../judge/index.js";
 import { detectProjectRoot } from "../project/detect-root.js";
@@ -61,6 +64,7 @@ export interface AuditResult {
   planPath: string;
   decisions: AuditDecision[];
   wrotePlan: boolean;
+  drift: DriftSummary;
 }
 
 export async function runAudit(options: AuditOptions = {}): Promise<AuditResult> {
@@ -203,6 +207,12 @@ export async function runAudit(options: AuditOptions = {}): Promise<AuditResult>
     );
   }
 
+  const sampledAt = new Date().toISOString();
+  const drift = driftFromAuditDecisions({
+    decisions,
+    sampledAt,
+    ...(options.limit !== undefined ? { limit: options.limit } : {}),
+  });
   const planPath = auditPlanPath(projectRoot);
   let wrotePlan = false;
   if (!dryRun) {
@@ -212,6 +222,7 @@ export async function runAudit(options: AuditOptions = {}): Promise<AuditResult>
         bankId: config.bankId,
         confidence: resolved.confidence,
         decisions,
+        drift,
       }),
     );
     wrotePlan = true;
@@ -224,6 +235,7 @@ export async function runAudit(options: AuditOptions = {}): Promise<AuditResult>
   for (const line of formatAuditTable({ decisions, dryRun })) {
     console.log(line);
   }
+  console.log(formatDriftLine(drift));
   console.log("");
   if (wrotePlan) {
     console.log(`Wrote ${planPath}`);
@@ -243,6 +255,7 @@ export async function runAudit(options: AuditOptions = {}): Promise<AuditResult>
     planPath,
     decisions,
     wrotePlan,
+    drift,
   };
 }
 

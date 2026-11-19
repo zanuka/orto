@@ -318,6 +318,36 @@ Denylist (in addition to the seed scanner's secrets/credentials rules): `.stow-a
 
 ---
 
+## `orto status`
+
+Print a bounded bank drift line. Nothing is written, deleted, or retained.
+
+```bash
+orto status
+orto status --dry-run
+orto status --sample 20 --judge jev
+```
+
+The line is `Drift: supported/sampled supported (percent) as of YYYY-MM-DD`.
+The default sample is 20 memories. The maximum is 50.
+Status asks Hindsight for one document page of that size.
+With the judge off, a memory is supported when its source file is still in the repo.
+With `--judge jev`, a memory is supported when `still_supported_by_repo` is confidently yes.
+`--dry-run` prints the same line and still writes nothing.
+
+| Flag | Description |
+|------|-------------|
+| `--dry-run` | Print the drift line without writing files |
+| `--sample <n>` | Memories to sample (default 20, maximum 50) |
+| `--judge jev` | Score the sample with `still_supported_by_repo` |
+| `--confidence <n>` | Minimum confidence for that score (default 0.8) |
+| `--hindsight-url <url>` | Override Hindsight base URL |
+| `--api-key <key>` | Hindsight API key |
+
+`orto audit` prints the same drift line for the document sample it judged.
+
+---
+
 ## `orto audit`
 
 Write a read-only prune/refresh plan for retained bank documents with `--judge jev`.
@@ -337,6 +367,8 @@ Mental models are judged first with freshness questions (`leave` / `refresh` / `
 Layer-specific aging then biases document (and other) actions (for example archive when a document source is gone; prefer `refresh_mental_model` over delete for mental models).
 Actions are `keep`, `refresh_mental_model`, `supersede`, `archive`, or `delete_candidate`.
 Live runs write `.orto/local/audit-plan.json` (gitignored) and print the same table on stdout.
+The summary line is `Drift: supported/sampled supported (percent) as of YYYY-MM-DD` for the document sample (default 20, maximum 50).
+That sample is also stored on the plan as `drift`.
 `--dry-run` prints the table only.
 Missing `ORTO_TYPESAFE_API_KEY` with `--judge jev` is a hard error.
 Apply with `orto prune --apply --plan .orto/local/audit-plan.json` ([JEV-17](https://github.com/zanuka/orto/issues/52)); this command only plans.
