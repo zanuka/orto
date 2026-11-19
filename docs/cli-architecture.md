@@ -142,7 +142,8 @@ node dist/cli.js mcp --write --dry-run
 | `seed` | Retain candidates into Hindsight; update local seed manifest |
 | `store --dry-run` | Print known/new/changed/unchanged buckets for allowlisted + discovered markdown; **no** API calls |
 | `store` | Retain an operator-selected subset (allowlist, `--files`, or interactive pick) via the same seed retain path. `--propose-adopt --judge jev` prints new files to consider; `--apply` writes those paths and does not retain. `--judge jev` on changed files runs the edit durability gate before retain |
-| `audit --judge jev` | Read-only prune/refresh plan: judge bank documents one at a time; write `.orto/local/audit-plan.json` (skipped with `--dry-run`); never mutates the bank |
+| `status` | Bounded bank drift line (`supported / sampled` and a date). Judge off compares source presence. `--judge jev` asks `still_supported_by_repo` for at most 50 memories |
+| `audit --judge jev` | Read-only prune/refresh plan: judge bank documents one at a time; write `.orto/local/audit-plan.json` (skipped with `--dry-run`); never mutates the bank. Prints the same drift summary |
 | `prune --dry-run` | List path-gone / section-gone / explicit candidates (read-only document list); no deletes |
 | `prune` | Delete selected bank documents; write local tombstones under `.orto/local/` |
 | `prune --plan` / `--apply` | Preview or apply an audit plan (`refresh_mental_model`, archive, supersede provenance; deletes only with `--allow-delete`) |

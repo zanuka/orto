@@ -4,6 +4,7 @@ import { ortoDir } from "../config/paths.js";
 import { extractFromSource } from "../extractor/extract.js";
 import { hashContent } from "../extractor/hash.js";
 import type { AuditDecision, AuditItemState } from "../judge/audit.js";
+import type { DriftSummary } from "../judge/drift.js";
 import type { DocumentSummary } from "../providers/hindsight/client.js";
 import type { DurableSource } from "../scanner/durable-sources.js";
 import { ensureDir, pathExists, writeJsonFile } from "../utils/fs.js";
@@ -17,6 +18,13 @@ export interface AuditPlanFile {
   createdAt: string;
   confidence: number;
   items: AuditPlanItem[];
+  drift?: {
+    supported: number;
+    sampled: number;
+    sampledAt: string;
+    percentSupported: number | null;
+    mode: DriftSummary["mode"];
+  };
 }
 
 export interface AuditPlanItem {
@@ -51,12 +59,24 @@ export function toAuditPlanFile(input: {
   bankId: string;
   confidence: number;
   decisions: readonly AuditDecision[];
+  drift?: DriftSummary;
 }): AuditPlanFile {
   return {
     version: 1,
     bankId: input.bankId,
     createdAt: new Date().toISOString(),
     confidence: input.confidence,
+    ...(input.drift !== undefined
+      ? {
+          drift: {
+            supported: input.drift.supported,
+            sampled: input.drift.sampled,
+            sampledAt: input.drift.sampledAt,
+            percentSupported: input.drift.percentSupported,
+            mode: input.drift.mode,
+          },
+        }
+      : {}),
     items: input.decisions.map((decision) => {
       const item: AuditPlanItem = {
         id: decision.id,

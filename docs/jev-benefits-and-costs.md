@@ -334,7 +334,7 @@ Path-gone and section-gone groups need **no TypeSafe call**. Jev is only for “
 |---|---|---|---|
 | Monthly sample of 50 memories vs current excerpts | 50 | ~100k | **~ $0.004** |
 | Quarterly sweep of 300 | 300 | ~600k | **~ $0.025** |
-| Full-bank score every night | thousands | millions | Do not. Bound the sample (JEV-35). |
+| Full-bank score every night | thousands | millions | `orto status` samples at most 50 memories (JEV-35). |
 
 #### E. Recall-time features (JEV-23, JEV-24, JEV-25) — default off
 

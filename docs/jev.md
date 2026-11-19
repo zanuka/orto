@@ -112,6 +112,7 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Firstmate-specific routing still planned (which registered project bank)
 - Share / deployment-profile safety (helper shipped: `judgeShareSafety` on `orto share --profile public --judge jev` and `hindsight-cloud`; default share stays on Phase 4 checks)
 - Golden-set eval (shipped: `pnpm eval:judge` replays recorded answers with no API key and compares heuristic vs Jev vs human labels; `ORTO_EVAL_JUDGE_LIVE=1` is the optional live job)
+- Bank drift metric (shipped: `orto status` prints `supported / sampled` and a date; default sample 20, cap 50; judge off is hash-only source present vs missing; `orto audit` includes the same line)
 
 Detail and sequencing: [jev-integration.md](./jev-integration.md) and the Phase 7 checklist in [ROADMAP.md](../ROADMAP.md).
 
@@ -693,6 +694,21 @@ Without that env var, the job replays the recorded answers.
 
 A security heading that states a coding standard is kept.
 A security mailbox, changelog, install, and quick start stay skipped, including a changelog that says "we decided".
+
+---
+
+## Bank drift
+
+`orto status` prints a health line for a bounded sample of bank memories ([JEV-35](https://github.com/zanuka/orto/issues/49)).
+
+The line is `Drift: supported/sampled supported (percent) as of YYYY-MM-DD`.
+The default sample is 20. The cap is 50.
+Status reads one Hindsight document page of that size.
+
+With the judge off, support means the source file is still in the repo.
+With `--judge jev`, support means `still_supported_by_repo` is confidently yes.
+`orto audit` prints the same line for its document sample and stores `drift` on the plan.
+Neither command deletes or retains.
 
 ---
 

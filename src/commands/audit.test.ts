@@ -122,9 +122,14 @@ describe("runAudit", () => {
 
     const plan = JSON.parse(await readFile(result.planPath, "utf8")) as {
       version: number;
+      drift?: { supported: number; sampled: number; sampledAt: string; mode: string };
       items: Array<{ id: string; action: string; confidence: number; reason: string }>;
     };
     expect(plan.version).toBe(1);
+    expect(result.drift.supported).toBe(1);
+    expect(result.drift.sampled).toBe(1);
+    expect(result.drift.sampledAt).toMatch(/^\d{4}-\d{2}-\d{2}/);
+    expect(plan.drift).toMatchObject({ supported: 1, sampled: 1, mode: "jev" });
     expect(plan.items[0]).toMatchObject({
       id: "orto:docs/adr/0001-local.md#decision",
       action: "keep",

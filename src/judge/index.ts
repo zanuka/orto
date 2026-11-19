@@ -104,6 +104,15 @@ export type {
   AuditLayer,
 } from "./audit.js";
 export {
+  DRIFT_SAMPLE_DEFAULT,
+  DRIFT_SAMPLE_MAX,
+  clampDriftSample,
+  driftFromAuditDecisions,
+  formatDriftLine,
+  summarizeDrift,
+} from "./drift.js";
+export type { DriftMode, DriftSample, DriftSummary } from "./drift.js";
+export {
   MENTAL_MODEL_FRESHNESS_ACTIONS,
   freshnessToAuditDecision,
   interpretMentalModelFreshness,

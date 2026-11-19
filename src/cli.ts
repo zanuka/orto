@@ -23,6 +23,7 @@ import { runStoreCommand } from "./commands/store.js";
 import { printBankApplyResult, runBankApply } from "./commands/bank.js";
 import { printShareResult, runShare } from "./commands/share.js";
 import { printDocsListResult, runDocsList } from "./commands/docs.js";
+import { runStatusCommand } from "./commands/status.js";
 import {
   addJudgeCliOptions,
   judgeOptionsFromCli,
@@ -761,6 +762,48 @@ async function main(): Promise<void> {
         ...(opts.files !== undefined ? { files: opts.files } : {}),
         ...(opts.addFiles !== undefined ? { addFiles: opts.addFiles } : {}),
         ...(opts.project !== undefined ? { project: opts.project } : {}),
+        ...(opts.hindsightUrl !== undefined
+          ? { hindsightUrl: opts.hindsightUrl }
+          : {}),
+        ...(opts.apiKey !== undefined ? { apiKey: opts.apiKey } : {}),
+        ...judgeOpts,
+      });
+    },
+  );
+
+  addJudgeCliOptions(
+    program
+      .command("status")
+      .description(
+        "Print a bounded bank drift line: supported / sampled and a date. Judge off uses source presence only.",
+      )
+      .option("--dry-run", "Print the drift line without writing files")
+      .option(
+        "--sample <n>",
+        "Memories to sample (default 20, maximum 50)",
+      )
+      .option(
+        "--hindsight-url <url>",
+        "Hindsight base URL (default: config, ORTO_HINDSIGHT_URL, or http://localhost:8888)",
+      )
+      .option(
+        "--api-key <key>",
+        "Hindsight API key (or set ORTO_HINDSIGHT_API_KEY / HINDSIGHT_API_KEY)",
+      ),
+  ).action(
+    async (opts: {
+      dryRun?: boolean;
+      sample?: string;
+      hindsightUrl?: string;
+      apiKey?: string;
+      judge?: string;
+      confidence?: string;
+      strict?: boolean;
+    }) => {
+      const judgeOpts = judgeOptionsFromCli(opts);
+      await runStatusCommand({
+        dryRun: Boolean(opts.dryRun),
+        ...(opts.sample !== undefined ? { sample: Number(opts.sample) } : {}),
         ...(opts.hindsightUrl !== undefined
           ? { hindsightUrl: opts.hindsightUrl }
           : {}),

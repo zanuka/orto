@@ -165,6 +165,7 @@ JEV-1 through JEV-10 are closed on GitHub.
 - [ ] Firstmate routing (remaining): which bank. ([JEV-27](https://github.com/zanuka/orto/issues/33))
 - [x] Share safety: `orto share --profile public` or `hindsight-cloud` with `--judge jev` asks `safe_outside_trusted_network`, `leaks_internal_urls_or_customers`, `sensitivity` (0-3), and Choice `profile_ok` (`local_only` | `vpn` | `public_ok`). An internal runbook with private hostnames cannot pass `public_ok`. A public-by-design standards doc can. Orto applies or refuses the profile. Jev does not publish. Share without `--judge` keeps the Phase 4 profile checks only. ([JEV-33](https://github.com/zanuka/orto/issues/56))
 - [x] Heuristic eval: `pnpm test` and `pnpm eval:judge` score a human-labeled keep/skip/kind fixture with recorded Jev answers and no API key. `ORTO_EVAL_JUDGE_LIVE=1 pnpm eval:judge` is the optional live job. Disagreements are heuristic tweaks. Jev is the yardstick, not a runtime requirement. A security heading with a real standard is kept. Changelog, install, and quick-start headings stay skipped. ([JEV-34](https://github.com/zanuka/orto/issues/48))
+- [x] Bank drift: `orto status` samples at most 50 memories (default 20, one document list page) and prints `supported / sampled` plus a date. With the judge off, support means the source file is still present. With `--judge jev`, support means a confident `still_supported_by_repo`. `orto audit` prints the same summary for its document sample and stores it on the plan. ([JEV-35](https://github.com/zanuka/orto/issues/49))
 
 Deferred (still tracked under the Jev epic; land with later phases):
 
@@ -174,7 +175,7 @@ Deferred (still tracked under the Jev epic; land with later phases):
 ### Jev issue index
 
 Issue index as of 2 November 2026.
-JEV-1 through JEV-26 and JEV-28 through JEV-34 are done in the checklist (JEV-12, JEV-13, and JEV-22 through JEV-26 plus JEV-28 through JEV-34 helpers included). JEV-32 (bank route) landed before JEV-31 (destination kind).
+JEV-1 through JEV-26 and JEV-28 through JEV-35 are done in the checklist (JEV-12, JEV-13, and JEV-22 through JEV-26 plus JEV-28 through JEV-35 helpers included). JEV-32 (bank route) landed before JEV-31 (destination kind).
 JEV-1 through JEV-10 are closed on GitHub.
 Open [`jev`-labeled issues](https://github.com/zanuka/orto/issues?q=is%3Aissue+is%3Aopen+label%3Ajev) are the rest of the table.
 Closed duplicate epic [#19](https://github.com/zanuka/orto/issues/19) is superseded by [#58](https://github.com/zanuka/orto/issues/58).
@@ -222,7 +223,7 @@ Closed duplicate epic [#19](https://github.com/zanuka/orto/issues/19) is superse
 
 ### Reliability & Developer Experience
 
-- [ ] Status / health commands (bank drift summary: [JEV-35](https://github.com/zanuka/orto/issues/49))
+- [x] Status / health commands (bank drift summary: [JEV-35](https://github.com/zanuka/orto/issues/49))
 - [ ] Better error messages and recovery paths
 - [ ] Bank rename / re-id: when the repo (or desired bank id) changes, keep the same retained knowledge under the new name; update `.orto/` config, bank template, seed manifest, and MCP/agent wiring (`--dry-run`). Do not require a full re-seed into an empty bank
 - [ ] Config schema + validation
