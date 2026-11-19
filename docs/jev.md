@@ -107,7 +107,8 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Task follow-up gate (helper shipped: `judgeTaskFollowup`; default off via `ORTO_JEV_TASK_FOLLOWUP`; harness-agnostic; Choice `followup` retain_to_bank | pr_only | both)
 - Escalate vs dispatch gate (helper shipped: `judgeEscalateDispatch`; default off via `ORTO_JEV_ESCALATE_DISPATCH`; Noul `needs_captain` + Choice `crewmate` from the distro charter list)
 - Scout-report seedability (helper shipped: `judgeScoutSeedability`; default off via `ORTO_JEV_SCOUT_SEEDABILITY`; docs point at official TypeSafe agent skill only)
-- Firstmate-specific routing still planned (which bank)
+- Multi-bank fact routing (helper shipped: `judgeBankRoute`; default off via `ORTO_JEV_BANK_ROUTE`; single-bank projects keep `in_scope` and never see the prompt)
+- Firstmate-specific routing still planned (which registered project bank)
 - Share / deployment-profile safety before public or Cloud exposure
 - Golden-set eval that scores offline heuristics without requiring Jev at runtime
 
@@ -596,6 +597,33 @@ Do not vendor their skill into this repo.
 Wire `ORTO_TYPESAFE_API_KEY` in the harness environment when using Jev; never commit keys.
 
 Same installer rule as Graphiti: thin pointers to official URLs, no wrap of their install path.
+
+---
+
+## Multi-bank fact routing
+
+`judgeBankRoute` in `src/judge/bank-route.ts` chooses which configured company-brain bank a section belongs in ([JEV-32](https://github.com/zanuka/orto/issues/47)).
+
+Single-bank projects never see this prompt. Seed keeps using `in_scope` from the relevance gate ([JEV-4](https://github.com/zanuka/orto/issues/30)).
+
+When two or more banks are configured:
+
+- Off unless `routeBanks: true` or `ORTO_JEV_BANK_ROUTE=1` (`NOCCIOLO_JEV_BANK_ROUTE` alias)
+- One Choice `bank` whose criteria are the configured bank ids plus `current` and `ask` (default `--confidence 0.8`)
+- Never invent bank ids
+
+| Verdict | Meaning |
+|---------|---------|
+| `route` + `current` | Seed the current bank |
+| `route` + other bank id | Do not seed the current bank. Queue the section for that bank |
+| `ask` | Operator picks. Do not guess |
+| `unset` | Gate off, or fewer than two banks |
+
+A design-token section with banks `billing-service` and `design-system` routes to `design-system` and sets `seedCurrent` false.
+
+This helper does not open a second retain client. Writing into the other bank waits on the Phase 8 multi-bank seed CLI.
+
+`formatBankRouteLines` prints the verdict and `latency: Nms vs ungated bank route`.
 
 ---
 

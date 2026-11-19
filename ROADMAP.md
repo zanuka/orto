@@ -160,19 +160,20 @@ JEV-1 through JEV-10 are closed on GitHub.
 - [x] Task follow-up gate: `judgeTaskFollowup` asks Choice `followup` (`retain_to_bank` | `pr_only` | `both`) after a PR/merge/task summary. Harness-agnostic for Claude Code, Codex, Cursor, Pi, and other popular agentic workflows (Firstmate optional). Default off (`followup: true` or `ORTO_JEV_TASK_FOLLOWUP=1`). ADR/standards merges → `retain_to_bank` or `both` (queue `orto store`/`seed`; never MCP-retain). Pure bugfix PRs → `pr_only`. Uncertain → escalate. `orto mcp` prints the policy notes and still works with the judge off. ([JEV-28](https://github.com/zanuka/orto/issues/34))
 - [x] Escalate vs dispatch gate: `judgeEscalateDispatch` asks Noul `needs_captain` + Choice `crewmate` (charter ids from the distro list + `ask_captain`) before spawning a worker. Harness-agnostic for multi-agent workflows (Firstmate primary; Claude Code / Codex / Cursor / Pi wrappers welcome). Default off (`dispatch: true` or `ORTO_JEV_ESCALATE_DISPATCH=1`). Never invent crewmates; empty list → `ask_captain` only. Architecture-invariant work → escalate. Typo/test-fix with a listed implementer → dispatch. `orto mcp` prints the policy notes and still works with the judge off. ([JEV-29](https://github.com/zanuka/orto/issues/35))
 - [x] Scout-report seedability: `judgeScoutSeedability` asks Noul `is_durable_scout_report` / `is_scratch_pad` + Choice `seed`|`skip`|`review` for investigation reports (typically `data/<id>/report.md`). Default off (`scoutSeed: true` or `ORTO_JEV_SCOUT_SEEDABILITY=1`). Durable findings queue `orto store`/`seed` (never MCP-retain); scratch pads skip; uncertain → review. Docs point captains at TypeSafe's official agent skill (`https://docs.typesafe.ai/agent-skill.md`) without wrapping their installer. `orto mcp` prints the policy notes and still works with the judge off. ([JEV-30](https://github.com/zanuka/orto/issues/46))
+- [x] Multi-bank fact routing: `judgeBankRoute` asks Choice `bank` from configured company-brain bank ids plus `current` and `ask`. Default off (`routeBanks: true` or `ORTO_JEV_BANK_ROUTE=1`). Fewer than two banks never prompts; seed keeps `in_scope`. With billing and design-system banks, a design-token section does not seed the billing bank (`seedCurrent: false`). The helper does not open a second retain client. ([JEV-32](https://github.com/zanuka/orto/issues/47))
 - [ ] Firstmate routing (remaining): which bank. ([JEV-27](https://github.com/zanuka/orto/issues/33))
 - [ ] Share safety and destination kind: route by destination kind (Hindsight remains first-class) and gate a public or Cloud share on a safety check before anything is exposed. ([JEV-31](https://github.com/zanuka/orto/issues/55), [JEV-33](https://github.com/zanuka/orto/issues/56))
 - [ ] Heuristic eval: a golden-set judge that scores the offline heuristics so the default path improves without requiring Jev at runtime. ([JEV-34](https://github.com/zanuka/orto/issues/48))
 
 Deferred (still tracked under the Jev epic; land with later phases):
 
-- Multi-bank fact routing ([JEV-32](https://github.com/zanuka/orto/issues/47)): with multi-bank support in Phase 8
+- Multi-bank retain CLI (routing decision shipped as [JEV-32](https://github.com/zanuka/orto/issues/47); writing into the other bank is still Phase 8)
 - Maglio and Strumentario product judges ([JEV-36](https://github.com/zanuka/orto/issues/28), [JEV-37](https://github.com/zanuka/orto/issues/29)): adjacent dogfood
 
 ### Jev issue index
 
 Issue index as of 2 November 2026.
-JEV-1 through JEV-26 and JEV-28 through JEV-30 are done in the checklist (JEV-12, JEV-13, and JEV-22 through JEV-26 plus JEV-28/JEV-29/JEV-30 helpers included).
+JEV-1 through JEV-26, JEV-28 through JEV-30, and JEV-32 are done in the checklist (JEV-12, JEV-13, and JEV-22 through JEV-26 plus JEV-28/JEV-29/JEV-30/JEV-32 helpers included).
 JEV-1 through JEV-10 are closed on GitHub.
 Open [`jev`-labeled issues](https://github.com/zanuka/orto/issues?q=is%3Aissue+is%3Aopen+label%3Ajev) are the rest of the table.
 Closed duplicate epic [#19](https://github.com/zanuka/orto/issues/19) is superseded by [#58](https://github.com/zanuka/orto/issues/58).
@@ -211,7 +212,7 @@ Closed duplicate epic [#19](https://github.com/zanuka/orto/issues/19) is superse
 | JEV-29 | [#35](https://github.com/zanuka/orto/issues/35) | Escalate vs dispatch: needs_captain + which crewmate |
 | JEV-30 | [#46](https://github.com/zanuka/orto/issues/46) | Scout report seedability + official TypeSafe skill pointer |
 | JEV-31 | [#55](https://github.com/zanuka/orto/issues/55) | Destination-kind router (not vendor lock-in) |
-| JEV-32 | [#47](https://github.com/zanuka/orto/issues/47) | Multi-bank fact routing (Phase 8) |
+| JEV-32 | [#47](https://github.com/zanuka/orto/issues/47) | Multi-bank fact routing |
 | JEV-33 | [#56](https://github.com/zanuka/orto/issues/56) | Deployment-profile safety gate before public share |
 | JEV-34 | [#48](https://github.com/zanuka/orto/issues/48) | Golden-set judge to tune heuristics |
 | JEV-35 | [#49](https://github.com/zanuka/orto/issues/49) | Bank drift metric (`orto status` / audit summary) |
@@ -242,7 +243,7 @@ Closed duplicate epic [#19](https://github.com/zanuka/orto/issues/19) is superse
     - [ ] Optional Zep Cloud runtime (`--provider zep`)
     - [ ] `mcp` / `docker print` point at official Graphiti docs (do not vendor compose)
   - [ ] Cognee adapter (later)
-- [ ] Multi-bank and multi-repo company brains (fact routing: [JEV-32](https://github.com/zanuka/orto/issues/47))
+- [ ] Multi-bank and multi-repo company brains (routing decision shipped: [JEV-32](https://github.com/zanuka/orto/issues/47); retain into the other bank is still this phase)
 - [ ] Lightweight inspection UI (optional, later)
 - [ ] Deeper ADR and decision-record parsers
 

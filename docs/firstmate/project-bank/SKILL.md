@@ -27,6 +27,10 @@ Optional harness gates (default off; works with Firstmate or any orchestrator):
   Durable findings queue `orto store`/`seed`; scratch pads skip. Captains may
   install TypeSafe's official agent skill from
   https://docs.typesafe.ai/agent-skill.md (Orto does not wrap that installer).
+- When two or more company-brain banks are configured and
+  `ORTO_JEV_BANK_ROUTE=1`, call `judgeBankRoute` (Choice `bank` from those
+  ids plus `current` and `ask`). A single bank never sees that prompt.
+  A design-token section must not seed the billing bank.
 
 ## What it does
 
