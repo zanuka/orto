@@ -521,12 +521,13 @@ Tracked under Phase 7 in the [roadmap](./ROADMAP.md).
 `orto prune` (path-gone / section-gone / explicit) is in the CLI today: [CLI reference](./docs/orto-cli-commands.md#orto-prune).
 Optional `--judge jev` annotation on prune is not shipped yet.
 
+`pnpm eval:judge` scores offline keep/skip against a labeled golden set with recorded answers and no API key ([JEV-34](https://github.com/zanuka/orto/issues/48)).
+
 Still planned, tracked in [JEV-0](https://github.com/zanuka/orto/issues/58) and the [open `jev` issues](https://github.com/zanuka/orto/issues?q=is%3Aissue+is%3Aopen+label%3Ajev):
 
 - `store` and seed-priority decisions, including a retain budget.
 - Optional `--judge jev` on `orto prune`: annotate outdated, irrelevant, or contradicted items, including when the file is still on disk. You confirm, then Orto deletes. Flags: [CLI reference](./docs/orto-cli-commands.md#orto-prune).
 - MCP recall guards, so an agent `retain` of session notes can be refused.
-- A golden set that can improve the offline heuristics without requiring Jev at runtime.
 - Deployment-profile and share-safety checks, with Firstmate routing and escalation when confidence is low.
 
 ### `orto mcp` options

@@ -41,8 +41,10 @@ const SIGNAL_PATTERNS: Array<{
   },
 ];
 
-const NOISE_HEADINGS =
-  /^(changelog|license|install(ation)?|getting started|quick start|contributing|table of contents|toc|status|security)\b/i;
+const HARD_NOISE_HEADINGS =
+  /^(changelog|license|install(ation)?|getting started|quick start|contributing|table of contents|toc|status)\b/i;
+
+const SOFT_NOISE_HEADINGS = /^(security)\b/i;
 
 const MIN_SECTION_CHARS = 40;
 const MAX_FACT_CHARS = 12_000;
@@ -202,20 +204,25 @@ function scoreSection(
     return undefined;
   }
 
-  const noise = NOISE_HEADINGS.test(heading.trim());
+  const hardNoise = HARD_NOISE_HEADINGS.test(heading.trim());
+  const softNoise = SOFT_NOISE_HEADINGS.test(heading.trim());
   let bestKind: KnowledgeKind = sourceKind === "readme" ? "overview" : "other";
   let score = sourceKind === "docs" ? 1 : sourceKind === "readme" ? 1 : 0;
+  let strongSignal = false;
 
   for (const signal of SIGNAL_PATTERNS) {
     if (signal.pattern.test(text)) {
       score += signal.weight;
       if (signal.weight >= 4) {
+        strongSignal = true;
         bestKind = signal.kind;
       } else if (bestKind === "other" || bestKind === "overview") {
         bestKind = signal.kind;
       }
     }
   }
+
+  const noise = hardNoise || (softNoise && !strongSignal);
 
   if (!noise && sourceKind === "readme" && isFirst) {
     score += 3;

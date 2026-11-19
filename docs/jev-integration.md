@@ -79,8 +79,8 @@ A low score goes to the captain instead of a silent apply.
 **Leave the default path local.**
 
 - With no `ORTO_TYPESAFE_API_KEY` and no `--judge jev`, the CLI behaves as it does today and makes no TypeSafe call.
-- A golden-set judge can score the offline heuristics so that default keep/skip improves for runs that never enable Jev.
-- A public or Cloud share still waits on a safety check in Orto before anything is exposed.
+- `pnpm eval:judge` scores the offline heuristics against a labeled golden set so default keep/skip can improve for runs that never enable Jev.
+- A public or Cloud share runs `judgeShareSafety` when `--judge jev` is set. Share without `--judge` keeps the Phase 4 checks.
 
 ## Where it sits
 

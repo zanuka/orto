@@ -445,6 +445,27 @@ export type {
   ShareSafetySource,
 } from "./share-safety.js";
 export {
+  GOLDEN_EVAL_GUIDANCE,
+  GOLDEN_SECTIONS,
+  evaluateGoldenSet,
+  formatGoldenReport,
+  goldenFindings,
+  jevKindToLabel,
+  recordedJudgeResult,
+  scoreGoldenHeuristic,
+} from "./golden-set.js";
+export type {
+  GoldenAction,
+  GoldenAnswerSource,
+  GoldenFinding,
+  GoldenJevAction,
+  GoldenLabel,
+  GoldenRecorded,
+  GoldenReport,
+  GoldenRow,
+  GoldenSection,
+} from "./golden-set.js";
+export {
   assertRetainBudget,
   compositePriority,
   DEFAULT_PRIORITY_WEIGHTS,

@@ -134,6 +134,40 @@ I built the product-first launch surface and reusable component libraries for th
     );
   });
 
+  it("keeps a security standard and still skips a vulnerability mailbox", () => {
+    const standard = extractFromSource(
+      source("docs/security-standard.md", "docs"),
+      `# Security standard
+
+API keys must never be committed. This coding standard applies to every package in the repo.
+`,
+    );
+    expect(standard.facts.map((fact) => fact.knowledgeKind)).toContain("standard");
+    expect(standard.heuristicSkips).toHaveLength(0);
+
+    const mailbox = extractFromSource(
+      source("docs/security.md", "docs"),
+      `# Security
+
+Report vulnerabilities to the private list for this repository only.
+`,
+    );
+    expect(mailbox.facts).toHaveLength(0);
+    expect(mailbox.heuristicSkips.length).toBeGreaterThan(0);
+  });
+
+  it("keeps changelog headings skipped even when the notes say we decided", () => {
+    const result = extractFromSource(
+      source("docs/changelog.md", "docs"),
+      `# Changelog
+
+We decided to rename the CLI in 0.2. This changelog entry is not an architecture decision record.
+`,
+    );
+    expect(result.facts).toHaveLength(0);
+    expect(result.heuristicSkips.length).toBeGreaterThan(0);
+  });
+
   it("skips empty files", () => {
     const result = extractFromSource(source("README.md", "readme"), "   \n");
     expect(result.skipped).toBe(true);
