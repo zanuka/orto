@@ -111,7 +111,7 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Destination-kind router (helper shipped: `judgeDestinationKind`; default off via `ORTO_JEV_DESTINATION_KIND`; Hindsight stays the default; Mem0 and Graphiti only when configured)
 - Firstmate-specific routing still planned (which registered project bank)
 - Share / deployment-profile safety (helper shipped: `judgeShareSafety` on `orto share --profile public --judge jev` and `hindsight-cloud`; default share stays on Phase 4 checks)
-- Golden-set eval that scores offline heuristics without requiring Jev at runtime
+- Golden-set eval (shipped: `pnpm eval:judge` replays recorded answers with no API key and compares heuristic vs Jev vs human labels; `ORTO_EVAL_JUDGE_LIVE=1` is the optional live job)
 
 Detail and sequencing: [jev-integration.md](./jev-integration.md) and the Phase 7 checklist in [ROADMAP.md](../ROADMAP.md).
 
@@ -670,6 +670,29 @@ Orto applies the profile. Jev does not publish.
 An internal runbook that names a private hostname cannot pass `public_ok`, even when the Choice is confident. A public-by-design standards doc can. A refused public profile is not written.
 
 `orto share` without `--judge` keeps the Phase 4 profile checks only (required base URL, localhost rule, Cloud URL). It does not call TypeSafe.
+
+---
+
+## Golden-set eval
+
+`pnpm eval:judge` scores the offline keep/skip heuristics against a human-labeled fixture ([JEV-34](https://github.com/zanuka/orto/issues/48)).
+
+The fixture lives in `src/judge/golden-set.ts`.
+Each section has a human `keep` or `skip`, a kind, and recorded Jev answers.
+`pnpm test` replays those answers.
+No `ORTO_TYPESAFE_API_KEY` is required.
+
+The report has three columns: label, heuristic, and Jev.
+When the label and Jev agree and the heuristic does not, the finding says to tune the offline heuristic.
+Jev is the yardstick for the eval.
+It is not a production dependency, and seed still runs with no key.
+
+`ORTO_EVAL_JUDGE_LIVE=1 pnpm eval:judge` is the optional live job.
+It calls TypeSafe on the same fixture and prints heuristic vs live Jev vs labels.
+Without that env var, the job replays the recorded answers.
+
+A security heading that states a coding standard is kept.
+A security mailbox, changelog, install, and quick start stay skipped, including a changelog that says "we decided".
 
 ---
 

@@ -17,6 +17,7 @@
     "orto": "node bin/orto.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "eval:judge": "vitest run src/judge/golden-set.eval.test.ts src/judge/golden-set.test.ts",
     "test:watch": "vitest",
     "prepublishOnly": "pnpm run build"
   },

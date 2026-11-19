@@ -164,7 +164,7 @@ JEV-1 through JEV-10 are closed on GitHub.
 - [x] Destination-kind router: `judgeDestinationKind` asks Choice `destination_kind` (`institutional` | `personal_preference` | `temporal_episode`). Default off (`destinationKind: true` or `ORTO_JEV_DESTINATION_KIND=1`). Institutional stays on Hindsight. A style preference selects Mem0 only when that provider is configured. A temporal episode selects Graphiti only when that provider is configured. An unconfigured destination defaults to Hindsight and warns. No crash. This shipped after JEV-32: bank routing runs only when the resolved provider is still Hindsight. Mem0 and Graphiti adapters are not wired into seed yet. ([JEV-31](https://github.com/zanuka/orto/issues/55))
 - [ ] Firstmate routing (remaining): which bank. ([JEV-27](https://github.com/zanuka/orto/issues/33))
 - [x] Share safety: `orto share --profile public` or `hindsight-cloud` with `--judge jev` asks `safe_outside_trusted_network`, `leaks_internal_urls_or_customers`, `sensitivity` (0-3), and Choice `profile_ok` (`local_only` | `vpn` | `public_ok`). An internal runbook with private hostnames cannot pass `public_ok`. A public-by-design standards doc can. Orto applies or refuses the profile. Jev does not publish. Share without `--judge` keeps the Phase 4 profile checks only. ([JEV-33](https://github.com/zanuka/orto/issues/56))
-- [ ] Heuristic eval: a golden-set judge that scores the offline heuristics so the default path improves without requiring Jev at runtime. ([JEV-34](https://github.com/zanuka/orto/issues/48))
+- [x] Heuristic eval: `pnpm test` and `pnpm eval:judge` score a human-labeled keep/skip/kind fixture with recorded Jev answers and no API key. `ORTO_EVAL_JUDGE_LIVE=1 pnpm eval:judge` is the optional live job. Disagreements are heuristic tweaks. Jev is the yardstick, not a runtime requirement. A security heading with a real standard is kept. Changelog, install, and quick-start headings stay skipped. ([JEV-34](https://github.com/zanuka/orto/issues/48))
 
 Deferred (still tracked under the Jev epic; land with later phases):
 
@@ -174,7 +174,7 @@ Deferred (still tracked under the Jev epic; land with later phases):
 ### Jev issue index
 
 Issue index as of 2 November 2026.
-JEV-1 through JEV-26 and JEV-28 through JEV-33 are done in the checklist (JEV-12, JEV-13, and JEV-22 through JEV-26 plus JEV-28 through JEV-33 helpers included). JEV-32 (bank route) landed before JEV-31 (destination kind).
+JEV-1 through JEV-26 and JEV-28 through JEV-34 are done in the checklist (JEV-12, JEV-13, and JEV-22 through JEV-26 plus JEV-28 through JEV-34 helpers included). JEV-32 (bank route) landed before JEV-31 (destination kind).
 JEV-1 through JEV-10 are closed on GitHub.
 Open [`jev`-labeled issues](https://github.com/zanuka/orto/issues?q=is%3Aissue+is%3Aopen+label%3Ajev) are the rest of the table.
 Closed duplicate epic [#19](https://github.com/zanuka/orto/issues/19) is superseded by [#58](https://github.com/zanuka/orto/issues/58).

@@ -79,8 +79,35 @@ A low score goes to the captain instead of a silent apply.
 **Leave the default path local.**
 
 - With no `ORTO_TYPESAFE_API_KEY` and no `--judge jev`, the CLI behaves as it does today and makes no TypeSafe call.
-- A golden-set judge can score the offline heuristics so that default keep/skip improves for runs that never enable Jev.
-- A public or Cloud share still waits on a safety check in Orto before anything is exposed.
+- `pnpm eval:judge` scores the offline heuristics against a labeled golden set so default keep/skip can improve for runs that never enable Jev.
+- A public or Cloud share runs `judgeShareSafety` when `--judge jev` is set. Share without `--judge` keeps the Phase 4 checks.
+
+### What an eval report looks like
+
+`pnpm eval:judge` prints one row per fixture section.
+Each cell is an action and a kind: `keep`, `skip`, or `review`, then `decision`, `architecture`, `domain`, `overview`, `standard`, or `other`.
+`review` means Jev stayed under the confidence gate, so that row is neither a confident keep nor a confident skip.
+A finding is recorded when the human label and Jev agree and the heuristic does not.
+The default command replays recorded answers and needs no API key.
+
+`ORTO_EVAL_JUDGE_LIVE=1 pnpm eval:judge` asks TypeSafe on the same fixture in `src/judge/golden-set.ts`.
+This is one live run of that fixture.
+The heuristic matched the label action on all ten sections.
+Live Jev matched the label action on `changelog-rename`, `quick-start`, and `editor-theme`.
+The other seven rows came back `review`, so this run recorded no heuristic-tweak findings.
+
+| Section | Label | Heuristic | Live Jev |
+|---|---|---|---|
+| adr-typescript | keep decision | keep decision | review decision |
+| architecture-boundaries | keep architecture | keep architecture | review architecture |
+| domain-invariant | keep domain | keep domain | review domain |
+| readme-goal | keep overview | keep overview | review other |
+| security-standard | keep standard | keep standard | review standard |
+| changelog-rename | skip other | skip architecture | skip other |
+| install-steps | skip other | skip other | review other |
+| security-mailbox | skip other | skip other | review standard |
+| quick-start | skip other | skip other | skip other |
+| editor-theme | skip other | skip other | skip other |
 
 ## Where it sits
 

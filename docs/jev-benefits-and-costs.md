@@ -357,7 +357,9 @@ These sit on the hot path. A naive “score every recalled passage on every agen
 
 #### F. Golden-set eval (JEV-34)
 
-CI should replay **recorded** answers with no live key (`$0`). An optional live job on a fixture of 100 sections is about **$0.008** per run. Run it when you change questions or heuristics, not on every commit.
+`pnpm test` and `pnpm eval:judge` replay **recorded** answers with no live key (`$0`).
+`ORTO_EVAL_JUDGE_LIVE=1 pnpm eval:judge` is the optional live job on that same fixture.
+Run the live job when you change questions or heuristics, not on every commit.
 
 ### 5.5 Worked monthly examples
 
