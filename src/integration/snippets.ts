@@ -1,4 +1,5 @@
 import { buildBankRoutePolicyNotes } from "./bank-route-policy.js";
+import { buildDestinationKindPolicyNotes } from "./destination-kind-policy.js";
 import { buildEscalateDispatchPolicyNotes } from "./escalate-dispatch-policy.js";
 import { buildNeedsBankPolicyNotes } from "./needs-bank-policy.js";
 import { buildScoutSeedabilityPolicyNotes } from "./scout-seedability-policy.js";
@@ -106,6 +107,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         ...buildEscalateDispatchPolicyNotes(),
         ...buildScoutSeedabilityPolicyNotes(),
         ...buildBankRoutePolicyNotes(),
+        ...buildDestinationKindPolicyNotes(),
       ],
     },
     {
@@ -122,6 +124,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         ...buildEscalateDispatchPolicyNotes(),
         ...buildScoutSeedabilityPolicyNotes(),
         ...buildBankRoutePolicyNotes(),
+        ...buildDestinationKindPolicyNotes(),
       ],
     },
     {
@@ -180,6 +183,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         ...buildEscalateDispatchPolicyNotes(),
         ...buildScoutSeedabilityPolicyNotes(),
         ...buildBankRoutePolicyNotes(),
+        ...buildDestinationKindPolicyNotes(),
       ],
     },
     {
@@ -196,6 +200,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         ...buildEscalateDispatchPolicyNotes(),
         ...buildScoutSeedabilityPolicyNotes(),
         ...buildBankRoutePolicyNotes(),
+        ...buildDestinationKindPolicyNotes(),
       ],
     },
     {
@@ -222,6 +227,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         ...buildEscalateDispatchPolicyNotes(),
         ...buildScoutSeedabilityPolicyNotes(),
         ...buildBankRoutePolicyNotes(),
+        ...buildDestinationKindPolicyNotes(),
       ],
     },
     {
@@ -240,6 +246,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         ...buildEscalateDispatchPolicyNotes(),
         ...buildScoutSeedabilityPolicyNotes(),
         ...buildBankRoutePolicyNotes(),
+        ...buildDestinationKindPolicyNotes(),
       ],
     },
   ];

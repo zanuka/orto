@@ -161,8 +161,9 @@ JEV-1 through JEV-10 are closed on GitHub.
 - [x] Escalate vs dispatch gate: `judgeEscalateDispatch` asks Noul `needs_captain` + Choice `crewmate` (charter ids from the distro list + `ask_captain`) before spawning a worker. Harness-agnostic for multi-agent workflows (Firstmate primary; Claude Code / Codex / Cursor / Pi wrappers welcome). Default off (`dispatch: true` or `ORTO_JEV_ESCALATE_DISPATCH=1`). Never invent crewmates; empty list → `ask_captain` only. Architecture-invariant work → escalate. Typo/test-fix with a listed implementer → dispatch. `orto mcp` prints the policy notes and still works with the judge off. ([JEV-29](https://github.com/zanuka/orto/issues/35))
 - [x] Scout-report seedability: `judgeScoutSeedability` asks Noul `is_durable_scout_report` / `is_scratch_pad` + Choice `seed`|`skip`|`review` for investigation reports (typically `data/<id>/report.md`). Default off (`scoutSeed: true` or `ORTO_JEV_SCOUT_SEEDABILITY=1`). Durable findings queue `orto store`/`seed` (never MCP-retain); scratch pads skip; uncertain → review. Docs point captains at TypeSafe's official agent skill (`https://docs.typesafe.ai/agent-skill.md`) without wrapping their installer. `orto mcp` prints the policy notes and still works with the judge off. ([JEV-30](https://github.com/zanuka/orto/issues/46))
 - [x] Multi-bank fact routing: `judgeBankRoute` asks Choice `bank` from configured company-brain bank ids plus `current` and `ask`. Default off (`routeBanks: true` or `ORTO_JEV_BANK_ROUTE=1`). Fewer than two banks never prompts; seed keeps `in_scope`. With billing and design-system banks, a design-token section does not seed the billing bank (`seedCurrent: false`). The helper does not open a second retain client. ([JEV-32](https://github.com/zanuka/orto/issues/47))
+- [x] Destination-kind router: `judgeDestinationKind` asks Choice `destination_kind` (`institutional` | `personal_preference` | `temporal_episode`). Default off (`destinationKind: true` or `ORTO_JEV_DESTINATION_KIND=1`). Institutional stays on Hindsight. A style preference selects Mem0 only when that provider is configured. A temporal episode selects Graphiti only when that provider is configured. An unconfigured destination defaults to Hindsight and warns. No crash. This shipped after JEV-32: bank routing runs only when the resolved provider is still Hindsight. Mem0 and Graphiti adapters are not wired into seed yet. ([JEV-31](https://github.com/zanuka/orto/issues/55))
 - [ ] Firstmate routing (remaining): which bank. ([JEV-27](https://github.com/zanuka/orto/issues/33))
-- [ ] Share safety and destination kind: route by destination kind (Hindsight remains first-class) and gate a public or Cloud share on a safety check before anything is exposed. ([JEV-31](https://github.com/zanuka/orto/issues/55), [JEV-33](https://github.com/zanuka/orto/issues/56))
+- [ ] Share safety: gate a public or Cloud share on a safety check before anything is exposed. ([JEV-33](https://github.com/zanuka/orto/issues/56))
 - [ ] Heuristic eval: a golden-set judge that scores the offline heuristics so the default path improves without requiring Jev at runtime. ([JEV-34](https://github.com/zanuka/orto/issues/48))
 
 Deferred (still tracked under the Jev epic; land with later phases):
@@ -173,7 +174,7 @@ Deferred (still tracked under the Jev epic; land with later phases):
 ### Jev issue index
 
 Issue index as of 2 November 2026.
-JEV-1 through JEV-26, JEV-28 through JEV-30, and JEV-32 are done in the checklist (JEV-12, JEV-13, and JEV-22 through JEV-26 plus JEV-28/JEV-29/JEV-30/JEV-32 helpers included).
+JEV-1 through JEV-26 and JEV-28 through JEV-32 are done in the checklist (JEV-12, JEV-13, and JEV-22 through JEV-26 plus JEV-28 through JEV-32 helpers included). JEV-32 (bank route) landed before JEV-31 (destination kind).
 JEV-1 through JEV-10 are closed on GitHub.
 Open [`jev`-labeled issues](https://github.com/zanuka/orto/issues?q=is%3Aissue+is%3Aopen+label%3Ajev) are the rest of the table.
 Closed duplicate epic [#19](https://github.com/zanuka/orto/issues/19) is superseded by [#58](https://github.com/zanuka/orto/issues/58).
@@ -234,7 +235,7 @@ Closed duplicate epic [#19](https://github.com/zanuka/orto/issues/19) is superse
 
 - [ ] File watcher / event-driven re-seeding (wire `judgeWatcherGate` / `collectSeedEnqueue` into an opt-in watch loop; gate helper: [JEV-13](https://github.com/zanuka/orto/issues/42))
 - [ ] Multi-provider support: Hindsight remains first-class and the default; other backends are opt-in CLI options
-  - [ ] Multi-provider foundation (extract `HindsightProvider`, `--provider` dispatch; destination-kind router: [JEV-31](https://github.com/zanuka/orto/issues/55))
+  - [ ] Multi-provider foundation (extract `HindsightProvider`, `--provider` dispatch; destination-kind decision shipped: [JEV-31](https://github.com/zanuka/orto/issues/55))
   - [ ] Mem0 adapter
   - [ ] Graphiti / Zep adapter: **seed destination only** (see [docs/graphiti-integration.md](./docs/graphiti-integration.md))
     - [ ] OSS HTTP transport spike (`add_episode` + `group_id`)

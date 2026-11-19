@@ -122,6 +122,8 @@ describe("generateMcpSnippets", () => {
     expect(firstmate!.notes.join(" ")).toMatch(/judgeScoutSeedability/);
     expect(firstmate!.notes.join(" ")).toMatch(/ORTO_JEV_BANK_ROUTE/);
     expect(firstmate!.notes.join(" ")).toMatch(/judgeBankRoute/);
+    expect(firstmate!.notes.join(" ")).toMatch(/judgeDestinationKind/);
+    expect(firstmate!.notes.join(" ")).toMatch(/ORTO_JEV_DESTINATION_KIND/);
     expect(firstmate!.notes.join(" ")).toMatch(/in_scope/);
     expect(firstmate!.notes.join(" ")).toMatch(/docs\.typesafe\.ai\/agent-skill\.md/);
     expect(firstmate!.notes.join(" ")).toMatch(/Claude Code/);
@@ -139,6 +141,7 @@ describe("generateMcpSnippets", () => {
     expect(pi!.notes.join(" ")).toMatch(/judgeEscalateDispatch/);
     expect(pi!.notes.join(" ")).toMatch(/judgeScoutSeedability/);
     expect(pi!.notes.join(" ")).toMatch(/judgeBankRoute/);
+    expect(pi!.notes.join(" ")).toMatch(/judgeDestinationKind/);
   });
 
   it("adds bearer env for Pi with --include-auth", () => {
@@ -165,6 +168,8 @@ describe("generateMcpSnippets", () => {
       expect(notes).toContain("ORTO_JEV_SCOUT_SEEDABILITY");
       expect(notes).toContain("judgeBankRoute");
       expect(notes).toContain("ORTO_JEV_BANK_ROUTE");
+      expect(notes).toContain("judgeDestinationKind");
+      expect(notes).toContain("ORTO_JEV_DESTINATION_KIND");
       expect(notes).toContain("https://docs.typesafe.ai/agent-skill.md");
       expect(notes).toMatch(/Claude Code/);
       expect(notes).not.toMatch(/sk-[a-z0-9]{8,}/i);
@@ -247,6 +252,7 @@ describe("agent rules", () => {
     expect(rule).toContain("judgeEscalateDispatch");
     expect(rule).toContain("judgeScoutSeedability");
     expect(rule).toContain("judgeBankRoute");
+    expect(rule).toContain("judgeDestinationKind");
     expect(rule).toContain("Claude Code");
     expect(rule).toContain("Pi");
   });
@@ -265,6 +271,7 @@ describe("agent rules", () => {
     expect(section).toContain("judgeEscalateDispatch");
     expect(section).toContain("judgeScoutSeedability");
     expect(section).toContain("judgeBankRoute");
+    expect(section).toContain("judgeDestinationKind");
     expect(section).toContain("harness-agnostic");
     expect(section).toContain("Claude Code");
     expect(section).toContain("Pi");
