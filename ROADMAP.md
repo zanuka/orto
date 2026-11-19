@@ -170,7 +170,8 @@ JEV-1 through JEV-10 are closed on GitHub.
 Deferred (still tracked under the Jev epic; land with later phases):
 
 - Multi-bank retain CLI (routing decision shipped as [JEV-32](https://github.com/zanuka/orto/issues/47); writing into the other bank is still Phase 8)
-- Maglio and Strumentario product judges ([JEV-36](https://github.com/zanuka/orto/issues/28), [JEV-37](https://github.com/zanuka/orto/issues/29)): adjacent dogfood
+- Maglio work-order invariant check: [maglio#1](https://github.com/zanuka/maglio/issues/1) (JEV-36, moved out of this repo)
+- Strumentario instrument-output check: [strumentario#41](https://github.com/zanuka/strumentario/issues/41) (JEV-37, moved out of this repo)
 
 ### Jev issue index
 
@@ -218,8 +219,8 @@ Closed duplicate epic [#19](https://github.com/zanuka/orto/issues/19) is superse
 | JEV-33 | [#56](https://github.com/zanuka/orto/issues/56) | Deployment-profile safety gate before public share |
 | JEV-34 | [#48](https://github.com/zanuka/orto/issues/48) | Golden-set judge to tune heuristics |
 | JEV-35 | [#49](https://github.com/zanuka/orto/issues/49) | Bank drift metric (`orto status` / audit summary) |
-| JEV-36 | [#28](https://github.com/zanuka/orto/issues/28) | Maglio: work order vs bank invariant (adjacent dogfood) |
-| JEV-37 | [#29](https://github.com/zanuka/orto/issues/29) | Strumentario: instrument output vs bank standard (adjacent dogfood) |
+| JEV-36 | [maglio#1](https://github.com/zanuka/maglio/issues/1) | Maglio: work order vs bank invariant (moved to Maglio) |
+| JEV-37 | [strumentario#41](https://github.com/zanuka/strumentario/issues/41) | Strumentario: instrument output vs bank standard (moved to Strumentario) |
 
 ### Reliability & Developer Experience
 
