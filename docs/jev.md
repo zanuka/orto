@@ -108,6 +108,7 @@ Bounded decisions where a typed answer plus confidence is enough:
 - Escalate vs dispatch gate (helper shipped: `judgeEscalateDispatch`; default off via `ORTO_JEV_ESCALATE_DISPATCH`; Noul `needs_captain` + Choice `crewmate` from the distro charter list)
 - Scout-report seedability (helper shipped: `judgeScoutSeedability`; default off via `ORTO_JEV_SCOUT_SEEDABILITY`; docs point at official TypeSafe agent skill only)
 - Multi-bank fact routing (helper shipped: `judgeBankRoute`; default off via `ORTO_JEV_BANK_ROUTE`; single-bank projects keep `in_scope` and never see the prompt)
+- Destination-kind router (helper shipped: `judgeDestinationKind`; default off via `ORTO_JEV_DESTINATION_KIND`; Hindsight stays the default; Mem0 and Graphiti only when configured)
 - Firstmate-specific routing still planned (which registered project bank)
 - Share / deployment-profile safety before public or Cloud exposure
 - Golden-set eval that scores offline heuristics without requiring Jev at runtime
@@ -624,6 +625,32 @@ A design-token section with banks `billing-service` and `design-system` routes t
 This helper does not open a second retain client. Writing into the other bank waits on the Phase 8 multi-bank seed CLI.
 
 `formatBankRouteLines` prints the verdict and `latency: Nms vs ungated bank route`.
+
+---
+
+## Destination kind
+
+`judgeDestinationKind` in `src/judge/destination-kind.ts` chooses the kind of knowledge, then the provider that kind uses ([JEV-31](https://github.com/zanuka/orto/issues/55)).
+
+This landed after `judgeBankRoute` ([JEV-32](https://github.com/zanuka/orto/issues/47)). They compose. Destination kind runs first. Bank routing runs only when the resolved provider is still Hindsight (`routeHindsightBank`).
+
+| Kind | Provider |
+|------|----------|
+| `institutional` | Hindsight (default) |
+| `personal_preference` | Mem0, when configured |
+| `temporal_episode` | Graphiti, when configured |
+
+The Choice is the kind, not a vendor name.
+
+- Off unless `destinationKind: true` or `ORTO_JEV_DESTINATION_KIND=1` (`NOCCIOLO_JEV_DESTINATION_KIND` alias)
+- Default `--confidence 0.8`
+- An ADR stays `institutional` on Hindsight
+- A style preference can select Mem0 when that provider is in the configured list (the stand-in for `--provider mem0`)
+- If the chosen kind's provider is not configured, the helper defaults to Hindsight, sets `warning`, and does not throw
+
+Mem0 and Graphiti seed adapters are not wired yet. This helper only decides the route.
+
+`formatDestinationKindLines` prints the kind, the provider, any warning, and `latency: Nms vs ungated destination kind`.
 
 ---
 

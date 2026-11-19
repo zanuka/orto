@@ -88,6 +88,8 @@ describe("runMcp --write-firstmate", () => {
     expect(skill).toContain("https://docs.typesafe.ai/agent-skill.md");
     expect(skill).toContain("ORTO_JEV_BANK_ROUTE");
     expect(skill).toContain("judgeBankRoute");
+    expect(skill).toContain("ORTO_JEV_DESTINATION_KIND");
+    expect(skill).toContain("judgeDestinationKind");
 
     const registryPath = join(fmHome, ".orto", "projects.json");
     const registry = JSON.parse(await readFile(registryPath, "utf8")) as {

@@ -45,6 +45,12 @@ Optional harness gates (default off; works with Firstmate or any orchestrator):
   \`ORTO_JEV_BANK_ROUTE=1\`, call \`judgeBankRoute\` (Choice \`bank\` from those
   ids plus \`current\` and \`ask\`). A single bank never sees that prompt.
   A design-token section must not seed the billing bank.
+- When \`ORTO_JEV_DESTINATION_KIND=1\`, call \`judgeDestinationKind\` before
+  bank routing. Choice \`destination_kind\` is the kind of knowledge
+  (institutional stays on Hindsight; personal preference can use Mem0;
+  a temporal episode can use Graphiti). If that provider is not configured,
+  default to Hindsight and warn. Run \`judgeBankRoute\` only when the
+  destination stays on Hindsight.
 
 ## What it does
 

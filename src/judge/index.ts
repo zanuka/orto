@@ -396,6 +396,36 @@ export type {
   CompanyBankRef,
 } from "./bank-route.js";
 export {
+  DESTINATION_KIND_DEFAULT_CONFIDENCE,
+  DESTINATION_KIND_ENV,
+  DESTINATION_KIND_ENV_ALIASES,
+  DESTINATION_KIND_GRAPHITI_MESSAGE,
+  DESTINATION_KIND_HINDSIGHT_MESSAGE,
+  DESTINATION_KIND_MEM0_MESSAGE,
+  DESTINATION_KIND_TEXT_MAX_CHARS,
+  DESTINATION_KIND_UNSET_MESSAGE,
+  DESTINATION_KINDS,
+  DESTINATION_PROVIDERS,
+  destinationKindQuestions,
+  formatDestinationKindLines,
+  heuristicDestinationKind,
+  interpretDestinationKind,
+  judgeDestinationKind,
+  normalizeConfiguredProviders,
+  parseDestinationKindEnabled,
+  passThroughDestinationKind,
+  providerForDestinationKind,
+  resolveDestinationKindEnabled,
+  resolveDestinationProvider,
+} from "./destination-kind.js";
+export type {
+  DestinationKind,
+  DestinationKindDecision,
+  DestinationKindResult,
+  DestinationKindSource,
+  DestinationProviderId,
+} from "./destination-kind.js";
+export {
   assertRetainBudget,
   compositePriority,
   DEFAULT_PRIORITY_WEIGHTS,
