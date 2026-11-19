@@ -27,7 +27,7 @@ import {
   addJudgeCliOptions,
   judgeOptionsFromCli,
 } from "./judge/cli.js";
-import { parseBudget, parseExtractionAggressiveness } from "./judge/index.js";
+import { createJudge, parseBudget, parseExtractionAggressiveness } from "./judge/index.js";
 import { formatError } from "./utils/errors.js";
 
 function readPackageVersion(): string {
@@ -221,6 +221,9 @@ async function main(): Promise<void> {
     )
     .option("--validate", "Validate the active share/profile without writing")
     .option("--dry-run", "Preview share.json / config updates without writing")
+    .option("--judge <id>", "With jev, gate public and Cloud profiles before Orto writes them")
+    .option("--confidence <n>", "Minimum confidence for the share safety gate (default 0.8)")
+    .option("--strict", "With --judge jev, fail instead of falling back when TypeSafe errors")
     .action(
       async (opts: {
         profile?: string;
@@ -228,13 +231,26 @@ async function main(): Promise<void> {
         mcpAuth?: string;
         validate?: boolean;
         dryRun?: boolean;
+        judge?: string;
+        confidence?: string;
+        strict?: boolean;
       }) => {
+        const judgeOpts = judgeOptionsFromCli(opts);
+        const resolved =
+          judgeOpts.judge !== undefined ? createJudge(judgeOpts) : undefined;
         const result = await runShare({
           dryRun: Boolean(opts.dryRun),
           validate: Boolean(opts.validate),
           ...(opts.profile !== undefined ? { profile: opts.profile } : {}),
           ...(opts.baseUrl !== undefined ? { baseUrl: opts.baseUrl } : {}),
           ...(opts.mcpAuth !== undefined ? { mcpAuth: opts.mcpAuth } : {}),
+          ...(resolved !== undefined
+            ? {
+                judge: resolved.judge,
+                judgeId: resolved.judgeId,
+                confidence: resolved.confidence,
+              }
+            : {}),
         });
         printShareResult(result);
       },

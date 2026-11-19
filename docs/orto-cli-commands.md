@@ -159,9 +159,13 @@ Portable project identity stays in `config.json`; host strategy lives in the sha
 | `--mcp-auth <mode>` | Cloud MCP mode: `api-key` (default) or `oauth` |
 | `--validate` | Validate the active profile without writing |
 | `--dry-run` | Preview `share.json` / `deploymentProfile` updates |
+| `--judge jev` | Before `public` or `hindsight-cloud`, run the share safety gate. Orto refuses the write when the docs cannot pass `public_ok` |
+| `--confidence <n>` | Minimum confidence for that gate (default 0.8) |
 
 Prints security defaults and trade-offs for the chosen profile.
+Without `--judge`, share keeps those Phase 4 checks only.
 Cloud skips local Docker; see [hindsight-cloud.md](./hindsight-cloud.md).
+See [share safety](./jev.md#share-safety).
 
 ---
 
