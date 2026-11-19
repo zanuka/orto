@@ -118,6 +118,9 @@ describe("generateMcpSnippets", () => {
     expect(firstmate!.notes.join(" ")).toMatch(/judgeEscalateDispatch/);
     expect(firstmate!.notes.join(" ")).toMatch(/needs_captain/);
     expect(firstmate!.notes.join(" ")).toMatch(/ask_captain/);
+    expect(firstmate!.notes.join(" ")).toMatch(/ORTO_JEV_SCOUT_SEEDABILITY/);
+    expect(firstmate!.notes.join(" ")).toMatch(/judgeScoutSeedability/);
+    expect(firstmate!.notes.join(" ")).toMatch(/docs\.typesafe\.ai\/agent-skill\.md/);
     expect(firstmate!.notes.join(" ")).toMatch(/Claude Code/);
     expect(firstmate!.notes.join(" ")).toMatch(/\bPi\b/);
   });
@@ -131,6 +134,7 @@ describe("generateMcpSnippets", () => {
     expect(pi!.notes.join(" ")).toMatch(/needs_project_bank/);
     expect(pi!.notes.join(" ")).toMatch(/judgeTaskFollowup/);
     expect(pi!.notes.join(" ")).toMatch(/judgeEscalateDispatch/);
+    expect(pi!.notes.join(" ")).toMatch(/judgeScoutSeedability/);
   });
 
   it("adds bearer env for Pi with --include-auth", () => {
@@ -141,7 +145,7 @@ describe("generateMcpSnippets", () => {
     expect(pi!.body).toContain("--bearer-token-env-var ORTO_HINDSIGHT_API_KEY");
   });
 
-  it("documents needs_project_bank, task followup, and escalate/dispatch on popular harnesses without a TypeSafe key", () => {
+  it("documents needs_project_bank, task followup, escalate/dispatch, and scout seedability on popular harnesses without a TypeSafe key", () => {
     for (const harness of ["cursor", "claude-code", "codex", "pi"] as const) {
       const snippet = generateMcpSnippets(input).find((s) => s.harness === harness);
       const notes = snippet!.notes.join("\n");
@@ -153,6 +157,9 @@ describe("generateMcpSnippets", () => {
       expect(notes).toContain("judgeEscalateDispatch");
       expect(notes).toContain("needs_captain");
       expect(notes).toContain("ORTO_JEV_ESCALATE_DISPATCH");
+      expect(notes).toContain("judgeScoutSeedability");
+      expect(notes).toContain("ORTO_JEV_SCOUT_SEEDABILITY");
+      expect(notes).toContain("https://docs.typesafe.ai/agent-skill.md");
       expect(notes).toMatch(/Claude Code/);
       expect(notes).not.toMatch(/sk-[a-z0-9]{8,}/i);
       expect(notes).not.toMatch(/ORTO_TYPESAFE_API_KEY=\S+/);
@@ -232,6 +239,7 @@ describe("agent rules", () => {
     expect(rule).toContain("judgeNeedsBank");
     expect(rule).toContain("judgeTaskFollowup");
     expect(rule).toContain("judgeEscalateDispatch");
+    expect(rule).toContain("judgeScoutSeedability");
     expect(rule).toContain("Claude Code");
     expect(rule).toContain("Pi");
   });
@@ -248,6 +256,7 @@ describe("agent rules", () => {
     expect(section).toContain("judgeNeedsBank");
     expect(section).toContain("judgeTaskFollowup");
     expect(section).toContain("judgeEscalateDispatch");
+    expect(section).toContain("judgeScoutSeedability");
     expect(section).toContain("harness-agnostic");
     expect(section).toContain("Claude Code");
     expect(section).toContain("Pi");

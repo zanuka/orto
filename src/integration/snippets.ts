@@ -1,5 +1,6 @@
 import { buildEscalateDispatchPolicyNotes } from "./escalate-dispatch-policy.js";
 import { buildNeedsBankPolicyNotes } from "./needs-bank-policy.js";
+import { buildScoutSeedabilityPolicyNotes } from "./scout-seedability-policy.js";
 import { buildTaskFollowupPolicyNotes } from "./task-followup-policy.js";
 import { buildSingleBankMcpUrl, defaultMcpServerName } from "./mcp-url.js";
 
@@ -102,6 +103,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         ...buildNeedsBankPolicyNotes(),
         ...buildTaskFollowupPolicyNotes(),
         ...buildEscalateDispatchPolicyNotes(),
+        ...buildScoutSeedabilityPolicyNotes(),
       ],
     },
     {
@@ -116,6 +118,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         ...buildNeedsBankPolicyNotes(),
         ...buildTaskFollowupPolicyNotes(),
         ...buildEscalateDispatchPolicyNotes(),
+        ...buildScoutSeedabilityPolicyNotes(),
       ],
     },
     {
@@ -172,6 +175,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         ...buildNeedsBankPolicyNotes(),
         ...buildTaskFollowupPolicyNotes(),
         ...buildEscalateDispatchPolicyNotes(),
+        ...buildScoutSeedabilityPolicyNotes(),
       ],
     },
     {
@@ -186,6 +190,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         ...buildNeedsBankPolicyNotes(),
         ...buildTaskFollowupPolicyNotes(),
         ...buildEscalateDispatchPolicyNotes(),
+        ...buildScoutSeedabilityPolicyNotes(),
       ],
     },
     {
@@ -210,6 +215,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         ...buildNeedsBankPolicyNotes(),
         ...buildTaskFollowupPolicyNotes(),
         ...buildEscalateDispatchPolicyNotes(),
+        ...buildScoutSeedabilityPolicyNotes(),
       ],
     },
     {
@@ -226,6 +232,7 @@ export function generateMcpSnippets(input: McpSnippetInput): McpSnippet[] {
         ...buildNeedsBankPolicyNotes(),
         ...buildTaskFollowupPolicyNotes(),
         ...buildEscalateDispatchPolicyNotes(),
+        ...buildScoutSeedabilityPolicyNotes(),
       ],
     },
   ];
