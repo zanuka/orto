@@ -30,9 +30,7 @@ Agent memory needs structured, durable, queryable knowledge with a mission and c
 
 ## The Vision
 
-Orto is the **company brain config** layer.
-
-It turns the durable knowledge already living in your repository into a configured memory bank that agents can retain, recall, and reflect against, starting with [Hindsight](https://hindsight.vectorize.io).
+See the [Vision in STRATEGY.md](./STRATEGY.md#vision).
 
 ## One memory across your agents
 
@@ -48,7 +46,7 @@ For Firstmate, `orto mcp --harness firstmate --write-firstmate` registers the pr
 
 ## What Orto Does
 
-- **Scans** your project for durable knowledge (READMEs, ADRs, standards, domain docs, schemas)
+- **Scans** all of your project's docs for durable knowledge (READMEs, ADRs, standards, domain docs, schema docs)
 - **Configures** a Hindsight memory bank with a clear mission, directives, and extraction settings tuned for software projects
 - **Seeds** the bank with high-signal facts and decisions via Hindsight **retain**: not by uploading raw markdown like a file-sync script
 - **Adds an optional Jev judgment layer** so `seed --judge jev` can skip changelogs, tables of contents, and other ephemeral sections before retain, and can flag a section that supersedes or contradicts an observation already in the bank. Recall rerank, prune annotation, and routing are still planned: see [Jev](#jev)
