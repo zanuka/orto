@@ -6,6 +6,17 @@ import type {
   KnowledgeKind,
 } from "./types.js";
 
+function uniqueSectionSlug(base: string, taken: Set<string>): string {
+  let candidate = base;
+  let suffix = 2;
+  while (taken.has(candidate)) {
+    candidate = `${base}-${suffix}`;
+    suffix += 1;
+  }
+  taken.add(candidate);
+  return candidate;
+}
+
 const SIGNAL_PATTERNS: Array<{
   pattern: RegExp;
   kind: KnowledgeKind;
@@ -95,6 +106,7 @@ export function extractFromSource(
   const sections = splitMarkdownSections(trimmed);
   const facts: CandidateFact[] = [];
   const heuristicSkips: CandidateFact[] = [];
+  const takenSlugs = new Set<string>();
 
   for (const [index, section] of sections.entries()) {
     const scored = scoreSection(
@@ -112,7 +124,10 @@ export function extractFromSource(
       body: section.body,
       knowledgeKind: scored.kind,
       score: scored.score,
-      sectionSlug: slugifyHeading(section.heading || "body"),
+      sectionSlug: uniqueSectionSlug(
+        slugifyHeading(section.heading || "body"),
+        takenSlugs,
+      ),
       ...(options.commit !== undefined ? { commit: options.commit } : {}),
     });
     if (!fact) {

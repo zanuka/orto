@@ -173,4 +173,22 @@ We decided to rename the CLI in 0.2. This changelog entry is not an architecture
     expect(result.skipped).toBe(true);
     expect(result.facts).toHaveLength(0);
   });
+
+  it("gives repeated headings in one file distinct section ids", () => {
+    const content = `# Architecture
+
+## Decision
+
+We keep the CLI local-first and self-hostable for every team.
+
+## Decision
+
+We keep the bank template under version control for every team.
+`;
+    const result = extractFromSource(source("docs/notes.md", "docs"), content);
+    const ids = [...result.facts, ...result.heuristicSkips].map((fact) => fact.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids.some((id) => id.endsWith("#decision"))).toBe(true);
+    expect(ids.some((id) => id.endsWith("#decision-2"))).toBe(true);
+  });
 });
