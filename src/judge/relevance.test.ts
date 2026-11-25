@@ -712,7 +712,7 @@ describe("knowledge kind on the relevance call", () => {
     const items = toRetainItems([
       {
         ...architecture,
-        bankKind: decision.bankKind,
+        ...(decision.bankKind !== undefined ? { bankKind: decision.bankKind } : {}),
       },
     ]);
     expect(items[0]?.tags).toEqual([
