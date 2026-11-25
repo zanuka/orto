@@ -302,10 +302,10 @@ export async function runMentalModelProposeCommand(
 async function resolveSelectedProposals(input: {
   proposed: MentalModelCatalogProposal[];
   yes: boolean;
-  ids?: string[];
-  selectProposals?: (
-    proposed: MentalModelCatalogProposal[],
-  ) => Promise<MentalModelCatalogProposal[]>;
+  ids?: string[] | undefined;
+  selectProposals?:
+    | ((proposed: MentalModelCatalogProposal[]) => Promise<MentalModelCatalogProposal[]>)
+    | undefined;
 }): Promise<MentalModelCatalogProposal[]> {
   if (input.proposed.length === 0) {
     return [];

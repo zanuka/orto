@@ -257,18 +257,18 @@ function finalizeFreshness(input: {
   id: string;
   action: MentalModelFreshnessAction;
   confidence: number;
-  stillAnswers?: number;
-  stillBand?: NoulBand;
-  newEvidence?: number;
-  evidenceBand?: NoulBand;
-  chosenAction?: string;
-  actionConfidence?: number;
-  modelStillAnswersSourceQuery?: number;
-  modelStillAnswersBand?: NoulBand;
-  newEvidenceSinceRefresh?: number;
-  newEvidenceBand?: NoulBand;
-  review?: boolean;
-  threshold?: number;
+  stillAnswers?: number | undefined;
+  stillBand?: NoulBand | undefined;
+  newEvidence?: number | undefined;
+  evidenceBand?: NoulBand | undefined;
+  chosenAction?: string | undefined;
+  actionConfidence?: number | undefined;
+  modelStillAnswersSourceQuery?: number | undefined;
+  modelStillAnswersBand?: NoulBand | undefined;
+  newEvidenceSinceRefresh?: number | undefined;
+  newEvidenceBand?: NoulBand | undefined;
+  review?: boolean | undefined;
+  threshold?: number | undefined;
 }): MentalModelFreshnessDecision {
   const reviewOnly = input.action === "retarget_query";
   return {
@@ -309,12 +309,12 @@ function finalizeFreshness(input: {
 
 function reasonFromAnswers(input: {
   action: string;
-  stillAnswers?: number;
-  stillBand?: NoulBand;
-  newEvidence?: number;
-  evidenceBand?: NoulBand;
-  review?: boolean;
-  threshold?: number;
+  stillAnswers?: number | undefined;
+  stillBand?: NoulBand | undefined;
+  newEvidence?: number | undefined;
+  evidenceBand?: NoulBand | undefined;
+  review?: boolean | undefined;
+  threshold?: number | undefined;
   reviewOnly?: boolean;
 }): string {
   const parts = [`action=${input.action}`];

@@ -160,8 +160,7 @@ export function interpretMcpRetain(input: {
   if (
     actionConfident &&
     chosen?.choice === "allow" &&
-    durableBand === "yes" &&
-    fluffBand !== "yes"
+    durableBand === "yes"
   ) {
     return {
       ...base,

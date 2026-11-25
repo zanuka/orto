@@ -332,8 +332,7 @@ export function interpretScoutSeedability(input: {
   if (
     actionConfident &&
     chosen?.choice === "seed" &&
-    durableBand === "yes" &&
-    scratchBand !== "yes"
+    durableBand === "yes"
   ) {
     return {
       ...base,

@@ -16,7 +16,7 @@
     "start": "node bin/orto.js",
     "orto": "node bin/orto.js",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "pnpm run typecheck && vitest run",
     "eval:judge": "vitest run src/judge/golden-set.eval.test.ts src/judge/golden-set.test.ts",
     "test:watch": "vitest",
     "prepublishOnly": "pnpm run build"

@@ -424,9 +424,9 @@ function finishKind(input: {
   kind: DestinationKind;
   reason: string;
   source: DestinationKindSource;
-  configuredProviders?: readonly string[];
-  chosenKind?: string;
-  kindConfidence?: number;
+  configuredProviders?: readonly string[] | undefined;
+  chosenKind?: string | undefined;
+  kindConfidence?: number | undefined;
 }): DestinationKindDecision {
   const resolved = resolveDestinationProvider({
     kind: input.kind,

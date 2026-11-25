@@ -74,6 +74,9 @@ describe("runPrune", () => {
       interactive: false,
     });
 
+    if (!("plan" in result)) {
+      throw new Error("expected a prune plan result");
+    }
     expect(result.plan.pathGone).toHaveLength(2);
     expect(result.deleted).toEqual([]);
     expect(client.deleteDocument).not.toHaveBeenCalled();

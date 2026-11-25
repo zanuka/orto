@@ -339,10 +339,10 @@ export function formatAuditTable(input: {
 
 function reasonFromAnswers(input: {
   action: string;
-  supported?: number;
-  supportedBand?: NoulBand;
-  superseded?: number;
-  supersededBand?: NoulBand;
+  supported?: number | undefined;
+  supportedBand?: NoulBand | undefined;
+  superseded?: number | undefined;
+  supersededBand?: NoulBand | undefined;
   review?: boolean;
   threshold?: number;
 }): string {

@@ -22,6 +22,7 @@ pnpm orto --help
 ```
 
 Useful scripts: `pnpm build`, `pnpm test`, `pnpm typecheck`, `pnpm orto <command>`.
+`pnpm test` runs `pnpm typecheck` first, so a type error fails the test run.
 
 To use bare `orto` on your PATH from **any other local repo** (`cd` there first: `pnpm orto` only works in this clone):
 
