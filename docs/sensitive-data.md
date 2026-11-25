@@ -24,6 +24,7 @@ How Orto keeps secrets and low-value project noise out of Hindsight banks. Compa
 The scanner only looks for durable documentation shapes:
 
 - `README.md`
+- Root `STRATEGY.md` and `VISION.md` (the project vision)
 - Markdown under `docs/`, `doc/`, `documentation/`
 - ADR locations (`adr/`, `docs/adr/`, `docs/decisions/`, root `ADR*.md`, …)
 

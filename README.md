@@ -46,7 +46,7 @@ For Firstmate, `orto mcp --harness firstmate --write-firstmate` registers the pr
 
 ## What Orto Does
 
-- **Scans** your project's docs for durable knowledge (READMEs, ADRs, standards, domain docs, schema docs): by default the root `README.md`, `docs/`, and ADR folders, or the globs you set in `scanner.include` (see [docs/orto-configs.md](./docs/orto-configs.md))
+- **Scans** your project's docs for durable knowledge (READMEs, ADRs, standards, domain docs, schema docs): by default the root `README.md`, `STRATEGY.md`, and `VISION.md`, `docs/`, and ADR folders, or the globs you set in `scanner.include` (see [docs/orto-configs.md](./docs/orto-configs.md))
 - **Configures** a Hindsight memory bank with a clear mission, directives, and extraction settings tuned for software projects
 - **Seeds** the bank with high-signal facts and decisions via Hindsight **retain**: not by uploading raw markdown like a file-sync script
 - **Adds an optional Jev judgment layer** so `seed --judge jev` can skip changelogs, tables of contents, and other ephemeral sections before retain, and can flag a section that supersedes or contradicts an observation already in the bank. Recall rerank, prune annotation, and routing are still planned: see [Jev](#jev)
@@ -188,7 +188,7 @@ Full rationale for contributors: [docs/orto-sync-strategy.md](./docs/orto-sync-s
 
 What `seed` actually does:
 
-1. Scan durable sources locally (README, `docs/**`, ADRs: secrets like `.env` excluded). A `scanner` block in `.orto/config.json` replaces that default walk with `include` globs, then applies `exclude` globs. Omit `scanner` to keep the conservative default. The secrets denylist still wins over `include`. `store.allowlist` stays separate: the scanner decides what can be discovered, and the allowlist decides which new files `store` retains.
+1. Scan durable sources locally (README, `STRATEGY.md` / `VISION.md`, `docs/**`, ADRs: secrets like `.env` excluded). A `scanner` block in `.orto/config.json` replaces that default walk with `include` globs, then applies `exclude` globs. Omit `scanner` to keep the conservative default. The secrets denylist still wins over `include`. `store.allowlist` stays separate: the scanner decides what can be discovered, and the allowlist decides which new files `store` retains.
 2. Extract scored candidate facts with provenance (source path + optional git commit). `.mdx` is extracted like markdown when `scanner.extensions` includes `.mdx`. Leading YAML frontmatter is dropped so title and status fields are not retained as sections. Draft filenames are skipped only when an `exclude` glob matches them (for example `**/_*.mdx`).
 3. Optionally, with `--judge jev`, ask whether each candidate is durable project knowledge. High-confidence rejects are dropped. Low confidence stays in review. Omit the flag and this step does not run.
 4. **Retain** each kept candidate via Hindsight’s memories API (LLM extraction per item)
