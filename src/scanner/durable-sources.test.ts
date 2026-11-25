@@ -23,6 +23,32 @@ describe("findDurableSources", () => {
     ]);
   });
 
+  it("finds root STRATEGY.md and VISION.md by default", async () => {
+    const root = await mkdtemp(join(tmpdir(), "orto-scan-vision-"));
+    await writeFile(join(root, "README.md"), "# Hello\n");
+    await writeFile(join(root, "STRATEGY.md"), "# Strategy\n\n## Vision\n");
+    await writeFile(join(root, "VISION.md"), "# Vision\n");
+    await writeFile(join(root, "CONTRIBUTING.md"), "# Contributing\n");
+
+    const sources = await findDurableSources(root);
+    const byPath = new Map(sources.map((s) => [s.relativePath, s.kind]));
+
+    expect([...byPath.keys()].sort()).toEqual(["README.md", "STRATEGY.md", "VISION.md"]);
+    expect(byPath.get("STRATEGY.md")).toBe("docs");
+    expect(byPath.get("VISION.md")).toBe("docs");
+  });
+
+  it("does not add STRATEGY.md when scanner.include is set", async () => {
+    const root = await mkdtemp(join(tmpdir(), "orto-scan-vision-include-"));
+    await mkdir(join(root, "docs"), { recursive: true });
+    await writeFile(join(root, "STRATEGY.md"), "# Strategy\n");
+    await writeFile(join(root, "docs", "guide.md"), "# Guide\n");
+
+    const sources = await findDurableSources(root, { include: ["docs/**/*.md"] });
+
+    expect(sources.map((s) => s.relativePath)).toEqual(["docs/guide.md"]);
+  });
+
   it("excludes sensitive paths even under docs/", async () => {
     const root = await mkdtemp(join(tmpdir(), "orto-scan-sens-"));
     await writeFile(join(root, "README.md"), "# Hello\n");

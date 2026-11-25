@@ -68,7 +68,7 @@ Written by `orto init`. Portable project identity for this repo.
 | `deploymentProfile` | Optional share profile hint: `local` (default), `lan`, `vpn`, `public`, `hindsight-cloud`. |
 | `docker.containerName` / `volumeName` | Which **local Docker server** hosts banks: not 1:1 with `bankId`. Skip under Cloud. |
 | `hindsightBaseUrl` | Optional default Hindsight URL (still overridable by env / CLI / share). |
-| `scanner.include` | Optional globs. When set, `seed` and `store` discover these paths instead of the default README / docs / ADR walk. |
+| `scanner.include` | Optional globs. When set, `seed` and `store` discover these paths instead of the default README / STRATEGY / VISION / docs / ADR walk. |
 | `scanner.exclude` | Optional globs removed after discovery (default scan or `include`). |
 | `scanner.extensions` | Optional suffixes. Default is `.md` and `.markdown`. Add `.mdx` to retain MDX. |
 | `judge.priorityWeights` | Optional weights for `seed --budget`. Keys: `durability`, `centrality`, `supersession`, `fanout`, `secretRisk`. Defaults are in [jev.md](./jev.md). |

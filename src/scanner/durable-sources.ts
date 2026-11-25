@@ -21,8 +21,12 @@ export interface DurableSource {
   kind: "readme" | "docs" | "adr";
 }
 
+// STRATEGY.md and VISION.md hold a project's vision (an acceptance policy), so
+// they are durable by definition and scanned next to the root README.
 const ROOT_FILES: Array<{ name: string; kind: DurableSource["kind"] }> = [
   { name: "README.md", kind: "readme" },
+  { name: "STRATEGY.md", kind: "docs" },
+  { name: "VISION.md", kind: "docs" },
 ];
 
 const DOC_DIRS = ["docs", "doc", "documentation"];
