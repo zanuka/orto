@@ -10,6 +10,8 @@ It helps developers turn durable project knowledge (docs, ADRs, decisions, domai
 
 We are building this in public as open source.
 
+The Vision section of [STRATEGY.md](./STRATEGY.md#vision) is the acceptance policy: check a change against its "aligns" and "should be resisted" tests before proposing it.
+
 ## Core Principles (non-negotiable)
 
 1. **Durable over ephemeral**  
