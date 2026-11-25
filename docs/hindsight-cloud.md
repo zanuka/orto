@@ -182,7 +182,7 @@ Recommendation: **default Cloud MCP emission = bank-scoped API URL + env API key
 
 ## Team workflows
 
-### Shared Cloud bank (recommended for distributed teams)
+### Shared Cloud bank
 
 1. One person creates the Cloud org + bank (bank id = project `bankId`).
 2. Repo commits `.orto/` template + profile hint `hindsight-cloud` (no secrets).
