@@ -25,6 +25,7 @@
       "docs/hindsight-cloud.md",
       "docs/hindsight-mental-models.md",
       "docs/hindsight-upgrade.md",
+      "docs/jev-103-phase0-findings.md",
       "docs/jev-benefits-and-costs.md",
       "docs/jev-diagrams.md",
       "docs/jev-integration.md",
@@ -37,6 +38,7 @@
       "docs/phase-4-dogfood-gaps.md",
       "docs/phase-5-dogfood-gaps.md",
       "docs/phase-6-dogfood-gaps.md",
+      "docs/retain-tags.md",
       "docs/sensitive-data.md",
       "docs/team-sharing.md",
       "docs/why-orto.md"
