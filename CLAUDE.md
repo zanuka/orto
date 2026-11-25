@@ -2,6 +2,8 @@
 
 **Orto** is an open-source CLI that turns durable project knowledge into Hindsight memory banks so AI agents inherit shared context.
 
+The Vision section of [STRATEGY.md](./STRATEGY.md#vision) is the acceptance policy: check a change against its "aligns" and "should be resisted" tests before proposing it.
+
 ## Core Principles
 
 ### Non-negotiable
