@@ -36,6 +36,55 @@ describe("buildDockerUpPlan", () => {
     const plan = buildDockerUpPlan({});
     expect(plan.envHints.some((h) => /LLM API key/i.test(h))).toBe(true);
   });
+
+  it("emits LLM model, base URL, and reflect overrides when set", () => {
+    const plan = buildDockerUpPlan({
+      llmProvider: "ollama",
+      llmModel: "qwen2.5:7b",
+      llmBaseUrl: "http://host.docker.internal:11434/v1",
+      reflectLlmModel: "llama3.1:8b",
+    });
+    expect(plan.argv).toContain("HINDSIGHT_API_LLM_PROVIDER=ollama");
+    expect(plan.argv).toContain("HINDSIGHT_API_LLM_MODEL=qwen2.5:7b");
+    expect(plan.argv).toContain(
+      "HINDSIGHT_API_LLM_BASE_URL=http://host.docker.internal:11434/v1",
+    );
+    expect(plan.argv).toContain("HINDSIGHT_API_REFLECT_LLM_PROVIDER=ollama");
+    expect(plan.argv).toContain("HINDSIGHT_API_REFLECT_LLM_MODEL=llama3.1:8b");
+    expect(plan.argv).toContain(
+      "HINDSIGHT_API_REFLECT_LLM_BASE_URL=http://host.docker.internal:11434/v1",
+    );
+    expect(plan.display).toContain("HINDSIGHT_API_REFLECT_LLM_PROVIDER=ollama");
+    expect(plan.display).toContain(
+      "HINDSIGHT_API_REFLECT_LLM_MODEL=llama3.1:8b",
+    );
+    expect(plan.display).toContain(
+      "HINDSIGHT_API_REFLECT_LLM_BASE_URL=http://host.docker.internal:11434/v1",
+    );
+  });
+
+  it("allows explicit reflect provider and base URL overrides", () => {
+    const plan = buildDockerUpPlan({
+      llmProvider: "ollama",
+      llmModel: "qwen2.5:7b",
+      llmBaseUrl: "http://host.docker.internal:11434/v1",
+      reflectLlmProvider: "openai",
+      reflectLlmModel: "gpt-4o-mini",
+      reflectLlmBaseUrl: "https://api.openai.com/v1",
+    });
+    expect(plan.argv).toContain("HINDSIGHT_API_REFLECT_LLM_PROVIDER=openai");
+    expect(plan.argv).toContain("HINDSIGHT_API_REFLECT_LLM_MODEL=gpt-4o-mini");
+    expect(plan.argv).toContain(
+      "HINDSIGHT_API_REFLECT_LLM_BASE_URL=https://api.openai.com/v1",
+    );
+  });
+
+  it("omits LLM model and reflect env vars when not set", () => {
+    const plan = buildDockerUpPlan({ llmProvider: "ollama" });
+    expect(plan.argv.join(" ")).not.toContain("HINDSIGHT_API_LLM_MODEL");
+    expect(plan.argv.join(" ")).not.toContain("HINDSIGHT_API_LLM_BASE_URL");
+    expect(plan.argv.join(" ")).not.toContain("HINDSIGHT_API_REFLECT_LLM_");
+  });
 });
 
 describe("buildDockerStopPlan", () => {
