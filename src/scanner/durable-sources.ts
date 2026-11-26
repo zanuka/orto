@@ -23,11 +23,17 @@ export interface DurableSource {
 
 // STRATEGY.md and VISION.md hold a project's vision (an acceptance policy), so
 // they are durable by definition and scanned next to the root README.
+const VISION_FILE_NAMES = ["STRATEGY.md", "VISION.md"] as const;
+
 const ROOT_FILES: Array<{ name: string; kind: DurableSource["kind"] }> = [
   { name: "README.md", kind: "readme" },
-  { name: "STRATEGY.md", kind: "docs" },
-  { name: "VISION.md", kind: "docs" },
+  ...VISION_FILE_NAMES.map((name) => ({ name, kind: "docs" as const })),
 ];
+
+/** True for a root-level STRATEGY.md or VISION.md (not one nested in a folder). */
+export function isRootVisionFile(relativePath: string): boolean {
+  return (VISION_FILE_NAMES as readonly string[]).includes(relativePath);
+}
 
 const DOC_DIRS = ["docs", "doc", "documentation"];
 const ADR_DIRS = ["adr", "adrs", "docs/adr", "docs/adrs", "docs/decisions"];

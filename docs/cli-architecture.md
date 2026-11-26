@@ -248,7 +248,7 @@ If Hindsight returns `401`/`403`, the CLI hints that an API key may be required.
 Conservative first pass looks for:
 
 - `README.md`
-- Root `STRATEGY.md` and `VISION.md` (the project vision)
+- Root `STRATEGY.md` and `VISION.md` (the project vision). The extractor keeps every section of these two files unless its heading is noise (changelog, install, and the like), because a vision states its rules with words such as "never", "refused", and "opt-in" that section scoring does not count.
 - Markdown under `docs/`, `doc/`, `documentation/`
 - ADR paths (`adr/`, `docs/adr/`, `docs/decisions/`, root `ADR*.md`, etc.)
 

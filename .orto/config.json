@@ -13,6 +13,7 @@
     "allowlist": [
       "AGENTS.md",
       "README.md",
+      "STRATEGY.md",
       "docs/cli-architecture.md",
       "docs/company-brain.md",
       "docs/dev-testing.md",

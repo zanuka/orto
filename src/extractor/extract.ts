@@ -1,4 +1,7 @@
-import type { DurableSource } from "../scanner/durable-sources.js";
+import {
+  isRootVisionFile,
+  type DurableSource,
+} from "../scanner/durable-sources.js";
 import { hashContent, slugifyHeading } from "./hash.js";
 import type {
   CandidateFact,
@@ -95,6 +98,10 @@ export function extractFromSource(
   const sections = splitMarkdownSections(trimmed);
   const facts: CandidateFact[] = [];
   const heuristicSkips: CandidateFact[] = [];
+  // A vision states rules with "never", "refused", and "opt-in" rather than the
+  // keywords the scorer looks for, so every section of it is kept unless its
+  // heading marks it as noise.
+  const keepAllSections = isRootVisionFile(source.relativePath);
 
   for (const [index, section] of sections.entries()) {
     const scored = scoreSection(
@@ -102,6 +109,7 @@ export function extractFromSource(
       section.body,
       source.kind,
       index === 0,
+      keepAllSections,
     );
     if (!scored) {
       continue;
@@ -198,6 +206,7 @@ function scoreSection(
   body: string,
   sourceKind: DurableSource["kind"],
   isFirst: boolean,
+  keepUnlessNoise = false,
 ): { kind: KnowledgeKind; score: number; keep: boolean } | undefined {
   const text = `${heading}\n${body}`;
   if (text.trim().length < MIN_SECTION_CHARS) {
@@ -227,6 +236,14 @@ function scoreSection(
   if (!noise && sourceKind === "readme" && isFirst) {
     score += 3;
     bestKind = "overview";
+  }
+
+  if (keepUnlessNoise && !noise) {
+    return {
+      kind: bestKind === "other" ? "standard" : bestKind,
+      score,
+      keep: true,
+    };
   }
 
   return { kind: bestKind, score, keep: !noise && score >= 3 };
