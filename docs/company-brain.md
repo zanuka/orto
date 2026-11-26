@@ -75,11 +75,10 @@ Orto keeps those steps in the repo and makes the retain path the same every time
 | Docker flags are assembled from Hindsight's docs. | `docker print` / `docker up` use the container and volume names from `.orto/config.json`. `docker upgrade` plans a pinned image move. |
 | The next clone does not know the bank id, the template, or which files are in scope. | `.orto/config.json`, the bank template, and `store.allowlist` are the shareable setup. The seed manifest and API keys stay off git. |
 
-Two limits are part of the current CLI, so they belong in the comparison.
+Two practical notes about how the current CLI works belong in the comparison.
 
-Applying the template is still an import.
-`configure` does not call Hindsight.
-A bank you seed before that import runs with whatever mission is already on the server.
+`configure` writes the template locally without calling Hindsight.
+Run `configure --apply` or `bank apply` (with `--dry-run` first if you want a preview) to create or update the bank on the server from `.orto/hindsight/bank-template.json`.
 
 `seed` and `store` are additive.
 Editing a file in place and re-running updates that section.
@@ -87,6 +86,8 @@ Renaming or deleting a source retains the new path and leaves the old `document_
 See the [CLI reference](./orto-cli-commands.md#orto-prune).
 For still-on-disk claims that may be outdated, run `orto audit --judge jev` ([Jev integration](./jev-integration.md)).
 Orto deletes only after you confirm prune (or after `--yes` with an explicit selection).
+
+A company brain composes banks rather than merging repositories into one: each repository keeps its own bank and owner, and wiring shared banks alongside a project's own bank is planned in Phase 8 (see [STRATEGY.md](../STRATEGY.md#one-owner-per-bank) and [ROADMAP.md](../ROADMAP.md#phase-8-advanced--extensibility)).
 
 The same `seed` / `mcp` flow targets a local server or Hindsight Cloud.
 Cloud is opt-in.

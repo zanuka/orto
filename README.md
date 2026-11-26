@@ -49,7 +49,7 @@ For Firstmate, `orto mcp --harness firstmate --write-firstmate` registers the pr
 - **Scans** your project's docs for durable knowledge (READMEs, ADRs, standards, domain docs, schema docs): by default the root `README.md`, `STRATEGY.md`, and `VISION.md`, `docs/`, and ADR folders, or the globs you set in `scanner.include` (see [docs/orto-configs.md](./docs/orto-configs.md))
 - **Configures** a Hindsight memory bank with a clear mission, directives, and extraction settings tuned for software projects
 - **Seeds** the bank with high-signal facts and decisions via Hindsight **retain**: not by uploading raw markdown like a file-sync script
-- **Adds an optional Jev judgment layer** so `seed --judge jev` can skip changelogs, tables of contents, and other ephemeral sections before retain, and can flag a section that supersedes or contradicts an observation already in the bank. Recall rerank, prune annotation, and routing are still planned: see [Jev](#jev)
+- **Adds an optional Jev judgment layer** so `seed --judge jev` can skip changelogs, tables of contents, and other ephemeral sections before retain, flag sections that supersede or contradict existing observations, and support opt-in audit plans, recall rerank, and routing: see [Jev](#jev)
 - **Emits** MCP config so each harness shares one project bank. See [One memory across your agents](#one-memory-across-your-agents)
 - **Shares** knowledgebases across teams with explicit deployment profiles: local/LAN, VPN, public self-host, or [Hindsight Cloud](https://docs.hindsight.vectorize.io/): so the company brain reaches the agents that need it
 - **Stays local-first**: self-host by default; Cloud is opt-in, never required
@@ -57,7 +57,7 @@ For Firstmate, `orto mcp --harness firstmate --write-firstmate` registers the pr
 Hindsight is the first-class target ([retain / recall / reflect](https://hindsight.vectorize.io/), observations, mental models, bank templates).
 Host it yourself with Docker or use [Hindsight Cloud](https://docs.hindsight.vectorize.io/) when you want managed infra (same Orto seed/MCP flow: see [docs/hindsight-cloud.md](./docs/hindsight-cloud.md)).
 [Graphiti](https://github.com/getzep/graphiti) (and optional Zep Cloud) is planned as an opt-in seed destination, not a second default: see [Graphiti (planned)](#graphiti-planned) below.
-Event-driven updates, richer curation, and team-wide sharing are on the [roadmap](./ROADMAP.md).
+Jev validation/evals, multi-bank company brains, external durable sources, and event-driven updates are on the [roadmap](./ROADMAP.md).
 
 ## Why Orto
 

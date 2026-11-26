@@ -19,7 +19,8 @@ A retain budget ships on `seed --budget N --judge jev`.
 The watcher high-signal gate helper ships in `src/judge/watcher-gate.ts`.
 There is no `watch` CLI command yet.
 `store` edit durability ships on `store --judge jev`.
-Prune annotation is still planned.
+Audit prune/refresh plans ship on `orto audit --judge jev`, and apply with confirmation on `orto prune --apply --plan`.
+Every judge must earn its place with a named test (answer quality, catch rate, or drift), and no judge ships ahead of the thing it judges (see [STRATEGY.md](../STRATEGY.md#judgment-is-optional-and-earns-its-place) and [#102](https://github.com/zanuka/orto/issues/102), [#103](https://github.com/zanuka/orto/issues/103), [#104](https://github.com/zanuka/orto/issues/104), [#117](https://github.com/zanuka/orto/issues/117)).
 **Related:** [jev-integration.md](./jev-integration.md) (where it sits), [jev-diagrams.md](./jev-diagrams.md) (store / update flows), [jev-benefits-and-costs.md](./jev-benefits-and-costs.md), [ROADMAP.md](../ROADMAP.md) Phase 7, [JEV-0](https://github.com/zanuka/orto/issues/58).
 
 ---
