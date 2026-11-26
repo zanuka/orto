@@ -166,6 +166,7 @@ JEV-1 through JEV-10 are closed on GitHub.
 - [x] Share safety: `orto share --profile public` or `hindsight-cloud` with `--judge jev` asks `safe_outside_trusted_network`, `leaks_internal_urls_or_customers`, `sensitivity` (0-3), and Choice `profile_ok` (`local_only` | `vpn` | `public_ok`). An internal runbook with private hostnames cannot pass `public_ok`. A public-by-design standards doc can. Orto applies or refuses the profile. Jev does not publish. Share without `--judge` keeps the Phase 4 profile checks only. ([JEV-33](https://github.com/zanuka/orto/issues/56))
 - [x] Heuristic eval: `pnpm test` and `pnpm eval:judge` score a human-labeled keep/skip/kind fixture with recorded Jev answers and no API key. `ORTO_EVAL_JUDGE_LIVE=1 pnpm eval:judge` is the optional live job. Disagreements are heuristic tweaks. Jev is the yardstick, not a runtime requirement. A security heading with a real standard is kept. Changelog, install, and quick-start headings stay skipped. ([JEV-34](https://github.com/zanuka/orto/issues/48))
 - [x] Bank drift: `orto status` samples at most 50 memories (default 20, one document list page) and prints `supported / sampled` plus a date. With the judge off, support means the source file is still present. With `--judge jev`, support means a confident `still_supported_by_repo`. `orto audit` prints the same summary for its document sample and stores it on the plan. ([JEV-35](https://github.com/zanuka/orto/issues/49))
+- [ ] Jev seed validation and evals: verify `seed --judge jev` across doc, ADR, and API-contract repos ([#102](https://github.com/zanuka/orto/issues/102)), prove whether Jev picks facts that improve MCP answers ([#103](https://github.com/zanuka/orto/issues/103)), and make keep-and-connect seed decisions cheaper, explicit, and measurable ([#104](https://github.com/zanuka/orto/issues/104))
 
 Deferred (still tracked under the Jev epic; land with later phases):
 
@@ -237,7 +238,7 @@ Closed duplicate epic [#19](https://github.com/zanuka/orto/issues/19) is superse
 
 - [ ] File watcher / event-driven re-seeding (wire `judgeWatcherGate` / `collectSeedEnqueue` into an opt-in watch loop; gate helper: [JEV-13](https://github.com/zanuka/orto/issues/42))
 - [ ] Multi-provider support: Hindsight remains first-class and the default; other backends are opt-in CLI options
-  - [ ] Multi-provider foundation (extract `HindsightProvider`, `--provider` dispatch; destination-kind decision shipped: [JEV-31](https://github.com/zanuka/orto/issues/55))
+  - [ ] Multi-provider foundation (extract `HindsightProvider`, `--provider` dispatch; destination-kind decision shipped: [JEV-31](https://github.com/zanuka/orto/issues/55), follow-up: [#117](https://github.com/zanuka/orto/issues/117))
   - [ ] Mem0 adapter
   - [ ] Graphiti / Zep adapter: **seed destination only** (see [docs/graphiti-integration.md](./docs/graphiti-integration.md))
     - [ ] OSS HTTP transport spike (`add_episode` + `group_id`)
@@ -247,6 +248,15 @@ Closed duplicate epic [#19](https://github.com/zanuka/orto/issues/19) is superse
     - [ ] `mcp` / `docker print` point at official Graphiti docs (do not vendor compose)
   - [ ] Cognee adapter (later)
 - [ ] Multi-bank and multi-repo company brains (routing decision shipped: [JEV-32](https://github.com/zanuka/orto/issues/47); retain into the other bank is still this phase)
+  - [ ] Deterministic bank routing in config (free path for [JEV-32](https://github.com/zanuka/orto/issues/47)) ([#113](https://github.com/zanuka/orto/issues/113))
+  - [ ] Repo-qualified document ids for banks written by more than one repo ([#111](https://github.com/zanuka/orto/issues/111))
+  - [ ] `orto mcp`: wire shared banks a project reads beside its own bank ([#112](https://github.com/zanuka/orto/issues/112))
+  - [ ] Audience guard: refuse knowledge whose readers are narrower than the bank's readers ([#110](https://github.com/zanuka/orto/issues/110))
+- [ ] External durable sources (beyond git repos)
+  - [ ] `orto import`: Markdown snapshots of external pages with source frontmatter ([#107](https://github.com/zanuka/orto/issues/107))
+  - [ ] Prune external sources when a page is gone, archived, or moved ([#108](https://github.com/zanuka/orto/issues/108))
+  - [ ] Content secret scan on the free path for sources without a file path ([#109](https://github.com/zanuka/orto/issues/109))
+  - [ ] Explore MCP-backed external sources (Notion, Confluence, Google Docs) ([#106](https://github.com/zanuka/orto/issues/106))
 - [ ] Lightweight inspection UI (optional, later)
 - [ ] Deeper ADR and decision-record parsers
 
