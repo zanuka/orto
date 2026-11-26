@@ -168,6 +168,57 @@ We decided to rename the CLI in 0.2. This changelog entry is not an architecture
     expect(result.heuristicSkips.length).toBeGreaterThan(0);
   });
 
+  describe("root vision files", () => {
+    // These sections state rules without any keyword the scorer looks for.
+    const vision = `# Vision
+
+## Local first, Hindsight first
+
+The default path is a self-hosted Hindsight server on the operator's machine, with no account and no cloud dependency.
+API keys live in the environment, never in committed config.
+
+## One owner per bank
+
+A company brain composes banks; it never merges repositories into one.
+
+## Changelog
+
+Renamed a heading in 0.2 and moved two lines around.
+`;
+
+    it("keeps every section of a root STRATEGY.md or VISION.md", () => {
+      for (const name of ["STRATEGY.md", "VISION.md"]) {
+        const result = extractFromSource(source(name, "docs"), vision);
+        const ids = result.facts.map((f) => f.id);
+        expect(ids).toContain(`orto:${name}#local-first-hindsight-first`);
+        expect(ids).toContain(`orto:${name}#one-owner-per-bank`);
+        for (const fact of result.facts) {
+          expect(fact.knowledgeKind).not.toBe("other");
+        }
+      }
+    });
+
+    it("still skips noise headings in a vision file", () => {
+      const result = extractFromSource(source("STRATEGY.md", "docs"), vision);
+      expect(result.facts.map((f) => f.id)).not.toContain(
+        "orto:STRATEGY.md#changelog",
+      );
+      expect(result.heuristicSkips.map((f) => f.id)).toContain(
+        "orto:STRATEGY.md#changelog",
+      );
+    });
+
+    it("scores the same text normally outside the root", () => {
+      const result = extractFromSource(
+        source("docs/STRATEGY.md", "docs"),
+        vision,
+      );
+      expect(result.facts.map((f) => f.id)).not.toContain(
+        "orto:docs/STRATEGY.md#one-owner-per-bank",
+      );
+    });
+  });
+
   it("skips empty files", () => {
     const result = extractFromSource(source("README.md", "readme"), "   \n");
     expect(result.skipped).toBe(true);
