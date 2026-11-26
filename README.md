@@ -338,6 +338,10 @@ It only operates on the durable clone that owns `.orto/`.
 From a worktree it resolves that clone via the captain-home registry (`$FM_HOME/.orto/projects.json`, written by `orto mcp --harness firstmate --write-firstmate`) or via `--project <durable-clone-path>`.
 See [One memory across your agents](#one-memory-across-your-agents).
 
+### Coding-agent handoff: queue until quiet
+
+When a coding session edits durable docs, you can hand those paths to the project bank without retaining immediately. Preview with `orto store --propose-from-paths <paths> --dry-run`, then queue the allowlisted paths with `--enqueue`. Run `orto store --drain-queue` later, and it syncs only when Hindsight is quiet (`--now` skips the check). Queue state lives in `.orto/local/store-queue.json` (gitignored). The design, quiet-window defaults, and non-goals are in [coding-agent bridge](./docs/coding-agent-bridge.md).
+
 ## Local Hindsight & agent wiring
 
 Default path: run Hindsight yourself (Docker). For managed hosting, see [Hindsight Cloud](#hindsight-cloud-opt-in) below and [docs/hindsight-cloud.md](./docs/hindsight-cloud.md).
@@ -580,6 +584,7 @@ pnpm orto mcp --hindsight-url http://127.0.0.1:8888 --include-auth
 - [Jev diagrams](./docs/jev-diagrams.md): how Jev enhances store of new data and updates to changed content
 - [Jev integration](./docs/jev-integration.md): opt-in judge. The seed relevance gate is available. Prune annotation is still planned.
 - [Sync strategy](./docs/orto-sync-strategy.md): why Orto uses curated retain instead of markdown file upload
+- [Coding-agent bridge](./docs/coding-agent-bridge.md): propose-from-paths handoff and the quiet-window store queue alongside Hindsight coding-agent memory
 - [Knowledge-base configs](./docs/orto-configs.md): `.orto/` files, bank template, seed manifest, and MCP recall
 - [Team sharing](./docs/team-sharing.md): deployment profiles, `orto share`, bank apply, multi-repo MCP for teams
 - [CLI architecture](./docs/cli-architecture.md): module boundaries, seed pipeline, config, and env/auth for contributors

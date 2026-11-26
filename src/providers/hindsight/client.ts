@@ -44,6 +44,17 @@ export interface OperationStatus {
   progress?: OperationProgress | null;
 }
 
+export interface BankOperationSummary {
+  id?: string;
+  operation_id?: string;
+  operation_type?: string;
+  status?: string;
+  stage?: string | null;
+  stage_age?: number | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
 export interface DocumentSummary {
   id: string;
   bank_id?: string;
@@ -256,6 +267,50 @@ export class HindsightClient {
     }
 
     return (await response.json()) as OperationStatus;
+  }
+
+  async listOperations(bankId: string): Promise<BankOperationSummary[]> {
+    const url = `${this.baseUrl}/v1/default/banks/${encodeURIComponent(bankId)}/operations`;
+
+    let response: Response;
+    try {
+      response = await this.fetchImpl(url, {
+        method: "GET",
+        headers: this.headers(),
+      });
+    } catch (error) {
+      throw new OrtoError(
+        `Failed to reach Hindsight at ${this.baseUrl}`,
+        `Could not list operations for "${bankId}". (${error instanceof Error ? error.message : String(error)})`,
+      );
+    }
+
+    if (response.status === 404) {
+      return [];
+    }
+
+    if (!response.ok) {
+      const body = await safeReadText(response);
+      throw new OrtoError(
+        `Hindsight list operations failed (${response.status}) for "${bankId}"`,
+        body ? `Response: ${body.slice(0, 500)}` : undefined,
+        response.status,
+      );
+    }
+
+    const data = (await response.json()) as
+      | BankOperationSummary[]
+      | { operations?: BankOperationSummary[]; items?: BankOperationSummary[] };
+    if (Array.isArray(data)) {
+      return data;
+    }
+    if (Array.isArray(data.operations)) {
+      return data.operations;
+    }
+    if (Array.isArray(data.items)) {
+      return data.items;
+    }
+    return [];
   }
 
   async listDocuments(

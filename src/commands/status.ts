@@ -23,6 +23,12 @@ import {
 import type { HindsightBankTemplate } from "../providers/hindsight/types.js";
 import { buildAuditItems } from "../seeder/audit-plan.js";
 import { parseDocumentId } from "../seeder/prune-plan.js";
+import {
+  formatAgeMinutes,
+  loadStoreQueue,
+  summarizeStoreQueue,
+  type QueueStatusSummary,
+} from "../seeder/store-queue.js";
 import { pathExists, readJsonFile } from "../utils/fs.js";
 
 export interface StatusOptions {
@@ -46,6 +52,7 @@ export interface StatusResult {
   baseUrl: string;
   dryRun: boolean;
   drift: DriftSummary;
+  storeQueue: QueueStatusSummary;
 }
 
 export async function runStatus(options: StatusOptions = {}): Promise<StatusResult> {
@@ -91,12 +98,16 @@ export async function runStatus(options: StatusOptions = {}): Promise<StatusResu
         sampledAt,
       });
 
+  const queue = await loadStoreQueue(projectRoot);
+  const storeQueue = summarizeStoreQueue(queue);
+
   return {
     projectRoot,
     bankId: config.bankId,
     baseUrl: connection.baseUrl,
     dryRun,
     drift,
+    storeQueue,
   };
 }
 
@@ -107,6 +118,15 @@ export function printStatusResult(result: StatusResult): void {
   console.log(
     `${prefix}mode: ${result.drift.mode === "hash" ? "hash (source present vs missing)" : "jev (still_supported_by_repo)"}`,
   );
+  if (result.storeQueue.total > 0) {
+    const oldest = formatAgeMinutes(result.storeQueue.oldestAgeMs);
+    const nudge = result.storeQueue.agedPastMaxWait
+      ? " (aged past quiet window; run `orto store --drain-queue --now` or wait)"
+      : "";
+    console.log(
+      `${prefix}store queue: ${result.storeQueue.pending} pending, ${result.storeQueue.failed} failed (oldest ${oldest})${nudge}`,
+    );
+  }
   console.log(`${prefix}Nothing was deleted or retained.`);
 }
 
