@@ -273,6 +273,13 @@
       "tags": [
         "principles"
       ]
+    },
+    {
+      "name": "english-only",
+      "content": "Always write in English: observations, mental model content, and reflect answers. Never answer in another language, even if a source or prompt uses one.",
+      "priority": 10,
+      "is_active": true,
+      "tags": ["safety"]
     }
   ]
 }
