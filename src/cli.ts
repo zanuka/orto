@@ -1047,6 +1047,26 @@ async function main(): Promise<void> {
       "HINDSIGHT_API_LLM_PROVIDER (openai, anthropic, ollama, …)",
     )
     .option(
+      "--llm-model <model>",
+      "HINDSIGHT_API_LLM_MODEL (e.g. qwen2.5:7b, gpt-4o-mini)",
+    )
+    .option(
+      "--llm-base-url <url>",
+      "HINDSIGHT_API_LLM_BASE_URL (e.g. http://host.docker.internal:11434/v1)",
+    )
+    .option(
+      "--reflect-llm-provider <name>",
+      "HINDSIGHT_API_REFLECT_LLM_PROVIDER (override provider for reflect)",
+    )
+    .option(
+      "--reflect-llm-model <model>",
+      "HINDSIGHT_API_REFLECT_LLM_MODEL (tool-calling model for reflect / mental models)",
+    )
+    .option(
+      "--reflect-llm-base-url <url>",
+      "HINDSIGHT_API_REFLECT_LLM_BASE_URL (override base URL for reflect)",
+    )
+    .option(
       "--api-key <key>",
       "Enable tenant API auth on the container (HINDSIGHT_API_TENANT_API_KEY)",
     )
@@ -1063,6 +1083,11 @@ async function main(): Promise<void> {
           image?: string;
           llmApiKey?: string;
           llmProvider?: string;
+          llmModel?: string;
+          llmBaseUrl?: string;
+          reflectLlmProvider?: string;
+          reflectLlmModel?: string;
+          reflectLlmBaseUrl?: string;
           apiKey?: string;
           pull?: boolean;
           detach?: boolean;
@@ -1087,6 +1112,19 @@ async function main(): Promise<void> {
             : {}),
           ...(opts.llmProvider !== undefined
             ? { llmProvider: opts.llmProvider }
+            : {}),
+          ...(opts.llmModel !== undefined ? { llmModel: opts.llmModel } : {}),
+          ...(opts.llmBaseUrl !== undefined
+            ? { llmBaseUrl: opts.llmBaseUrl }
+            : {}),
+          ...(opts.reflectLlmProvider !== undefined
+            ? { reflectLlmProvider: opts.reflectLlmProvider }
+            : {}),
+          ...(opts.reflectLlmModel !== undefined
+            ? { reflectLlmModel: opts.reflectLlmModel }
+            : {}),
+          ...(opts.reflectLlmBaseUrl !== undefined
+            ? { reflectLlmBaseUrl: opts.reflectLlmBaseUrl }
             : {}),
           ...(opts.apiKey !== undefined ? { apiKey: opts.apiKey } : {}),
         });

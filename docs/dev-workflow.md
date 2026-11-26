@@ -98,6 +98,16 @@ pnpm orto docker status
 
 Uses `ghcr.io/vectorize-io/hindsight:latest` (API `:8888`, UI `:9999`). Container/volume resolve as: `--name` flag → `docker` in `.orto/config.json` → defaults `hindsight` / `hindsight-data`. Pass `--api-key` to enable tenant auth on the container. `--dry-run` on `up` prints the command only.
 
+For local Ollama, `reflect` and mental-model refresh require a tool-calling model (verify with `ollama show <model>` that `tools` is listed). On 16 GB machines, keep retain on a smaller model and override reflect:
+
+```bash
+pnpm orto docker up \
+  --llm-provider ollama \
+  --llm-model qwen2.5:7b \
+  --llm-base-url http://host.docker.internal:11434/v1 \
+  --reflect-llm-model llama3.1:8b
+```
+
 ### 4. Preview what would be retained
 
 ```bash

@@ -4,6 +4,12 @@ import { DEPLOYMENT_PROFILES, type DeploymentProfile } from "./profiles.js";
 export const DockerConfigSchema = z.object({
   containerName: z.string().min(1),
   volumeName: z.string().min(1).optional(),
+  llmProvider: z.string().min(1).optional(),
+  llmModel: z.string().min(1).optional(),
+  llmBaseUrl: z.string().min(1).optional(),
+  reflectLlmProvider: z.string().min(1).optional(),
+  reflectLlmModel: z.string().min(1).optional(),
+  reflectLlmBaseUrl: z.string().min(1).optional(),
 });
 
 export const StoreConfigSchema = z.object({

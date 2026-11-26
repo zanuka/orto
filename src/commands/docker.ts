@@ -1,6 +1,6 @@
 import { loadConfig, loadShareConfig } from "../config/load.js";
 import { resolveDeploymentProfile } from "../config/connection.js";
-import { defaultVolumeName } from "../config/schema.js";
+import { defaultVolumeName, type DockerConfig } from "../config/schema.js";
 import { detectProjectRoot } from "../project/detect-root.js";
 import {
   assertDockerAvailable,
@@ -28,6 +28,11 @@ export interface DockerCommandOptions {
   image?: string;
   llmApiKey?: string;
   llmProvider?: string;
+  llmModel?: string;
+  llmBaseUrl?: string;
+  reflectLlmProvider?: string;
+  reflectLlmModel?: string;
+  reflectLlmBaseUrl?: string;
   apiKey?: string;
   pull?: boolean;
   detach?: boolean;
@@ -45,40 +50,79 @@ export interface DockerCommandResult {
   executed: boolean;
 }
 
+export interface ResolvedDockerSettings {
+  containerName: string;
+  volumeName: string;
+  llmProvider?: string;
+  llmModel?: string;
+  llmBaseUrl?: string;
+  reflectLlmProvider?: string;
+  reflectLlmModel?: string;
+  reflectLlmBaseUrl?: string;
+}
+
+export async function resolveDockerSettings(options: {
+  cwd?: string;
+  containerName?: string;
+  volumeName?: string;
+  llmProvider?: string;
+  llmModel?: string;
+  llmBaseUrl?: string;
+  reflectLlmProvider?: string;
+  reflectLlmModel?: string;
+  reflectLlmBaseUrl?: string;
+}): Promise<ResolvedDockerSettings> {
+  let configDocker: DockerConfig | undefined;
+
+  try {
+    const projectRoot = await detectProjectRoot(options.cwd ?? process.cwd());
+    const config = await loadConfig(projectRoot);
+    configDocker = config.docker;
+  } catch {
+  }
+
+  const containerName =
+    options.containerName ??
+    configDocker?.containerName ??
+    DEFAULT_CONTAINER_NAME;
+  const volumeName =
+    options.volumeName ??
+    (options.containerName !== undefined
+      ? defaultVolumeName(containerName)
+      : configDocker?.volumeName ??
+        (configDocker?.containerName
+          ? defaultVolumeName(containerName)
+          : DEFAULT_VOLUME_NAME));
+
+  const llmProvider = options.llmProvider ?? configDocker?.llmProvider;
+  const llmModel = options.llmModel ?? configDocker?.llmModel;
+  const llmBaseUrl = options.llmBaseUrl ?? configDocker?.llmBaseUrl;
+  const reflectLlmProvider =
+    options.reflectLlmProvider ?? configDocker?.reflectLlmProvider;
+  const reflectLlmModel =
+    options.reflectLlmModel ?? configDocker?.reflectLlmModel;
+  const reflectLlmBaseUrl =
+    options.reflectLlmBaseUrl ?? configDocker?.reflectLlmBaseUrl;
+
+  return {
+    containerName,
+    volumeName,
+    ...(llmProvider !== undefined ? { llmProvider } : {}),
+    ...(llmModel !== undefined ? { llmModel } : {}),
+    ...(llmBaseUrl !== undefined ? { llmBaseUrl } : {}),
+    ...(reflectLlmProvider !== undefined ? { reflectLlmProvider } : {}),
+    ...(reflectLlmModel !== undefined ? { reflectLlmModel } : {}),
+    ...(reflectLlmBaseUrl !== undefined ? { reflectLlmBaseUrl } : {}),
+  };
+}
+
 export async function resolveDockerNames(options: {
   cwd?: string;
   containerName?: string;
   volumeName?: string;
 }): Promise<{ containerName: string; volumeName: string }> {
-  if (options.containerName !== undefined) {
-    const containerName = options.containerName;
-    return {
-      containerName,
-      volumeName:
-        options.volumeName ?? defaultVolumeName(containerName),
-    };
-  }
-
-  try {
-    const projectRoot = await detectProjectRoot(options.cwd ?? process.cwd());
-    const config = await loadConfig(projectRoot);
-    if (config.docker?.containerName) {
-      const containerName = config.docker.containerName;
-      return {
-        containerName,
-        volumeName:
-          options.volumeName ??
-          config.docker.volumeName ??
-          defaultVolumeName(containerName),
-      };
-    }
-  } catch {
-  }
-
-  return {
-    containerName: DEFAULT_CONTAINER_NAME,
-    volumeName: options.volumeName ?? DEFAULT_VOLUME_NAME,
-  };
+  const { containerName, volumeName } = await resolveDockerSettings(options);
+  return { containerName, volumeName };
 }
 
 export async function runDockerHelper(
@@ -109,13 +153,38 @@ export async function runDockerHelper(
     }
   }
 
-  const { containerName, volumeName } = await resolveDockerNames({
+  const {
+    containerName,
+    volumeName,
+    llmProvider,
+    llmModel,
+    llmBaseUrl,
+    reflectLlmProvider,
+    reflectLlmModel,
+    reflectLlmBaseUrl,
+  } = await resolveDockerSettings({
     ...(options.cwd !== undefined ? { cwd: options.cwd } : {}),
     ...(options.containerName !== undefined
       ? { containerName: options.containerName }
       : {}),
     ...(options.volumeName !== undefined
       ? { volumeName: options.volumeName }
+      : {}),
+    ...(options.llmProvider !== undefined
+      ? { llmProvider: options.llmProvider }
+      : {}),
+    ...(options.llmModel !== undefined ? { llmModel: options.llmModel } : {}),
+    ...(options.llmBaseUrl !== undefined
+      ? { llmBaseUrl: options.llmBaseUrl }
+      : {}),
+    ...(options.reflectLlmProvider !== undefined
+      ? { reflectLlmProvider: options.reflectLlmProvider }
+      : {}),
+    ...(options.reflectLlmModel !== undefined
+      ? { reflectLlmModel: options.reflectLlmModel }
+      : {}),
+    ...(options.reflectLlmBaseUrl !== undefined
+      ? { reflectLlmBaseUrl: options.reflectLlmBaseUrl }
       : {}),
   });
   const llmApiKey = options.llmApiKey ?? resolveLlmApiKey();
@@ -176,9 +245,12 @@ export async function runDockerHelper(
       ...(options.uiPort !== undefined ? { uiPort: options.uiPort } : {}),
       ...(llmApiKey !== undefined ? { llmApiKey } : {}),
       ...(llmKeyDisplay !== undefined ? { llmKeyDisplay } : {}),
-      ...(options.llmProvider !== undefined
-        ? { llmProvider: options.llmProvider }
-        : {}),
+      ...(llmProvider !== undefined ? { llmProvider } : {}),
+      ...(llmModel !== undefined ? { llmModel } : {}),
+      ...(llmBaseUrl !== undefined ? { llmBaseUrl } : {}),
+      ...(reflectLlmProvider !== undefined ? { reflectLlmProvider } : {}),
+      ...(reflectLlmModel !== undefined ? { reflectLlmModel } : {}),
+      ...(reflectLlmBaseUrl !== undefined ? { reflectLlmBaseUrl } : {}),
       ...(options.apiKey !== undefined
         ? {
             tenantApiKey: options.apiKey,

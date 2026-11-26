@@ -363,6 +363,18 @@ Single-bank MCP URL shape: `http://localhost:8888/mcp/<bankId>/`. LLM key for Do
 
 Hindsight **retain** (what `orto seed` calls) needs a working LLM. If your Hindsight instance is configured for **Ollama**, that process must be running and reachable from the Hindsight container before you seed: otherwise retain returns `500` with errors like `ConnectError: All connection attempts failed` / `Fact extraction failed`. Start Ollama (`ollama serve`), ensure the model is pulled, and use a base URL the container can reach (often `host.docker.internal`, not `localhost`). Cloud providers (e.g. OpenAI via `HINDSIGHT_API_LLM_API_KEY`) do not need Ollama.
 
+Hindsight **reflect** (and mental-model refresh) requires a model that reliably makes tool calls. Check local Ollama models with `ollama show <model>` and confirm `tools` is listed under capabilities. On 16 GB machines, a two-model setup keeps retain and consolidation on a smaller model while routing reflect to a tool-calling model:
+
+```bash
+pnpm orto docker up \
+  --llm-provider ollama \
+  --llm-model qwen2.5:7b \
+  --llm-base-url http://host.docker.internal:11434/v1 \
+  --reflect-llm-model llama3.1:8b
+```
+
+You can also set `--reflect-llm-provider` and `--reflect-llm-base-url` explicitly, or persist non-secret model choices under `docker` in `.orto/config.json` (keep API keys in environment variables).
+
 ### Hindsight MCP tools (any agent)
 
 Once the project bank is wired, every harness exposes the same Hindsight tools.

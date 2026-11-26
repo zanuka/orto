@@ -125,6 +125,43 @@ describe("parseDockerInspect + recreate plan", () => {
     expect(plan.display).not.toContain("tenant-secret");
     expect(plan.argv.join(" ")).not.toMatch(/volume rm/);
   });
+
+  it("preserves HINDSIGHT_API_REFLECT_LLM_* overrides across upgrade", () => {
+    const baseFixture = inspectFixture[0]!;
+    const fixtureWithReflect = [
+      {
+        ...baseFixture,
+        Config: {
+          ...baseFixture.Config,
+          Env: [
+            ...baseFixture.Config.Env,
+            "HINDSIGHT_API_LLM_MODEL=qwen2.5:7b",
+            "HINDSIGHT_API_LLM_BASE_URL=http://host.docker.internal:11434/v1",
+            "HINDSIGHT_API_REFLECT_LLM_PROVIDER=ollama",
+            "HINDSIGHT_API_REFLECT_LLM_MODEL=llama3.1:8b",
+            "HINDSIGHT_API_REFLECT_LLM_BASE_URL=http://host.docker.internal:11434/v1",
+          ],
+        },
+      },
+    ];
+    const inspected = parseDockerInspect(fixtureWithReflect);
+    const plan = buildRecreatePlan({
+      inspected,
+      targetImage: "ghcr.io/vectorize-io/hindsight:0.10.3",
+    });
+    expect(plan.argv).toContain("HINDSIGHT_API_REFLECT_LLM_PROVIDER=ollama");
+    expect(plan.argv).toContain("HINDSIGHT_API_REFLECT_LLM_MODEL=llama3.1:8b");
+    expect(plan.argv).toContain(
+      "HINDSIGHT_API_REFLECT_LLM_BASE_URL=http://host.docker.internal:11434/v1",
+    );
+    expect(plan.display).toContain("HINDSIGHT_API_REFLECT_LLM_PROVIDER=ollama");
+    expect(plan.display).toContain(
+      "HINDSIGHT_API_REFLECT_LLM_MODEL=llama3.1:8b",
+    );
+    expect(plan.display).toContain(
+      "HINDSIGHT_API_REFLECT_LLM_BASE_URL=http://host.docker.internal:11434/v1",
+    );
+  });
 });
 
 describe("backup plan", () => {

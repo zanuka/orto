@@ -15,6 +15,11 @@ export interface DockerUpOptions {
   volumeName?: string;
   llmApiKey?: string;
   llmProvider?: string;
+  llmModel?: string;
+  llmBaseUrl?: string;
+  reflectLlmProvider?: string;
+  reflectLlmModel?: string;
+  reflectLlmBaseUrl?: string;
   tenantApiKey?: string;
   pull?: boolean;
   detach?: boolean;
@@ -93,6 +98,47 @@ export function buildDockerUpPlan(options: DockerUpOptions = {}): DockerCommandP
   if (options.llmProvider) {
     argv.push("-e", `HINDSIGHT_API_LLM_PROVIDER=${options.llmProvider}`);
     displayArgv.push("-e", `HINDSIGHT_API_LLM_PROVIDER=${options.llmProvider}`);
+  }
+  if (options.llmModel) {
+    argv.push("-e", `HINDSIGHT_API_LLM_MODEL=${options.llmModel}`);
+    displayArgv.push("-e", `HINDSIGHT_API_LLM_MODEL=${options.llmModel}`);
+  }
+  if (options.llmBaseUrl) {
+    argv.push("-e", `HINDSIGHT_API_LLM_BASE_URL=${options.llmBaseUrl}`);
+    displayArgv.push("-e", `HINDSIGHT_API_LLM_BASE_URL=${options.llmBaseUrl}`);
+  }
+
+  const reflectLlmProvider =
+    options.reflectLlmProvider ??
+    (options.reflectLlmModel ? options.llmProvider : undefined);
+  const reflectLlmModel = options.reflectLlmModel;
+  const reflectLlmBaseUrl =
+    options.reflectLlmBaseUrl ??
+    (options.reflectLlmModel ? options.llmBaseUrl : undefined);
+
+  if (reflectLlmProvider) {
+    argv.push("-e", `HINDSIGHT_API_REFLECT_LLM_PROVIDER=${reflectLlmProvider}`);
+    displayArgv.push(
+      "-e",
+      `HINDSIGHT_API_REFLECT_LLM_PROVIDER=${reflectLlmProvider}`,
+    );
+  }
+  if (reflectLlmModel) {
+    argv.push("-e", `HINDSIGHT_API_REFLECT_LLM_MODEL=${reflectLlmModel}`);
+    displayArgv.push(
+      "-e",
+      `HINDSIGHT_API_REFLECT_LLM_MODEL=${reflectLlmModel}`,
+    );
+  }
+  if (reflectLlmBaseUrl) {
+    argv.push(
+      "-e",
+      `HINDSIGHT_API_REFLECT_LLM_BASE_URL=${reflectLlmBaseUrl}`,
+    );
+    displayArgv.push(
+      "-e",
+      `HINDSIGHT_API_REFLECT_LLM_BASE_URL=${reflectLlmBaseUrl}`,
+    );
   }
 
   if (options.tenantApiKey) {
