@@ -723,6 +723,30 @@ async function main(): Promise<void> {
         "With --propose-adopt, write the proposed paths onto store.allowlist. Does not retain",
       )
       .option(
+        "--propose-from-paths <list>",
+        "Propose syncing comma-separated paths (e.g. from coding-agent session edits); pair with --enqueue or --now",
+      )
+      .option(
+        "--enqueue",
+        "With --propose-from-paths, queue confirmed allowlisted paths under .orto/local/store-queue.json until Hindsight is quiet",
+      )
+      .option(
+        "--now",
+        "With --propose-from-paths or --drain-queue, run immediately and bypass quiet checks",
+      )
+      .option(
+        "--queue",
+        "List pending jobs in .orto/local/store-queue.json",
+      )
+      .option(
+        "--drain-queue",
+        "Drain pending jobs in .orto/local/store-queue.json when Hindsight is quiet (or pass --now)",
+      )
+      .option(
+        "--coding-agent-bank <id>",
+        "Optional coding-agent bank id to include in quiet-policy checks (defaults to coding-agent::<repo>)",
+      )
+      .option(
         "--project <path>",
         "Project root (defaults to cwd, walking out of a disposable worktree to the durable clone)",
       )
@@ -744,6 +768,12 @@ async function main(): Promise<void> {
       addFiles?: string;
       proposeAdopt?: boolean;
       apply?: boolean;
+      proposeFromPaths?: string;
+      enqueue?: boolean;
+      now?: boolean;
+      queue?: boolean;
+      drainQueue?: boolean;
+      codingAgentBank?: string;
       project?: string;
       hindsightUrl?: string;
       apiKey?: string;
@@ -759,6 +789,16 @@ async function main(): Promise<void> {
         yes: Boolean(opts.yes),
         proposeAdopt: Boolean(opts.proposeAdopt),
         apply: Boolean(opts.apply),
+        enqueue: Boolean(opts.enqueue),
+        now: Boolean(opts.now),
+        queue: Boolean(opts.queue),
+        drainQueue: Boolean(opts.drainQueue),
+        ...(opts.proposeFromPaths !== undefined
+          ? { proposeFromPaths: opts.proposeFromPaths }
+          : {}),
+        ...(opts.codingAgentBank !== undefined
+          ? { codingAgentBank: opts.codingAgentBank }
+          : {}),
         ...(opts.files !== undefined ? { files: opts.files } : {}),
         ...(opts.addFiles !== undefined ? { addFiles: opts.addFiles } : {}),
         ...(opts.project !== undefined ? { project: opts.project } : {}),

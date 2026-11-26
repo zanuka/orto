@@ -47,6 +47,13 @@ import {
 } from "../seeder/retained-sources.js";
 import { OrtoError } from "../utils/errors.js";
 import { isInteractive, promptMultiSelect } from "../utils/prompt.js";
+import {
+  printDrainQueueResult,
+  printProposeFromPathsResult,
+  runDrainStoreQueue,
+  runProposeFromPaths,
+  runShowStoreQueue,
+} from "./store-queue.js";
 
 export interface StoreOptions {
   cwd?: string;
@@ -64,6 +71,12 @@ export interface StoreOptions {
   strict?: boolean;
   proposeAdopt?: boolean;
   apply?: boolean;
+  proposeFromPaths?: string;
+  enqueue?: boolean;
+  now?: boolean;
+  queue?: boolean;
+  drainQueue?: boolean;
+  codingAgentBank?: string;
   resolvedJudge?: ResolvedJudge;
   previousByPath?: Record<string, string>;
 }
@@ -796,6 +809,33 @@ function printStorePlan(input: {
 }
 
 export async function runStoreCommand(options: StoreOptions = {}): Promise<void> {
+  if (options.queue) {
+    const projectRoot = await resolveStoreProjectRoot(options);
+    await runShowStoreQueue({ projectRoot });
+    return;
+  }
+  if (options.drainQueue) {
+    const projectRoot = await resolveStoreProjectRoot(options);
+    const result = await runDrainStoreQueue({ projectRoot, options });
+    printDrainQueueResult(result);
+    if (result.failed > 0) {
+      process.exitCode = 1;
+    }
+    return;
+  }
+  if (options.proposeFromPaths !== undefined) {
+    const projectRoot = await resolveStoreProjectRoot(options);
+    const result = await runProposeFromPaths({
+      projectRoot,
+      rawPaths: options.proposeFromPaths,
+      options,
+    });
+    printProposeFromPathsResult(result);
+    if (result.storeResult && result.storeResult.failed > 0) {
+      process.exitCode = 1;
+    }
+    return;
+  }
   const result = await runStore(options);
   if (result.failed > 0) {
     process.exitCode = 1;
