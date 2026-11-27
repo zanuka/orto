@@ -81,7 +81,9 @@ Every retain item carries metadata:
 - `kind`: readme, agents, docs, adr
 - `knowledge_kind`: decision, architecture, standard, domain, overview, …
 - `commit`: optional `git rev-parse HEAD` when available
-- `orto_fact_id`: stable fact id matching `document_id`
+- `title`: the section heading
+
+The stable fact id travels only as `document_id`. Do not repeat it in metadata: Hindsight renders metadata into the extraction prompt, and a "fact id" key makes small local models collapse a multi-rule section into a single memory.
 
 Agents can answer “where did this come from?” and humans can verify against git. Raw file upload often loses structured provenance unless added manually.
 

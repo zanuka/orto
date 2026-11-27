@@ -167,12 +167,14 @@ export function toRetainItems(facts: CandidateFact[]): RetainItem[] {
       fact.bankKind !== undefined
         ? fact.bankKind.tags
         : [`knowledge:${fact.knowledgeKind}`];
+    // Hindsight renders metadata into the fact-extraction prompt. A key that
+    // names a single "fact id" makes small local models (qwen2.5:7b) collapse a
+    // multi-rule section into one memory, so the id travels only as document_id.
     const metadata: Record<string, string> = {
       source: fact.provenance.sourcePath,
       kind: fact.provenance.kind,
       knowledge_kind: fact.bankKind?.id ?? fact.knowledgeKind,
       title: fact.title,
-      orto_fact_id: fact.id,
     };
     if (fact.provenance.commit) {
       metadata.commit = fact.provenance.commit;
