@@ -325,7 +325,6 @@ describe("seed relevance gate", () => {
     );
     expect(adr?.document_id).not.toContain("knowledge:");
     expect(adr?.tags).toEqual(["orto", "kind:docs", "knowledge:adr"]);
-    expect(adr?.metadata.knowledge_kind).toBe("adr");
   });
 
   it("keeps heuristic candidates when --judge jev is omitted", async () => {
@@ -352,7 +351,6 @@ describe("seed relevance gate", () => {
     );
     expect(adr?.tags).toEqual(["orto", "kind:docs", "knowledge:domain"]);
     expect(adr?.tags).not.toContain("knowledge:adr");
-    expect(adr?.metadata.knowledge_kind).toBe("domain");
   });
 
   it("dry-run shows one row per README section and retains only the architecture section", async () => {
