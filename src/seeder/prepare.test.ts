@@ -31,6 +31,27 @@ describe("toRetainItems", () => {
     });
   });
 
+  it("keeps the fact id out of metadata so extraction does not collapse a section", () => {
+    const fact: CandidateFact = {
+      id: "orto:STRATEGY.md#durable-over-complete",
+      title: "Durable over complete",
+      content: "Orto retains only durable knowledge.",
+      knowledgeKind: "standard",
+      score: 4,
+      provenance: { sourcePath: "STRATEGY.md", kind: "docs" },
+    };
+
+    const [item] = toRetainItems([fact]);
+    expect(item?.document_id).toBe("orto:STRATEGY.md#durable-over-complete");
+    expect(Object.keys(item?.metadata ?? {})).toEqual([
+      "source",
+      "kind",
+      "knowledge_kind",
+      "title",
+    ]);
+    expect(Object.values(item?.metadata ?? {})).not.toContain(fact.id);
+  });
+
   it("uses catalog tags for a judged kind and keeps the document id", () => {
     const fact: CandidateFact = {
       id: "orto:docs/adr/0001-local-bank.md#document",
