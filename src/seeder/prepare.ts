@@ -167,14 +167,13 @@ export function toRetainItems(facts: CandidateFact[]): RetainItem[] {
       fact.bankKind !== undefined
         ? fact.bankKind.tags
         : [`knowledge:${fact.knowledgeKind}`];
-    // Hindsight renders metadata into the fact-extraction prompt. A key that
-    // names a single "fact id" makes small local models (qwen2.5:7b) collapse a
-    // multi-rule section into one memory, so the id travels only as document_id.
+    // Hindsight renders each metadata key as a line in the fact-extraction
+    // prompt. Sending kind, knowledge_kind and title together collapsed
+    // multi-rule sections into one memory on qwen2.5:7b, so metadata is kept to
+    // what Orto reads back (source) plus provenance. Kind and knowledge kind
+    // travel as tags, the title is in the content, the id is the document_id.
     const metadata: Record<string, string> = {
       source: fact.provenance.sourcePath,
-      kind: fact.provenance.kind,
-      knowledge_kind: fact.bankKind?.id ?? fact.knowledgeKind,
-      title: fact.title,
     };
     if (fact.provenance.commit) {
       metadata.commit = fact.provenance.commit;

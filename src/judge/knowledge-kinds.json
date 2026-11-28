@@ -98,7 +98,7 @@
         "not_for": "What a command promises to do (public_api), or a narrative of module boundaries (architecture).",
         "examples": [
           ".orto/config.json requires bankId and provider.",
-          "Retain metadata includes source and knowledge_kind."
+          "Retain metadata includes source and commit."
         ]
       }
     },

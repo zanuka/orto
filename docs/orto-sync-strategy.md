@@ -75,15 +75,16 @@ In-place edits: same path → same ids → upsert. No bank wipe.
 
 ### 5. Provenance agents can cite
 
-Every retain item carries metadata:
+Every retain item carries short metadata:
 
 - `source`: relative path in the repo
-- `kind`: readme, agents, docs, adr
-- `knowledge_kind`: decision, architecture, standard, domain, overview, …
 - `commit`: optional `git rev-parse HEAD` when available
-- `title`: the section heading
 
-The stable fact id travels only as `document_id`. Do not repeat it in metadata: Hindsight renders metadata into the extraction prompt, and a "fact id" key makes small local models collapse a multi-rule section into a single memory.
+The rest of the provenance travels elsewhere: the stable fact id is the `document_id`, the source kind and knowledge kind are the `kind:*` and `knowledge:*` tags, and the section heading opens the content.
+
+Judged facts (`--judge jev`) can also carry `supersedes` and `contradicts` observation ids.
+
+Metadata is limited to the fields Orto reads back plus provenance because Hindsight renders each key as a line in the fact-extraction prompt. In A/B runs on 2026-11-26 and 2026-11-27 (one section, qwen2.5:7b), sending `kind`, `knowledge_kind` and `title` together collapsed a multi-rule section: the old 4 and 5 field shapes gave 1 memory, `source` plus `commit` gave 10, and `source`, `commit`, `supersedes`, `contradicts` gave 8 to 10.
 
 Agents can answer “where did this come from?” and humans can verify against git. Raw file upload often loses structured provenance unless added manually.
 

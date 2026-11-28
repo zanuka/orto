@@ -22,16 +22,15 @@ describe("toRetainItems", () => {
     expect(items[0]).toMatchObject({
       document_id: "orto:README.md#goal",
       timestamp: "unset",
-      metadata: {
-        source: "README.md",
-        commit: "deadbeef",
-        knowledge_kind: "overview",
-      },
       tags: ["orto", "kind:readme", "knowledge:overview"],
+    });
+    expect(items[0]?.metadata).toStrictEqual({
+      source: "README.md",
+      commit: "deadbeef",
     });
   });
 
-  it("keeps the fact id out of metadata so extraction does not collapse a section", () => {
+  it("keeps metadata short so extraction does not collapse a section", () => {
     const fact: CandidateFact = {
       id: "orto:STRATEGY.md#durable-over-complete",
       title: "Durable over complete",
@@ -43,13 +42,7 @@ describe("toRetainItems", () => {
 
     const [item] = toRetainItems([fact]);
     expect(item?.document_id).toBe("orto:STRATEGY.md#durable-over-complete");
-    expect(Object.keys(item?.metadata ?? {})).toEqual([
-      "source",
-      "kind",
-      "knowledge_kind",
-      "title",
-    ]);
-    expect(Object.values(item?.metadata ?? {})).not.toContain(fact.id);
+    expect(item?.metadata).toStrictEqual({ source: "STRATEGY.md" });
   });
 
   it("uses catalog tags for a judged kind and keeps the document id", () => {
@@ -71,7 +64,6 @@ describe("toRetainItems", () => {
       "orto:docs/adr/0001-local-bank.md#document",
     );
     expect(items[0]?.document_id).not.toContain("knowledge:");
-    expect(items[0]?.metadata?.knowledge_kind).toBe("adr");
     expect(items[0]?.tags).toEqual(["orto", "kind:adr", "knowledge:adr"]);
   });
 });
